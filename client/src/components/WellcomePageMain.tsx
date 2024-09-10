@@ -23,14 +23,10 @@ export default function WellcomePageMain() {
           <img src={bishop} alt="rook" className="size-24" />
         </div>
         <h1 className="text-center text-xl text-gray-700">
-          "Chessfull is free chess platform, that aims for the best user
-          experience. Designed to enjoy chess."
+          "Chessfull is free chess platform, that aims for the best user experience. Designed to enjoy chess."
         </h1>
         <Link to={'/login'} className="w-full">
-          <Button
-            variant={'outline'}
-            className="w-full rounded-sm text-2xl py-6"
-          >
+          <Button variant={'outline'} className="w-full rounded-sm text-2xl py-6">
             Login
           </Button>
         </Link>

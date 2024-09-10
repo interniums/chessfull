@@ -2,17 +2,7 @@
 
 import { motion } from 'framer-motion'
 
-export default function ErrorInput({
-  top,
-  right,
-  value,
-  fontSize,
-  color,
-  borderRadius,
-  transitionTime,
-  px,
-  py,
-}) {
+export default function ErrorInput({ top, right, value, fontSize, color, borderRadius, transitionTime, px, py }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 1 }}

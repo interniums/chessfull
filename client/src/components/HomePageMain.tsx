@@ -27,11 +27,7 @@ export default function HomePageMain() {
       <HomePageHeader />
       <div className="w-full h-full items-center content-center justify-center grid">
         <ToggleGroup type="single" className="flex justify-center gap-20">
-          <ToggleGroupItem
-            value="bullet"
-            className="h-max py-4 px-8 rounded-md"
-            onClick={() => setGame('bullet')}
-          >
+          <ToggleGroupItem value="bullet" className="h-max py-4 px-8 rounded-md" onClick={() => setGame('bullet')}>
             <div>
               <h1 className="text-2xl text-center">Bullet</h1>
               <img src={rook} alt="pawn" className="size-32" />
@@ -45,11 +41,7 @@ export default function HomePageMain() {
               </div>
             </div>
           </ToggleGroupItem>
-          <ToggleGroupItem
-            value="blitz"
-            className="h-max py-4 px-8 rounded-md"
-            onClick={() => setGame('blitz')}
-          >
+          <ToggleGroupItem value="blitz" className="h-max py-4 px-8 rounded-md" onClick={() => setGame('blitz')}>
             <div className="">
               <h1 className="text-2xl text-center">Blitz</h1>
               <img src={queen} alt="pawn" className="size-32" />
@@ -63,11 +55,7 @@ export default function HomePageMain() {
               </div>
             </div>
           </ToggleGroupItem>
-          <ToggleGroupItem
-            onClick={() => setGame('rapid')}
-            value="rapid"
-            className="h-max py-4 px-8 rounded-md"
-          >
+          <ToggleGroupItem onClick={() => setGame('rapid')} value="rapid" className="h-max py-4 px-8 rounded-md">
             <div>
               <h1 className="text-2xl text-center">Rapid</h1>
               <img src={pawn} alt="pawn" className="size-32" />
@@ -82,11 +70,7 @@ export default function HomePageMain() {
             </div>
           </ToggleGroupItem>
         </ToggleGroup>
-        <Button
-          onClick={() => startGame()}
-          className="text-2xl py-6 w-full mt-8"
-          variant={'outline'}
-        >
+        <Button onClick={() => startGame()} className="text-2xl py-6 w-full mt-8" variant={'outline'}>
           {game.length > 1 ? `Find ${game} game` : 'Choose game format'}
         </Button>
       </div>

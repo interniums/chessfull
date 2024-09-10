@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { Link } from 'react-router-dom'
+import { Link, Navigate, replace, useLocation, useNavigate } from 'react-router-dom'
 import HomePageHeader from './HomePageHeader'
 import { Button } from './ui/button'
 import { useGlobalContext } from '@/context/GlobalContext'
@@ -15,15 +15,30 @@ import { ReloadIcon } from '@radix-ui/react-icons'
 import ErrorInput from './InputError'
 import axios from 'axios'
 import useAuth from '@/hooks/useAuth'
+import { Checkbox } from './ui/checkbox'
+import useLogout from '@/hooks/useLogout'
 
 export default function LoginPageMain() {
-  const { auth, setAuth } = useAuth()
+  const { auth, setAuth, persist, setPersist } = useAuth()
   const { globalState, setGlobalState } = useGlobalContext()
   const { toast } = useToast()
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
   const [fetchError, setFetchError] = useState(null)
   const [authorized, setAuthorized] = useState(true)
+  const location = useLocation()
+  const logout = useLogout()
+
+  useEffect(() => {
+    if (auth?.accessToken) {
+      localStorage.removeItem('persist')
+      setAuth({})
+      const out = () => {
+        logout()
+      }
+      out()
+    }
+  }, [])
 
   const {
     register,
@@ -43,10 +58,7 @@ export default function LoginPageMain() {
       }, 10000)
     }
 
-    if (
-      globalState.unauthorizedRedirectMessage.length > 1 &&
-      !auth?.accessToken
-    ) {
+    if (globalState.unauthorizedRedirectMessage.length > 1 && !auth?.accessToken) {
       toast({
         description: globalState.unauthorizedRedirectMessage,
       })
@@ -54,18 +66,19 @@ export default function LoginPageMain() {
         setGlobalState((prev) => ({ ...prev, unauthorizedRedirectMessage: '' }))
       }, 10000)
     }
-  }, [
-    globalState.successRegisterMessage,
-    globalState.unauthorizedRedirectMessage,
-  ])
+  }, [globalState.successRegisterMessage, globalState.unauthorizedRedirectMessage])
 
   const onSubmit = async (data) => {
     setLoading(true)
     axios
-      .post('http://localhost:3000/login', {
-        email: data.email,
-        password: data.password,
-      })
+      .post(
+        'http://localhost:3000/login',
+        {
+          email: data.email,
+          password: data.password,
+        },
+        { withCredentials: true }
+      )
       .then((response) => {
         if (response.status === 200) {
           const accessToken = response.data
@@ -96,8 +109,17 @@ export default function LoginPageMain() {
       })
   }
 
+  const togglePersist = () => {
+    setPersist((prev) => !prev)
+  }
+
+  useEffect(() => {
+    localStorage.setItem('persist', persist)
+  }, [persist])
+
   return (
     <main className="w-full h-full">
+      {success ? <Navigate to="/home" state={{ from: location }} replace /> : null}
       <div className="w-full h-full flex items-center justify-center">
         <HomePageHeader />
         <div className="py-4 px-8 w-2/5">
@@ -109,11 +131,7 @@ export default function LoginPageMain() {
                 {...register('email')}
                 className={
                   'rounded py-5 cursor-pointer hover:bg-slate-100' +
-                  `${
-                    errors.email && watch('email').length
-                      ? ' border-red-500 border-2 focus-visible:ring-0'
-                      : ' '
-                  }`
+                  `${errors.email && watch('email').length ? ' border-red-500 border-2 focus-visible:ring-0' : ' '}`
                 }
                 placeholder="email"
                 aria-invalid={errors.email ? 'true' : 'false'}
@@ -140,9 +158,7 @@ export default function LoginPageMain() {
                 className={
                   'rounded py-5 cursor-pointer hover:bg-slate-100' +
                   `${
-                    errors.password && watch('password').length
-                      ? ' border-red-500 border-2 focus-visible:ring-0'
-                      : ' '
+                    errors.password && watch('password').length ? ' border-red-500 border-2 focus-visible:ring-0' : ' '
                   }`
                 }
                 type="password"
@@ -161,6 +177,10 @@ export default function LoginPageMain() {
                   py={'8px'}
                 />
               ) : null}
+              <div className="flex gap-1.5 relative items-center justify-start mt-2">
+                <Checkbox onCheckedChange={togglePersist} checked={persist} />
+                <Label>Trust This Device</Label>
+              </div>
               <Button
                 type="submit"
                 variant={'outline'}
@@ -179,10 +199,7 @@ export default function LoginPageMain() {
             </div>
           </form>
           <div className="w-full grid mt-4">
-            <Link
-              to={'/registration'}
-              className="flex items-center justify-center"
-            >
+            <Link to={'/registration'} className="flex items-center justify-center">
               <Button variant={'link'} className="text-center">
                 Don't have an account? Register here.
               </Button>

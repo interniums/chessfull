@@ -13,6 +13,7 @@ import { GlobalProvider } from './context/GlobalContext.tsx'
 import { Toaster } from './components/ui/toaster.tsx'
 import RequireAuth from './components/RequireAuth.tsx'
 import ErrorPage from './components/Error.tsx'
+import PersistLogin from './components/PersistLogin.tsx'
 
 const router = createBrowserRouter([
   {
@@ -35,18 +36,24 @@ const router = createBrowserRouter([
         element: <RegisterPage />,
         errorElement: <ErrorPage />,
       },
+      // PROTECTED ROUTES
       {
-        element: <RequireAuth />,
+        element: <PersistLogin />,
         children: [
           {
-            path: '/home',
-            element: <HomePage />,
-            errorElement: <ErrorPage />,
-          },
-          {
-            path: '/play',
-            element: <PlayPage />,
-            errorElement: <ErrorPage />,
+            element: <RequireAuth />,
+            children: [
+              {
+                path: '/home',
+                element: <HomePage />,
+                errorElement: <ErrorPage />,
+              },
+              {
+                path: '/play',
+                element: <PlayPage />,
+                errorElement: <ErrorPage />,
+              },
+            ],
           },
         ],
       },
