@@ -9,6 +9,7 @@ var corsOptions = require('./config/cors-options')
 var jwtVerify = require('./middleware/jwtVerify')
 var credentials = require('./middleware/credentials')
 
+var indexRouter = require('./routes/index')
 var userRouter = require('./routes/user')
 var refreshRouter = require('./routes/refresh')
 var logoutRouter = require('./routes/logout')
@@ -22,6 +23,7 @@ connectDB()
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'jade')
+app.set('trust proxy', true)
 
 app.use(credentials)
 app.use(cors(corsOptions))
@@ -31,10 +33,11 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(express.static(path.join(__dirname, 'public')))
 
+app.use('/', indexRouter)
 app.use('/refresh', refreshRouter)
 app.use('/logout', logoutRouter)
 app.use('/login', loginRouter)
-app.use('/refistration', registrationRouter)
+app.use('/registration', registrationRouter)
 
 // PROTECTED ROUTES
 app.use(jwtVerify)

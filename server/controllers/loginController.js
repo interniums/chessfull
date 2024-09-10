@@ -29,20 +29,18 @@ const handleLogin = asyncHandler(async (req, res, next) => {
     { expiresIn: '10s' }
   )
 
-  const refreshToken = jwt.sign(
-    { username: user.username },
-    process.env.JWT_REFRESH_SECRET,
-    { expiresIn: '7d' }
-  )
+  const refreshToken = jwt.sign({ username: user.username }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' })
 
   user.refreshToken = refreshToken
   const result = await user.save()
 
+  res.clearCookie('jwt')
   res.cookie('jwt', refreshToken, {
+    sameSite: false,
     httpOnly: true,
-    secure: false,
-    sameSite: true,
-    maxAge: 1000 * 60 * 60 * 24 * 7,
+    secure: true,
+    maxAge: 24 * 60 * 60 * 1000,
+    path: '/',
   })
 
   res.json({ accessToken, username: result.username })
