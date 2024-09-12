@@ -7,6 +7,7 @@ const useLogout = () => {
   const { setAuth } = useAuth()
 
   const logout = async () => {
+    localStorage.removeItem('persist')
     setAuth({})
     try {
       const response = await axios('/logout', {
@@ -15,7 +16,6 @@ const useLogout = () => {
     } catch (err) {
       console.error(err)
     }
-    localStorage.removeItem('persist')
   }
 
   return logout

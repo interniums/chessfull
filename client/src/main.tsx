@@ -8,12 +8,16 @@ import HomePage from './pages/HomePage.tsx'
 import LoginPage from './pages/LoginPage.tsx'
 import RegisterPage from './pages/RegisterPage.tsx'
 import WellcomePage from './pages/WellcomePage.tsx'
-import PlayPage from './pages/PlayPage.tsx'
+import PlayPage from './pages/GamePage.tsx'
 import { GlobalProvider } from './context/GlobalContext.tsx'
 import { Toaster } from './components/ui/toaster.tsx'
 import RequireAuth from './components/RequireAuth.tsx'
 import ErrorPage from './components/Error.tsx'
 import PersistLogin from './components/PersistLogin.tsx'
+import ProfilePage from './pages/ProfilePage.tsx'
+import io from 'socket.io-client'
+import Queue from './pages/QueuePage.tsx'
+import QueuePage from './pages/QueuePage.tsx'
 
 const router = createBrowserRouter([
   {
@@ -49,8 +53,18 @@ const router = createBrowserRouter([
                 errorElement: <ErrorPage />,
               },
               {
-                path: '/play',
-                element: <PlayPage />,
+                path: '/game/:id',
+                element: <GamePage />,
+                errorElement: <ErrorPage />,
+              },
+              {
+                path: '/profile/:id',
+                element: <ProfilePage />,
+                errorElement: <ErrorPage />,
+              },
+              {
+                path: '/queue/:mode',
+                element: <QueuePage />,
                 errorElement: <ErrorPage />,
               },
             ],

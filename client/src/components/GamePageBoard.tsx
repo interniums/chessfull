@@ -4,15 +4,10 @@ import { Chess } from 'chess.js'
 import { useCallback, useMemo, useState } from 'react'
 import { Chessboard } from 'react-chessboard'
 import queen from '../assets/queen.png'
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  DoubleArrowLeftIcon,
-  DoubleArrowRightIcon,
-} from '@radix-ui/react-icons'
+import { ArrowLeftIcon, ArrowRightIcon, DoubleArrowLeftIcon, DoubleArrowRightIcon } from '@radix-ui/react-icons'
 import GameInfo from './GameInfo'
 
-export default function PlayPageBoard({ players, room, orientation, cleanup }) {
+export default function GamePageBoard({ players, room, orientation, cleanup }) {
   const chess = useMemo(() => new Chess(), []) // <- 1
   const [fen, setFen] = useState(chess.fen()) // <- 2
   const [over, setOver] = useState('')
@@ -31,9 +26,7 @@ export default function PlayPageBoard({ players, room, orientation, cleanup }) {
           if (chess.isCheckmate()) {
             // if reason for game over is a checkmate
             // Set message to checkmate.
-            setOver(
-              `Checkmate! ${chess.turn() === 'w' ? 'black' : 'white'} wins!`
-            )
+            setOver(`Checkmate! ${chess.turn() === 'w' ? 'black' : 'white'} wins!`)
             // The winner is determined by checking which side made the last move
           } else if (chess.isDraw()) {
             // if it is a draw
@@ -76,21 +69,14 @@ export default function PlayPageBoard({ players, room, orientation, cleanup }) {
             <GameInfo />
           </div>
         </div>
-        <div
-          className="grid gap-1 h-full"
-          style={{ maxWidth: '85vh', width: '85vh' }}
-        >
+        <div className="grid gap-1 h-full" style={{ maxWidth: '85vh', width: '85vh' }}>
           <div className="w-full flex items-center justify-center gap-8 py-2">
             <div className="text-2xl">W 3:02</div>
             <div className="text-2xl">|</div>
             <div className="text-2xl">B 1:53</div>
           </div>
           <div className="board" style={{ maxWidth: '85vh', width: '85vh' }}>
-            <Chessboard
-              position={fen}
-              onPieceDrop={onDrop}
-              customBoardStyle={{ borderRadius: '4px' }}
-            />
+            <Chessboard position={fen} onPieceDrop={onDrop} customBoardStyle={{ borderRadius: '4px' }} />
           </div>
         </div>
       </div>

@@ -15,12 +15,13 @@ const handleRefreshToken = async (req, res) => {
       {
         UserInfo: {
           username: decoded.username,
+          id: decoded.id,
         },
       },
       process.env.JWT_ACCESS_SECRET,
       { expiresIn: '10s' }
     )
-    res.json({ accessToken })
+    res.json({ accessToken, username: decoded.username, id: decoded.id })
   })
 }
 

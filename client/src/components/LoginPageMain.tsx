@@ -28,6 +28,7 @@ export default function LoginPageMain() {
   const [authorized, setAuthorized] = useState(true)
   const location = useLocation()
   const logout = useLogout()
+  console.log(persist)
 
   useEffect(() => {
     if (auth?.accessToken) {
@@ -87,6 +88,7 @@ export default function LoginPageMain() {
             email: watch('email'),
             password: watch('password'),
             accessToken: accessToken.accessToken,
+            id: response.data.id,
           })
           setSuccess(true)
           setLoading(false)

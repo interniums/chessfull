@@ -27,8 +27,8 @@ export default function HomePageHeader({ variant }) {
         </Link>
       </section>
       <div className="flex items-center justify-center gap-4 flex-wrap">
-        <h1 className="w-full">Active user: {auth?.username ? auth?.username : ' none'}</h1>
-        <Button onClick={handleLogout} variant={'outline'}>
+        <h1 className="w-full text-center">Active user: {auth?.username ? auth?.username : ' none'}</h1>
+        <Button className="w-full" onClick={handleLogout} variant={'outline'}>
           Logout
         </Button>
       </div>

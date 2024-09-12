@@ -10,11 +10,7 @@ export const GlobalProvider = ({ children }) => {
     unauthorizedRedirectMessage: '',
   })
 
-  return (
-    <GlobalContext.Provider value={{ globalState, setGlobalState }}>
-      {children}
-    </GlobalContext.Provider>
-  )
+  return <GlobalContext.Provider value={{ globalState, setGlobalState }}>{children}</GlobalContext.Provider>
 }
 
 export const useGlobalContext = () => {

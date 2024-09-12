@@ -23,13 +23,16 @@ const handleLogin = asyncHandler(async (req, res, next) => {
     {
       userInfo: {
         username: user.username,
+        id: user._id,
       },
     },
     process.env.JWT_ACCESS_SECRET,
-    { expiresIn: '10s' }
+    { expiresIn: '59s' }
   )
 
-  const refreshToken = jwt.sign({ username: user.username }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' })
+  const refreshToken = jwt.sign({ username: user.username, id: user._id }, process.env.JWT_REFRESH_SECRET, {
+    expiresIn: '7d',
+  })
 
   user.refreshToken = refreshToken
   const result = await user.save()
@@ -43,7 +46,7 @@ const handleLogin = asyncHandler(async (req, res, next) => {
     path: '/',
   })
 
-  res.json({ accessToken, username: result.username })
+  res.json({ accessToken, username: result.username, id: result._id })
 })
 
 module.exports = { handleLogin }
