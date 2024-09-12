@@ -11,16 +11,18 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ReloadIcon } from '@radix-ui/react-icons'
 import getSocket from '@/socket'
+import useAuth from '@/hooks/useAuth'
 
 export default function HomePageMain({ socket }) {
   const [gameMode, setGameMode] = useState('blitz')
   const [startGame, setStartGame] = useState(false)
   const navigate = useNavigate()
   const sock = getSocket()
+  const { auth } = useAuth()
 
   useEffect(() => {
     if (startGame) {
-      sock.emit('joinQueue', gameMode)
+      sock.emit('joinQueue', { gameMode, id: auth.id })
       navigate(`/queue/${gameMode}`)
     }
   }, [startGame])
@@ -29,8 +31,16 @@ export default function HomePageMain({ socket }) {
     <main className="h-full">
       <HomePageHeader />
       <div className="w-full h-full items-center content-center justify-center grid">
-        <ToggleGroup type="single" className="flex justify-center gap-20" value={gameMode}>
-          <ToggleGroupItem value="bullet" className="h-max py-4 px-8 rounded-md" onClick={() => setGameMode('bullet')}>
+        <ToggleGroup
+          type="single"
+          className="flex justify-center gap-20"
+          value={gameMode}
+        >
+          <ToggleGroupItem
+            value="bullet"
+            className="h-max py-4 px-8 rounded-md"
+            onClick={() => setGameMode('bullet')}
+          >
             <div>
               <h1 className="text-2xl text-center">Bullet</h1>
               <img src={rook} alt="pawn" className="size-32" />
@@ -44,7 +54,11 @@ export default function HomePageMain({ socket }) {
               </div>
             </div>
           </ToggleGroupItem>
-          <ToggleGroupItem value="blitz" className="h-max py-4 px-8 rounded-md" onClick={() => setGameMode('blitz')}>
+          <ToggleGroupItem
+            value="blitz"
+            className="h-max py-4 px-8 rounded-md"
+            onClick={() => setGameMode('blitz')}
+          >
             <div className="">
               <h1 className="text-2xl text-center">Blitz</h1>
               <img src={queen} alt="pawn" className="size-32" />
@@ -58,7 +72,11 @@ export default function HomePageMain({ socket }) {
               </div>
             </div>
           </ToggleGroupItem>
-          <ToggleGroupItem onClick={() => setGameMode('rapid')} value="rapid" className="h-max py-4 px-8 rounded-md">
+          <ToggleGroupItem
+            onClick={() => setGameMode('rapid')}
+            value="rapid"
+            className="h-max py-4 px-8 rounded-md"
+          >
             <div>
               <h1 className="text-2xl text-center">Rapid</h1>
               <img src={pawn} alt="pawn" className="size-32" />
@@ -73,7 +91,11 @@ export default function HomePageMain({ socket }) {
             </div>
           </ToggleGroupItem>
         </ToggleGroup>
-        <Button onClick={() => setStartGame(true)} className="text-2xl py-6 w-full mt-8" variant={'outline'}>
+        <Button
+          onClick={() => setStartGame(true)}
+          className="text-2xl py-6 w-full mt-8"
+          variant={'outline'}
+        >
           {`Find ${gameMode} game`}
         </Button>
       </div>

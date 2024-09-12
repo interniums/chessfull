@@ -6,7 +6,7 @@ let sock
 
 const getSocket = () => {
   if (!sock) {
-    sock = io('http://localhost:3000', {
+    sock = io('http://localhost:8080', {
       extraHeaders: {
         Authorization: `skip-auth`,
       },

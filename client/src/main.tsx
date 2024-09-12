@@ -18,6 +18,7 @@ import ProfilePage from './pages/ProfilePage.tsx'
 import io from 'socket.io-client'
 import Queue from './pages/QueuePage.tsx'
 import QueuePage from './pages/QueuePage.tsx'
+import GamePage from './pages/GamePage.tsx'
 
 const router = createBrowserRouter([
   {

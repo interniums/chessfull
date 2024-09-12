@@ -40,6 +40,7 @@ app.set('trust proxy', true)
 
 // HTTP Server
 const server = http.createServer(app)
+const port = process.env.PORT || 8080
 
 // Setup Socket.io
 setupSocketIO(server)
@@ -66,6 +67,10 @@ app.use(function (err, req, res, next) {
   res.locals.error = req.app.get('env') === 'development' ? err : {}
   res.status(err.status || 500)
   res.render('error')
+})
+
+server.listen(port, () => {
+  console.log(`listening on *:${port}`)
 })
 
 module.exports = app
