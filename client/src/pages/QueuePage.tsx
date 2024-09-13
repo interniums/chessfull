@@ -10,6 +10,18 @@ export default function QueuePage() {
   const navigate = useNavigate()
   const sock = getSocket()
 
+  useEffect(() => {
+    // Listen for the 'startGame' event
+    sock.on('startGame', ({ id, players, mode, color }) => {
+      // Navigate to the game room once matched
+      navigate(`/game/${roomId}`, { state: { id, players, mode, color } })
+    })
+
+    return () => {
+      sock.off('startGame')
+    }
+  }, [sock, navigate])
+
   return (
     <main className="inset-0 absolute z-50 bg-white flex items-center justify-center">
       <div className="grid gap-6 items-center justify-center">

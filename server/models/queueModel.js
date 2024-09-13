@@ -6,15 +6,15 @@ const QueueSchema = new mongoose.Schema({
     default: '',
   },
   blitz: {
-    type: [String],
+    type: Array,
     default: [],
   },
   rapid: {
-    type: [String],
+    type: Array,
     default: [],
   },
   bullet: {
-    type: [String],
+    type: Array,
     default: [],
   },
 })

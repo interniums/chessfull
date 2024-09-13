@@ -32,11 +32,19 @@ export default function RegisterPageMain() {
   const onSubmit = async (data) => {
     setLoading(true)
     axios
-      .post('http://localhost:3000/registration', {
-        email: data?.email,
-        password: data?.password,
-        username: data?.username,
-      })
+      .post(
+        'http://localhost:3000/registration',
+        {
+          email: data?.email,
+          password: data?.password,
+          username: data?.username,
+        },
+        {
+          headers: {
+            Authorization: 'skip-auth',
+          },
+        }
+      )
       .then((response) => {
         if (response.status === 200) {
           setFetchError(null)
@@ -85,7 +93,11 @@ export default function RegisterPageMain() {
                 autoComplete="off"
                 className={
                   'rounded py-5 cursor-pointer hover:bg-slate-100' +
-                  `${errors.email && watch('email').length ? ' border-red-500 border-2 focus-visible:ring-0' : ' '}`
+                  `${
+                    errors.email && watch('email').length
+                      ? ' border-red-500 border-2 focus-visible:ring-0'
+                      : ' '
+                  }`
                 }
                 placeholder="email"
                 aria-invalid={errors.email ? 'true' : 'false'}
@@ -113,7 +125,9 @@ export default function RegisterPageMain() {
                 className={
                   'rounded py-5 cursor-pointer hover:bg-slate-100' +
                   `${
-                    errors.username && watch('username').length ? ' border-red-500 border-2 focus-visible:ring-0' : ' '
+                    errors.username && watch('username').length
+                      ? ' border-red-500 border-2 focus-visible:ring-0'
+                      : ' '
                   }`
                 }
                 type="text"
@@ -143,7 +157,9 @@ export default function RegisterPageMain() {
                 className={
                   'rounded py-5 cursor-pointer hover:bg-slate-100' +
                   `${
-                    errors.password && watch('password').length ? ' border-red-500 border-2 focus-visible:ring-0' : ' '
+                    errors.password && watch('password').length
+                      ? ' border-red-500 border-2 focus-visible:ring-0'
+                      : ' '
                   }`
                 }
                 type="password"
@@ -173,14 +189,16 @@ export default function RegisterPageMain() {
                 className={
                   'rounded py-5 cursor-pointer hover:bg-slate-100' +
                   `${
-                    errors.passwordConfirmation && watch('passwordConfirmation').length
+                    errors.passwordConfirmation &&
+                    watch('passwordConfirmation').length
                       ? ' border-red-500 border-2 focus-visible:ring-0'
                       : ' '
                   }`
                 }
                 placeholder="confirm password"
               />
-              {errors.passwordConfirmation && watch('passwordConfirmation').length ? (
+              {errors.passwordConfirmation &&
+              watch('passwordConfirmation').length ? (
                 <ErrorInput
                   top={'-10%'}
                   right={'-20%'}
