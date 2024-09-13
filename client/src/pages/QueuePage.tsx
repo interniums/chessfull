@@ -14,7 +14,7 @@ export default function QueuePage() {
     // Listen for the 'startGame' event
     sock.on('startGame', ({ id, players, mode, color }) => {
       // Navigate to the game room once matched
-      navigate(`/game/${roomId}`, { state: { id, players, mode, color } })
+      navigate(`/game/${id}`, { state: { id, players, mode, color } })
     })
 
     return () => {

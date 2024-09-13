@@ -55,9 +55,7 @@ function setupSocketIO(server) {
           mode: gameMode,
           color: room.color,
         })
-        console.log(
-          `${gameMode} game created in ${roomId} between ${player1.id} and ${player2.id}`
-        )
+        console.log(`${gameMode} game created in ${roomId} between ${player1.id} and ${player2.id}`)
       }
     })
   })
