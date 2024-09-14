@@ -5,7 +5,7 @@ const jwtVerify = async (req, res, next) => {
 
   // Skip auth if 'skip-auth' is passed in the Authorization header
   if (authHeader && authHeader === 'skip-auth') {
-    // console.log('Authorization skipped')
+    console.log('Authorization skipped')
     return next()
   }
 

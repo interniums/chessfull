@@ -21,7 +21,7 @@ const RoomSchema = new mongoose.Schema({
     type: Array,
     default: '',
   },
-  color: {
+  orientation: {
     type: String,
     default: '',
   },

@@ -10,7 +10,7 @@ import GamePageBoard from '@/components/GamePageBoard'
 
 export default function GamePage() {
   const { state } = useLocation()
-  const { players, mode } = state
+  const { id, players, mode, orientation } = state
   const sock = getSocket()
   const [moves, setMoves] = useState([])
 
@@ -33,7 +33,14 @@ export default function GamePage() {
     <>
       <main className="w-full h-full">
         <HomePageHeader variant={'play'} />
-        <GamePageBoard mode={mode} players={players} />
+        <GamePageBoard
+          mode={mode}
+          players={players}
+          moves={moves}
+          setMoves={setMoves}
+          id={id}
+          orientation={orientation}
+        />
         <HomePageFooter />
       </main>
     </>

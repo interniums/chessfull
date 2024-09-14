@@ -12,9 +12,9 @@ export default function QueuePage() {
 
   useEffect(() => {
     // Listen for the 'startGame' event
-    sock.on('startGame', ({ id, players, mode, color }) => {
+    sock.on('startGame', ({ id, players, mode, orientation }) => {
       // Navigate to the game room once matched
-      navigate(`/game/${id}`, { state: { id, players, mode, color } })
+      navigate(`/game/${id}`, { state: { id, players, mode, orientation } })
     })
 
     return () => {

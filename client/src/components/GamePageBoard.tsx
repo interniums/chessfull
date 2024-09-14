@@ -7,12 +7,16 @@ import queen from '../assets/queen.png'
 import { ArrowLeftIcon, ArrowRightIcon, DoubleArrowLeftIcon, DoubleArrowRightIcon } from '@radix-ui/react-icons'
 import GameInfo from './GameInfo'
 import getSocket from '@/socket'
+import useAuth from '@/hooks/useAuth'
 
-export default function GamePageBoard({ players, room, orientation, cleanup }) {
-  const chess = useMemo(() => new Chess(), []) // <- 1
-  const [fen, setFen] = useState(chess.fen()) // <- 2
+export default function GamePageBoard({ mode, players, moves, setMoves, id, cleanup, orientation }) {
+  const chess = useMemo(() => new Chess(), [])
+  const [fen, setFen] = useState(chess.fen())
   const [over, setOver] = useState('')
   const sock = getSocket()
+  const { auth } = useAuth()
+  const player1Orientation = orientation
+  const player2Orientation = orientation == 'white' ? 'black' : 'white'
 
   const makeAMove = useCallback(
     (move) => {
@@ -45,7 +49,6 @@ export default function GamePageBoard({ players, room, orientation, cleanup }) {
     [chess]
   )
 
-  // onDrop function
   function onDrop(sourceSquare, targetSquare) {
     // orientation is either 'white' or 'black'. game.turn() returns 'w' or 'b'
     if (chess.turn() !== orientation[0]) return false // <- 1 prohibit player from moving piece of other player
@@ -55,7 +58,7 @@ export default function GamePageBoard({ players, room, orientation, cleanup }) {
     const moveData = {
       from: sourceSquare,
       to: targetSquare,
-      color: chess.turn(),
+      orientation: chess.turn(),
       promotion: 'q', // promote to queen where possible
     }
 
@@ -65,17 +68,16 @@ export default function GamePageBoard({ players, room, orientation, cleanup }) {
     if (move === null) return false
 
     sock.emit('move', {
-      // <- 3 emit a move event.
       move,
-      room,
-    }) // this event will be transmitted to the opponent via the server
+      id,
+    })
 
     return true
   }
 
   useEffect(() => {
     sock.on('move', (move) => {
-      makeAMove(move) //
+      makeAMove(move)
     })
   }, [makeAMove])
 
@@ -84,7 +86,14 @@ export default function GamePageBoard({ players, room, orientation, cleanup }) {
       <div className="w-full h-full flex items-center pl-20 pr-96">
         <div className="w-full pr-24">
           <div className="h-full flex items-center justify-center">
-            <GameInfo />
+            <GameInfo
+              mode={mode}
+              players={players}
+              moves={moves}
+              setMoves={setMoves}
+              id={id}
+              orientation={orientation}
+            />
           </div>
         </div>
         <div className="grid gap-1 h-full" style={{ maxWidth: '85vh', width: '85vh' }}>
@@ -95,11 +104,12 @@ export default function GamePageBoard({ players, room, orientation, cleanup }) {
           </div>
           <div className="board" style={{ maxWidth: '85vh', width: '85vh' }}>
             <Chessboard
+              arePremovesAllowed={true}
               position={fen}
               onPieceDrop={onDrop}
+              boardOrientation={auth.id === players[0] ? player1Orientation : player2Orientation}
               customBoardStyle={{
                 borderRadius: '4px',
-                boardOrientation: orientation,
               }}
             />
           </div>

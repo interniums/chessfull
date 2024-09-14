@@ -37,13 +37,13 @@ function setupSocketIO(server) {
 
         const roomId = uuidV4()
         const chooseColor = () => (Math.random() < 0.5 ? 'white' : 'black')
-        const color = chooseColor()
+        const orientation = chooseColor()
 
         const room = await Room.create({
           id: roomId,
           players: [player1.id, player2.id],
           mode: gameMode,
-          color,
+          orientation,
         })
 
         player1.socket.join(roomId)
@@ -53,7 +53,7 @@ function setupSocketIO(server) {
           id: roomId,
           players: room.players,
           mode: gameMode,
-          color: room.color,
+          orientation: room.orientation,
         })
         console.log(`${gameMode} game created in ${roomId} between ${player1.id} and ${player2.id}`)
       }
