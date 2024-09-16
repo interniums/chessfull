@@ -9,14 +9,20 @@ import GameInfo from './GameInfo'
 import getSocket from '@/socket'
 import useAuth from '@/hooks/useAuth'
 
-export default function GamePageBoard({ mode, players, moves, setMoves, id, cleanup, orientation }) {
+export default function GamePageBoard({ mode, players, moves, setMoves, roomId, orientation }) {
+  const { auth } = useAuth()
+  const sock = getSocket()
   const chess = useMemo(() => new Chess(), [])
   const [fen, setFen] = useState(chess.fen())
   const [over, setOver] = useState('')
-  const sock = getSocket()
-  const { auth } = useAuth()
+  const [playerSide, setPlayerSide] = useState(auth.id == players[0] ? 'white' : 'black')
+  // console.log(orientation)
+  // console.log(players[0])
+  // console.log('id', auth.id)
+  // console.log(players[1])
+
   const player1Orientation = orientation
-  const player2Orientation = orientation == 'white' ? 'black' : 'white'
+  const player2Orientation = orientation === 'white' ? 'black' : 'white'
 
   const makeAMove = useCallback(
     (move) => {
@@ -44,22 +50,22 @@ export default function GamePageBoard({ mode, players, moves, setMoves, id, clea
         return result
       } catch (e) {
         return null
-      } // null if the move was illegal, the move object if the move was legal
+      }
     },
     [chess]
   )
 
+  // onDrop function
   function onDrop(sourceSquare, targetSquare) {
-    // orientation is either 'white' or 'black'. game.turn() returns 'w' or 'b'
-    if (chess.turn() !== orientation[0]) return false // <- 1 prohibit player from moving piece of other player
+    if (chess.turn() !== playerSide[0]) return false // prohibit player from moving piece of other player
 
-    if (players.length < 2) return false // <- 2 disallow a move if the opponent has not joined
+    if (players.length < 2) return false // disallow a move if the opponent has not joined
 
     const moveData = {
       from: sourceSquare,
       to: targetSquare,
-      orientation: chess.turn(),
-      promotion: 'q', // promote to queen where possible
+      color: chess.turn(),
+      promotion: 'q',
     }
 
     const move = makeAMove(moveData)
@@ -67,16 +73,16 @@ export default function GamePageBoard({ mode, players, moves, setMoves, id, clea
     // illegal move
     if (move === null) return false
 
-    sock.emit('move', {
+    sock.emit('makeMove', {
       move,
-      id,
+      roomId,
     })
 
     return true
   }
 
   useEffect(() => {
-    sock.on('move', (move) => {
+    sock.on('opponentMove', (move) => {
       makeAMove(move)
     })
   }, [makeAMove])
@@ -91,7 +97,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, id, clea
               players={players}
               moves={moves}
               setMoves={setMoves}
-              id={id}
+              roomId={roomId}
               orientation={orientation}
             />
           </div>

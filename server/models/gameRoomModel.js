@@ -25,6 +25,14 @@ const RoomSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  socketId: {
+    type: Array,
+    default: [],
+  },
+  active: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 module.exports = mongoose.model('Room', RoomSchema)

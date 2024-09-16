@@ -10,37 +10,15 @@ import GamePageBoard from '@/components/GamePageBoard'
 
 export default function GamePage() {
   const { state } = useLocation()
-  const { id, players, mode, orientation } = state
-  const sock = getSocket()
-  const [moves, setMoves] = useState([])
+  const { roomId, players, mode, orientation } = state
 
-  useEffect(() => {
-    sock.on('opponentMove', (move) => {
-      setMoves((prev) => [...prev, move])
-    })
-
-    return () => {
-      sock.off('opponentMove')
-    }
-  }, [sock])
-
-  const handleMove = (move) => {
-    sock.emit('makeMove', { roomId: state.roomId, move })
-    setMoves((prev) => [...prev, move])
-  }
+  console.log(roomId)
 
   return (
     <>
       <main className="w-full h-full">
         <HomePageHeader variant={'play'} />
-        <GamePageBoard
-          mode={mode}
-          players={players}
-          moves={moves}
-          setMoves={setMoves}
-          id={id}
-          orientation={orientation}
-        />
+        <GamePageBoard mode={mode} players={players} roomId={roomId} orientation={orientation} />
         <HomePageFooter />
       </main>
     </>

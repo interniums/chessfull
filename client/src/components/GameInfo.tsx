@@ -7,7 +7,7 @@ import { axiosPrivate } from '@/api/axios'
 import { useLocation, useNavigate } from 'react-router-dom'
 import useAxiosPrivate from '@/hooks/useAxiosPrivate'
 
-export default function GameInfo({ mode, players, moves, setMoves, color }) {
+export default function GameInfo({ mode, players }) {
   const [loading, setLoading] = useState(false)
   const axiosPrivate = useAxiosPrivate()
   const [game, setGame] = useState(true)
