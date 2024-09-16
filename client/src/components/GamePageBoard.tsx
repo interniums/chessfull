@@ -16,10 +16,14 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
   const [fen, setFen] = useState(chess.fen())
   const [over, setOver] = useState('')
   const [playerSide, setPlayerSide] = useState(auth.id == players[0] ? 'white' : 'black')
+  const [opponentDisconnected, setOpponentDisconnected] = useState(false)
+  const [winner, setWinner] = useState('')
   // console.log(orientation)
   // console.log(players[0])
   // console.log('id', auth.id)
   // console.log(players[1])
+
+  console.log(winner)
 
   const player1Orientation = orientation
   const player2Orientation = orientation === 'white' ? 'black' : 'white'
@@ -87,16 +91,29 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     })
   }, [makeAMove])
 
+  useEffect(() => {
+    sock.on('opponentDisconnected', () => {
+      setOpponentDisconnected(true)
+    })
+    sock.on('opponentReconnected', () => {
+      setOpponentDisconnected(false)
+    })
+    sock.on('gameEnd', ({ winner }) => {
+      setOver(true)
+      setWinner(winner)
+    })
+  }, [sock])
+
   return (
     <>
       <div className="w-full h-full flex items-center pl-20 pr-96">
         <div className="w-full pr-24">
           <div className="h-full flex items-center justify-center">
             <GameInfo
+              opponentDisconnected={opponentDisconnected}
               mode={mode}
               players={players}
               moves={moves}
-              setMoves={setMoves}
               roomId={roomId}
               orientation={orientation}
             />

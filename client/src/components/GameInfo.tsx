@@ -6,8 +6,10 @@ import { useEffect, useState } from 'react'
 import { axiosPrivate } from '@/api/axios'
 import { useLocation, useNavigate } from 'react-router-dom'
 import useAxiosPrivate from '@/hooks/useAxiosPrivate'
+import useAuth from '@/hooks/useAuth'
 
-export default function GameInfo({ mode, players }) {
+export default function GameInfo({ mode, players, opponentDisconnected }) {
+  const { auth } = useAuth()
   const [loading, setLoading] = useState(false)
   const axiosPrivate = useAxiosPrivate()
   const [game, setGame] = useState(true)
@@ -28,7 +30,6 @@ export default function GameInfo({ mode, players }) {
             { id: playerID },
             { signal: controller.signal }
           )
-          console.log(response.data)
           isMounted &&
             setPlayerStats((prev) => [
               ...prev,
@@ -62,7 +63,7 @@ export default function GameInfo({ mode, players }) {
   }, [])
 
   return (
-    <div className="w-full border-2 rounded-md py-2 grid content-between">
+    <div className="w-full border-2 rounded-md py-2 grid content-between shadow-md">
       {loading ? (
         <div>loading</div>
       ) : (
@@ -72,6 +73,9 @@ export default function GameInfo({ mode, players }) {
               <h1 className="px-4 text-l text-ellipsis">
                 <span className="font-bold">GM </span>
                 {playerStats[0]?.name}
+                {opponentDisconnected && playerStats[0].name == auth?.username ? (
+                  <h1 className="text-red-400">Waiting for opponent to connect...</h1>
+                ) : null}
               </h1>
               <hr className="mt-2" />
               <div className="text-center mt-2">
@@ -195,6 +199,9 @@ export default function GameInfo({ mode, players }) {
               <h1 className="px-4 text-l text-ellipsis">
                 <span className="font-bold">GM </span>
                 {playerStats[1]?.name}
+                {opponentDisconnected && playerStats[1].name == auth?.username ? (
+                  <h1 className="text-red-400">Waiting for opponent to connect...</h1>
+                ) : null}
               </h1>
             </div>
           </div>

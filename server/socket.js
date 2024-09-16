@@ -11,6 +11,7 @@ const queues = {
 const TIME_TO_RECONNECT = 20000
 
 function setupSocketIO(server) {
+  let timeToReconnect
   const io = new Server(server, {
     cors: {
       origin: 'http://localhost:5173',
@@ -19,6 +20,11 @@ function setupSocketIO(server) {
   })
 
   io.on('connection', async (socket) => {
+    // line for clearing rooms
+    // const deleteRooms = await Room.deleteMany()
+    let gameActive
+    let winner
+
     const dbId = socket.handshake.query.data
     console.log('A user connected:', socket.id, `database id: ${dbId}`)
 
@@ -48,9 +54,11 @@ function setupSocketIO(server) {
         const room = await Room.create({
           id: roomId,
           players: [player1.id, player2.id],
+          disconnected: '',
           mode: gameMode,
           orientation,
           socketId: [player1.socketId, player2.socketId],
+          active: true,
         })
 
         player1.socket.join(roomId)
@@ -62,6 +70,7 @@ function setupSocketIO(server) {
           mode: gameMode,
           orientation: room.orientation,
         })
+        gameActive = true
         console.log(`${gameMode} game created in ${roomId} between ${player1.id} and ${player2.id}`)
       }
 
@@ -71,15 +80,26 @@ function setupSocketIO(server) {
       })
     })
 
-    let timeToReconnect
     // handling reconnections
-    const existingRooms = await Room.findOne({ players: { $in: [dbId] } })
+    const existingRooms = await Room.find({ players: { $in: [dbId] } })
     if (existingRooms) {
-      const nonExistingSocket = existingRooms.socketId.includes(socket.id)
-      if (existingRooms && !nonExistingSocket && existingRooms.active) {
-        clearTimeout(timeToReconnect)
-        console.log(`user ${dbId} reconnected`)
-        socket.join(existingRooms.id)
+      if (existingRooms.forEach((item) => item.socketId.includes(socket.id))) {
+        console.log('reconnection not needed')
+        return
+      } else {
+        const roomToReconnect = existingRooms.filter((item) => item.active)
+        if (roomToReconnect.length >= 1) {
+          clearTimeout(timeToReconnect)
+          console.log(`user ${dbId} reconnected`)
+          socket.join(roomToReconnect.id)
+          io.to(roomToReconnect[0].socketId[0]).emit('opponentReconnected')
+
+          const roomToEdit = await Room.findOne({ _id: roomToReconnect[0]._id })
+          roomToEdit.socketId.push(socket.id)
+          await roomToEdit.save()
+        } else {
+          console.log('no room to reconnect')
+        }
       }
     }
 
@@ -91,14 +111,29 @@ function setupSocketIO(server) {
         const withoutDisconnectedSocket = room.socketId.filter((id) => id !== socket.id)
         room.socketId = withoutDisconnectedSocket
         const updatedRoom = await room.save()
-        console.log('without disconnected socket:', updatedRoom.socketId)
         io.to(withoutDisconnectedSocket[0]).emit('opponentDisconnected')
 
-        timeToReconnect = setTimeout(async () => {
+        const endGame = async () => {
           room.active = false
+          room.disconnected = dbId
           const roomInactive = await room.save()
-          console.log('player don`t reconnected, room active: ', roomInactive.active)
+          console.log('room active state: ', roomInactive.active)
+
+          winner = room.players.filter((item) => item !== dbId)
+          io.to(room.id).emit('gameEnd', { winner: winner })
+        }
+
+        timeToReconnect = setTimeout(() => {
+          endGame()
         }, TIME_TO_RECONNECT)
+      }
+
+      if (room?.socketId.length < 1 && !timeToReconnect) {
+        room.active = false
+        const closeRoom = await room.save()
+        console.log(closeRoom)
+
+        io.to(room.id).emit('gameEnd', { winner: winner })
       }
     })
   })

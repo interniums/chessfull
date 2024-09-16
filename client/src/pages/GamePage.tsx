@@ -12,8 +12,6 @@ export default function GamePage() {
   const { state } = useLocation()
   const { roomId, players, mode, orientation } = state
 
-  console.log(roomId)
-
   return (
     <>
       <main className="w-full h-full">

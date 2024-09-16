@@ -4,7 +4,6 @@ import { io } from 'socket.io-client'
 import useAuth from './hooks/useAuth'
 
 let sock
-
 const getSocket = () => {
   const { auth } = useAuth()
   if (!sock) {

@@ -33,6 +33,10 @@ const RoomSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  disconnected: {
+    type: String,
+    default: '',
+  },
 })
 
 module.exports = mongoose.model('Room', RoomSchema)
