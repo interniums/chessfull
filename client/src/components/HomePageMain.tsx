@@ -10,96 +10,129 @@ import { Button } from './ui/button'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ReloadIcon } from '@radix-ui/react-icons'
-import getSocket from '@/socket'
 import useAuth from '@/hooks/useAuth'
+import useAxiosPrivate from '@/hooks/useAxiosPrivate'
+import { axiosPrivate } from '@/api/axios'
+import { useToast } from '@/hooks/use-toast'
+import { ToastAction } from './ui/toast'
 
 export default function HomePageMain({ socket }) {
   const [gameMode, setGameMode] = useState('blitz')
   const [startGame, setStartGame] = useState(false)
   const navigate = useNavigate()
-  const sock = getSocket()
   const { auth } = useAuth()
+  const { toast } = useToast()
+  const axiosPrivate = useAxiosPrivate()
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const checkForReconnect = async () => {
+      try {
+        const response = await axiosPrivate.get(`http://localhost:3000/game/reconnect/${auth.id}`, {
+          signal: controller.signal,
+        })
+
+        if (response.status === 200) {
+          showReconnectToast(response.data)
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    checkForReconnect()
+
+    return () => {
+      controller.abort()
+    }
+  }, [])
 
   useEffect(() => {
     if (startGame) {
-      sock.emit('joinQueue', { gameMode, id: auth.id })
-      navigate(`/queue/${gameMode}`)
+      navigateToQueue()
     }
   }, [startGame])
+
+  const showReconnectToast = (data) => {
+    toast({
+      title: 'Oh!',
+      description: 'You have an unfinished game',
+      duration: 20000,
+      action: (
+        <ToastAction altText="Reconnect" onClick={() => handleReconnect(data)}>
+          Reconnect
+        </ToastAction>
+      ),
+    })
+  }
+
+  const handleReconnect = (data) => {
+    navigate(`/game/${data.roomId}`, {
+      state: {
+        roomId: data.roomId,
+        players: data.players,
+        mode: data.mode,
+        orientation: data.orientation,
+      },
+    })
+  }
+
+  const navigateToQueue = () => {
+    navigate(`/game/queue/${gameMode}`, { state: { gameMode, id: auth.id } })
+  }
+
+  const handleGameModeChange = (mode) => {
+    setGameMode(mode)
+  }
 
   return (
     <main className="h-full">
       <HomePageHeader />
       <div className="w-full h-full items-center content-center justify-center grid">
-        <ToggleGroup
-          type="single"
-          className="flex justify-center gap-20"
-          value={gameMode}
-        >
+        <ToggleGroup type="single" className="flex justify-center gap-20" value={gameMode}>
           <ToggleGroupItem
             value="bullet"
             className="h-max py-4 px-8 rounded-md"
-            onClick={() => setGameMode('bullet')}
+            onClick={() => handleGameModeChange('bullet')}
           >
-            <div>
-              <h1 className="text-2xl text-center">Bullet</h1>
-              <img src={rook} alt="pawn" className="size-32" />
-              <div>
-                <h1 className="text-xl text-center">
-                  Rank: <span>A</span>
-                </h1>
-                <h1 className="text-xl text-center">
-                  Elo: <span>2500</span>
-                </h1>
-              </div>
-            </div>
+            <GameModeCard title="Bullet" image={rook} rank="A" elo="2500" />
           </ToggleGroupItem>
           <ToggleGroupItem
             value="blitz"
             className="h-max py-4 px-8 rounded-md"
-            onClick={() => setGameMode('blitz')}
+            onClick={() => handleGameModeChange('blitz')}
           >
-            <div className="">
-              <h1 className="text-2xl text-center">Blitz</h1>
-              <img src={queen} alt="pawn" className="size-32" />
-              <div>
-                <h1 className="text-xl text-center">
-                  Rank: <span>B</span>
-                </h1>
-                <h1 className="text-xl text-center">
-                  Elo: <span>2100</span>
-                </h1>
-              </div>
-            </div>
+            <GameModeCard title="Blitz" image={queen} rank="B" elo="2100" />
           </ToggleGroupItem>
           <ToggleGroupItem
-            onClick={() => setGameMode('rapid')}
+            onClick={() => handleGameModeChange('rapid')}
             value="rapid"
             className="h-max py-4 px-8 rounded-md"
           >
-            <div>
-              <h1 className="text-2xl text-center">Rapid</h1>
-              <img src={pawn} alt="pawn" className="size-32" />
-              <div>
-                <h1 className="text-xl text-center">
-                  Rank: <span>S</span>
-                </h1>
-                <h1 className="text-xl text-center">
-                  Elo: <span>1200</span>
-                </h1>
-              </div>
-            </div>
+            <GameModeCard title="Rapid" image={pawn} rank="S" elo="1200" />
           </ToggleGroupItem>
         </ToggleGroup>
-        <Button
-          onClick={() => setStartGame(true)}
-          className="text-2xl py-6 w-full mt-8"
-          variant={'outline'}
-        >
+        <Button onClick={() => setStartGame(true)} className="text-2xl py-6 w-full mt-8" variant={'outline'}>
           {`Find ${gameMode} game`}
         </Button>
       </div>
       <HomePageFooter />
     </main>
+  )
+}
+
+function GameModeCard({ title, image, rank, elo }) {
+  return (
+    <div>
+      <h1 className="text-2xl text-center">{title}</h1>
+      <img src={image} alt={title} className="size-32" />
+      <div>
+        <h1 className="text-xl text-center">
+          Rank: <span>{rank}</span>
+        </h1>
+        <h1 className="text-xl text-center">
+          Elo: <span>{elo}</span>
+        </h1>
+      </div>
+    </div>
   )
 }

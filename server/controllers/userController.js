@@ -11,7 +11,11 @@ const getAllUsers = asyncHandler(async (req, res, next) => {
 })
 
 const getUser = asyncHandler(async (req, res, next) => {
-  const { id } = req.body
+  const { id } = req.params
+  if (!id) {
+    return res.status(400).json({ message: 'Invalid id' })
+  }
+
   const user = await User.findById(id)
   if (!user) {
     return res.status(404).json({ message: 'Invalid user id' })

@@ -14,8 +14,8 @@ const RoomSchema = new mongoose.Schema({
     default: '',
   },
   state: {
-    type: Array,
-    default: [],
+    type: String,
+    default: '',
   },
   players: {
     type: Array,

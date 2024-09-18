@@ -12,7 +12,7 @@ export default function HomePageFooter() {
   const { auth, setAuth } = useAuth()
 
   return (
-    <footer className="absolute bottom-0 right-0 px-4 py-4 z-0 h-min">
+    <footer className="absolute bottom-0 left-0 px-4 py-4 z-0 h-min">
       <div className="w-full justify-end items-center grid">
         <div className="grid items-center justify-items-center gap-2 border rounded py-4 px-4 avatarCard">
           <Link to={`/profile/${auth?.id}`}>

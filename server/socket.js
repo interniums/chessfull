@@ -2,16 +2,17 @@ const { Server } = require('socket.io')
 const Room = require('./models/gameRoomModel')
 const { v4: uuidV4 } = require('uuid')
 
+const TIME_TO_RECONNECT = 20000
 const queues = {
   bullet: [],
   rapid: [],
   blitz: [],
 }
 
-const TIME_TO_RECONNECT = 20000
+let winner
+let timeToReconnect
 
 function setupSocketIO(server) {
-  let timeToReconnect
   const io = new Server(server, {
     cors: {
       origin: 'http://localhost:5173',
@@ -20,123 +21,145 @@ function setupSocketIO(server) {
   })
 
   io.on('connection', async (socket) => {
-    // line for clearing rooms
-    // const deleteRooms = await Room.deleteMany()
-    let gameActive
-    let winner
-
     const dbId = socket.handshake.query.data
     console.log('A user connected:', socket.id, `database id: ${dbId}`)
 
+    // Handle player joining a queue
     socket.on('joinQueue', async ({ gameMode, id }) => {
+      if (queues[gameMode].some(([socketId]) => socketId === id)) {
+        console.log('already in queue')
+        return
+      }
+
       queues[gameMode].push([socket, id, socket.id])
       console.log(`user ${id} joined ${gameMode} queue`)
 
       if (queues[gameMode].length >= 2) {
-        const player1 = {
-          socket: queues[gameMode][0][0],
-          id: queues[gameMode][0][1],
-          socketId: queues[gameMode][0][2],
-        }
-        queues[gameMode].shift()
-
-        const player2 = {
-          socket: queues[gameMode][0][0],
-          id: queues[gameMode][0][1],
-          socketId: queues[gameMode][0][2],
-        }
-        queues[gameMode].shift()
-
-        const roomId = uuidV4()
-        const chooseColor = () => (Math.random() < 0.5 ? 'white' : 'black')
-        const orientation = chooseColor()
-
-        const room = await Room.create({
-          id: roomId,
-          players: [player1.id, player2.id],
-          disconnected: '',
-          mode: gameMode,
-          orientation,
-          socketId: [player1.socketId, player2.socketId],
-          active: true,
-        })
-
-        player1.socket.join(roomId)
-        player2.socket.join(roomId)
-
-        io.to(roomId).emit('startGame', {
-          roomId: roomId,
-          players: room.players,
-          mode: gameMode,
-          orientation: room.orientation,
-        })
-        gameActive = true
-        console.log(`${gameMode} game created in ${roomId} between ${player1.id} and ${player2.id}`)
+        startGame(gameMode)
       }
 
-      socket.on('makeMove', ({ roomId, move }) => {
-        console.log(`move ${move} in ${roomId}`)
-        socket.to(roomId).emit('opponentMove', move)
+      socket.on('move', async ({ roomId, move, fen }) => {
+        await handleMove(roomId, move, fen)
       })
     })
 
-    // handling reconnections
-    const existingRooms = await Room.find({ players: { $in: [dbId] } })
-    if (existingRooms) {
-      if (existingRooms.forEach((item) => item.socketId.includes(socket.id))) {
-        console.log('reconnection not needed')
-        return
-      } else {
-        const roomToReconnect = existingRooms.filter((item) => item.active)
-        if (roomToReconnect.length >= 1) {
-          clearTimeout(timeToReconnect)
-          console.log(`user ${dbId} reconnected`)
-          socket.join(roomToReconnect.id)
-          io.to(roomToReconnect[0].socketId[0]).emit('opponentReconnected')
+    // Reconnection logic
+    handleReconnection(dbId, socket)
 
-          const roomToEdit = await Room.findOne({ _id: roomToReconnect[0]._id })
-          roomToEdit.socketId.push(socket.id)
-          await roomToEdit.save()
-        } else {
-          console.log('no room to reconnect')
-        }
-      }
-    }
-
+    // Handle socket disconnection
     socket.on('disconnect', async () => {
-      console.log('User disconnected:', socket.id)
-      const room = await Room.findOne({ socketId: { $in: [socket.id] } })
-
-      if (room) {
-        const withoutDisconnectedSocket = room.socketId.filter((id) => id !== socket.id)
-        room.socketId = withoutDisconnectedSocket
-        const updatedRoom = await room.save()
-        io.to(withoutDisconnectedSocket[0]).emit('opponentDisconnected')
-
-        const endGame = async () => {
-          room.active = false
-          room.disconnected = dbId
-          const roomInactive = await room.save()
-          console.log('room active state: ', roomInactive.active)
-
-          winner = room.players.filter((item) => item !== dbId)
-          io.to(room.id).emit('gameEnd', { winner: winner })
-        }
-
-        timeToReconnect = setTimeout(() => {
-          endGame()
-        }, TIME_TO_RECONNECT)
-      }
-
-      if (room?.socketId.length < 1 && !timeToReconnect) {
-        room.active = false
-        const closeRoom = await room.save()
-        console.log(closeRoom)
-
-        io.to(room.id).emit('gameEnd', { winner: winner })
-      }
+      handleSocketDisconnect(socket.id)
+      await handleDisconnection(socket.id, dbId)
     })
   })
+
+  async function startGame(gameMode) {
+    const player1 = getPlayerFromQueue(gameMode)
+    const player2 = getPlayerFromQueue(gameMode)
+
+    const roomId = uuidV4()
+    const orientation = Math.random() < 0.5 ? 'white' : 'black'
+
+    const room = await Room.create({
+      id: roomId,
+      players: [player1.id, player2.id],
+      disconnected: '',
+      mode: gameMode,
+      orientation,
+      socketId: [player1.socketId, player2.socketId],
+      active: true,
+    })
+
+    player1.socket.join(roomId)
+    player2.socket.join(roomId)
+
+    io.to(roomId).emit('startGame', {
+      roomId: roomId,
+      players: room.players,
+      mode: gameMode,
+      orientation: room.orientation,
+    })
+
+    console.log(`${gameMode} game created in ${roomId} between ${player1.id} and ${player2.id}`)
+  }
+
+  function getPlayerFromQueue(gameMode) {
+    const player = {
+      socket: queues[gameMode][0][0],
+      id: queues[gameMode][0][1],
+      socketId: queues[gameMode][0][2],
+    }
+    queues[gameMode].shift()
+    return player
+  }
+
+  async function handleMove(roomId, move, fen) {
+    const room = await Room.findOne({ id: roomId })
+    room.state = fen
+    await room.save()
+    console.log(`move ${move} in ${roomId}`)
+    io.to(roomId).emit('move', move)
+  }
+
+  async function handleReconnection(dbId, socket) {
+    const existingRooms = await Room.find({ players: { $in: [dbId] } })
+
+    const roomToReconnect = existingRooms.filter((item) => item.active)
+    if (roomToReconnect.length) {
+      if (roomToReconnect[0].socketId.includes(socket.id)) {
+        return
+      } else {
+        console.log(roomToReconnect)
+        console.log('calling reconnection')
+        clearTimeout(timeToReconnect)
+        await reconnectToRoom(roomToReconnect[0], socket)
+      }
+    }
+  }
+
+  async function reconnectToRoom(room, socket) {
+    const roomToEdit = await Room.findById(room._id)
+    roomToEdit.socketId.push(socket.id)
+    socket.join(room.id)
+    io.to(socket.id).emit('useFen')
+    io.to(roomToEdit.socketId[0]).emit('opponentReconnected')
+    console.log(`user reconnected`)
+
+    await roomToEdit.save()
+  }
+
+  function handleSocketDisconnect(socketId) {
+    for (const [key, queue] of Object.entries(queues)) {
+      const index = queue.findIndex((subArray) => subArray.includes(socketId))
+      if (index !== -1) {
+        queue.splice(index, 1)
+        console.log(`Removed from ${key} queue`)
+      }
+    }
+  }
+
+  async function handleDisconnection(socketId, dbId) {
+    console.log(`socket disconnected ${socketId}`)
+    const room = await Room.findOne({ socketId: { $in: [socketId] } })
+    if (!room) return
+
+    room.socketId = room.socketId.filter((id) => id !== socketId)
+    await room.save()
+    io.to(room.socketId[0]).emit('opponentDisconnected')
+
+    timeToReconnect = setTimeout(async () => {
+      await endGame(room, dbId)
+    }, TIME_TO_RECONNECT)
+  }
+
+  async function endGame(room, dbId) {
+    room.active = false
+    room.disconnected = dbId
+    const result = await room.save()
+
+    io.to(room.id).emit('gameEnd')
+    console.log(`game eneded`)
+  }
 }
 
 module.exports = setupSocketIO

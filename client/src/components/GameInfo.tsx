@@ -8,7 +8,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import useAxiosPrivate from '@/hooks/useAxiosPrivate'
 import useAuth from '@/hooks/useAuth'
 
-export default function GameInfo({ mode, players, opponentDisconnected }) {
+export default function GameInfo({ mode, players, opponentDisconnected, roomId }) {
   const { auth } = useAuth()
   const [loading, setLoading] = useState(false)
   const axiosPrivate = useAxiosPrivate()
@@ -18,47 +18,46 @@ export default function GameInfo({ mode, players, opponentDisconnected }) {
   const location = useLocation()
 
   useEffect(() => {
-    let isMounted = true
-    const controller = new AbortController()
-    setLoading(true)
+    if (playerStats.length < 2) {
+      let isMounted = true
+      const controller = new AbortController()
+      setLoading(true)
 
-    const getUsers = async () => {
-      try {
-        players.forEach(async (playerID) => {
-          const response = await axiosPrivate.post(
-            'http://localhost:3000/user/findUser',
-            { id: playerID },
-            { signal: controller.signal }
-          )
-          isMounted &&
-            setPlayerStats((prev) => [
-              ...prev,
-              {
-                name: response.data.name,
-                elo:
-                  mode == 'blitz'
-                    ? response.data.blitzElo
-                    : mode === 'rapid'
-                    ? response.data.rapidElo
-                    : mode == 'bullet'
-                    ? response.data.bulletElo
-                    : null,
-              },
-            ])
-          setLoading(false)
-        })
-      } catch {
-        console.error(err)
-        navigate('/login', { state: { from: location }, replace: true })
+      const getUsers = async () => {
+        try {
+          players.forEach(async (playerID) => {
+            const response = await axiosPrivate.get(`http://localhost:3000/user/${playerID}`, {
+              signal: controller.signal,
+            })
+            isMounted &&
+              setPlayerStats((prev) => [
+                ...prev,
+                {
+                  name: response.data.name,
+                  elo:
+                    mode == 'blitz'
+                      ? response.data.blitzElo
+                      : mode === 'rapid'
+                      ? response.data.rapidElo
+                      : mode == 'bullet'
+                      ? response.data.bulletElo
+                      : null,
+                },
+              ])
+            setLoading(false)
+          })
+        } catch (err) {
+          console.error(err)
+        }
       }
-    }
 
-    getUsers()
+      getUsers()
 
-    return () => {
-      isMounted = false
-      controller.abort()
-      setLoading(false)
+      return () => {
+        isMounted = false
+        controller.abort()
+        setLoading(false)
+      }
     }
   }, [])
 

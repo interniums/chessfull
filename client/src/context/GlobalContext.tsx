@@ -1,5 +1,7 @@
 // @ts-nocheck
 
+import useAuth from '@/hooks/useAuth'
+import getSocket from '@/socket'
 import { createContext, useContext, useState } from 'react'
 
 const GlobalContext = createContext()

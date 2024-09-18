@@ -18,6 +18,7 @@ const refreshRouter = require('./routes/refresh')
 const logoutRouter = require('./routes/logout')
 const loginRouter = require('./routes/login')
 const registrationRouter = require('./routes/registration')
+const gameRouter = require('./routes/game')
 
 const app = express()
 
@@ -55,6 +56,7 @@ app.use('/registration', registrationRouter)
 // Protected Routes
 app.use(jwtVerify)
 app.use('/user', userRouter)
+app.use('/game', gameRouter)
 
 // Catch 404 and Forward to Error Handler
 app.use(function (req, res, next) {

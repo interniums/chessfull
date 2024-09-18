@@ -8,22 +8,26 @@ import { ArrowLeftIcon, ArrowRightIcon, DoubleArrowLeftIcon, DoubleArrowRightIco
 import GameInfo from './GameInfo'
 import getSocket from '@/socket'
 import useAuth from '@/hooks/useAuth'
+import { axiosPrivate } from '@/api/axios'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-export default function GamePageBoard({ mode, players, moves, setMoves, roomId, orientation }) {
+export default function GamePageBoard({ mode, players, moves, setMoves, roomId, orientation, sock }) {
   const { auth } = useAuth()
-  const sock = getSocket()
+  const navigate = useNavigate()
+  const location = useLocation()
   const chess = useMemo(() => new Chess(), [])
+  const [loading, setLoading] = useState(false)
   const [fen, setFen] = useState(chess.fen())
   const [over, setOver] = useState('')
   const [playerSide, setPlayerSide] = useState(auth.id == players[0] ? 'white' : 'black')
   const [opponentDisconnected, setOpponentDisconnected] = useState(false)
   const [winner, setWinner] = useState('')
+  const [useFen, setUseFen] = useState(null)
   // console.log(orientation)
   // console.log(players[0])
   // console.log('id', auth.id)
   // console.log(players[1])
-
-  console.log(winner)
+  console.log(fen)
 
   const player1Orientation = orientation
   const player2Orientation = orientation === 'white' ? 'black' : 'white'
@@ -77,16 +81,17 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     // illegal move
     if (move === null) return false
 
-    sock.emit('makeMove', {
+    sock.emit('move', {
       move,
       roomId,
+      fen,
     })
 
     return true
   }
 
   useEffect(() => {
-    sock.on('opponentMove', (move) => {
+    sock.on('move', (move) => {
       makeAMove(move)
     })
   }, [makeAMove])
@@ -98,11 +103,41 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     sock.on('opponentReconnected', () => {
       setOpponentDisconnected(false)
     })
-    sock.on('gameEnd', ({ winner }) => {
+    sock.on('gameEnd', () => {
       setOver(true)
-      setWinner(winner)
+    })
+    sock.on('useFen', () => {
+      setUseFen(true)
     })
   }, [sock])
+
+  useEffect(() => {
+    if (useFen) {
+      let isMounted = true
+      const controller = new AbortController()
+      setLoading(true)
+
+      const getState = async () => {
+        try {
+          const response = await axiosPrivate.get(`http://localhost:3000/game/state/${roomId}`, {
+            signal: controller.signal,
+          })
+          isMounted && chess.load(response.data)
+          setUseFen(null)
+          setLoading(false)
+        } catch (err) {
+          console.error(err)
+        }
+      }
+
+      getState()
+
+      return () => {
+        isMounted = false
+        controller.abort()
+      }
+    }
+  }, [useFen])
 
   return (
     <>
