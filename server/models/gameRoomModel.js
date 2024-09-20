@@ -9,13 +9,17 @@ const RoomSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  endState: {
+    type: String,
+    default: '',
+  },
   mode: {
     type: String,
     default: '',
   },
   state: {
     type: String,
-    default: '',
+    default: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
   },
   players: {
     type: Array,

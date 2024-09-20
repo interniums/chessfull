@@ -37,14 +37,44 @@ function setupSocketIO(server) {
       if (queues[gameMode].length >= 2) {
         startGame(gameMode)
       }
+    })
 
-      socket.on('move', async ({ roomId, move, fen }) => {
-        await handleMove(roomId, move, fen)
-      })
+    socket.on('move', async ({ roomId, move, fen }) => {
+      await handleMove(roomId, move, fen)
     })
 
     // Reconnection logic
     handleReconnection(dbId, socket)
+
+    socket.on('sendFen', async (data) => {
+      const room = await Room.findOne({ id: data.roomId })
+
+      room.state = data.fen
+      room.save()
+    })
+
+    socket.on('offerDraw', async (data) => {
+      console.log('draw offered')
+      const room = await Room.findOne({ id: data.roomId })
+
+      const opponent = room.socketId.filter((id) => id !== data.socketId)
+      socket.to(opponent[0]).emit('offerDraw')
+    })
+
+    socket.on('refuseDraw', async (data) => {
+      console.log('draw refused')
+      const room = await Room.findOne({ id: data.roomId })
+
+      const opponent = room.socketId.filter((id) => id !== data.socketId)
+      socket.to(opponent[0]).emit('drawRefused')
+    })
+
+    socket.on('acceptDraw', async (data) => {
+      console.log('draw accepted')
+      const room = await Room.findOne({ id: data.roomId })
+
+      endGame(data.roomId, null, 'Draw by agreement')
+    })
 
     // Handle socket disconnection
     socket.on('disconnect', async () => {
@@ -109,7 +139,6 @@ function setupSocketIO(server) {
       if (roomToReconnect[0].socketId.includes(socket.id)) {
         return
       } else {
-        console.log(roomToReconnect)
         console.log('calling reconnection')
         clearTimeout(timeToReconnect)
         await reconnectToRoom(roomToReconnect[0], socket)
@@ -126,6 +155,8 @@ function setupSocketIO(server) {
     console.log(`user reconnected`)
 
     await roomToEdit.save()
+    const connectedSockets = io.sockets.adapter.rooms.get(room.id)
+    console.log(connectedSockets)
   }
 
   function handleSocketDisconnect(socketId) {
@@ -152,12 +183,26 @@ function setupSocketIO(server) {
     }, TIME_TO_RECONNECT)
   }
 
-  async function endGame(room, dbId) {
+  async function endGame(roomId, dbId, reason) {
+    const room = await Room.findOne({ id: roomId })
     room.active = false
-    room.disconnected = dbId
+
+    if (dbId) {
+      room.disconnected = dbId
+      room.endState = 'Abandon'
+
+      const winner = room.players.filter((id) => id !== dbId)
+      room.winner = winner[0]
+    }
+
+    if (reason == 'Draw by agreement') {
+      room.endState = 'Draw by agreement'
+      room.winner = 'Draw'
+    }
+
     const result = await room.save()
 
-    io.to(room.id).emit('gameEnd')
+    io.to(roomId).emit('gameEnd', { winner: result.winner, endState: result.endState })
     console.log(`game eneded`)
   }
 }

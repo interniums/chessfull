@@ -14,7 +14,7 @@ export default function HomePageFooter() {
   return (
     <footer className="absolute bottom-0 left-0 px-4 py-4 z-0 h-min">
       <div className="w-full justify-end items-center grid">
-        <div className="grid items-center justify-items-center gap-2 border rounded py-4 px-4 avatarCard">
+        <div className="grid items-center justify-items-center gap-2 border rounded py-4 px-4 avatarCard shadow-md">
           <Link to={`/profile/${auth?.id}`}>
             <Avatar className="size-12">
               <AvatarImage />

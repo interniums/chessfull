@@ -1,15 +1,20 @@
 // @ts-nocheck
 
 import getSocket from '@/socket'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { io } from 'socket.io-client'
 
 export default function GameProvider() {
   const [sock, setSock] = useState(getSocket())
-  console.log(sock)
+  console.log('game provider mounted')
+  // console.log(sock)
 
   useEffect(() => {
+    if (!sock.connected) {
+      sock.connect()
+    }
+
     return () => {
       setSock(sock.disconnect())
     }

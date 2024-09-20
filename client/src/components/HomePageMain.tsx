@@ -17,8 +17,10 @@ import { useToast } from '@/hooks/use-toast'
 import { ToastAction } from './ui/toast'
 
 export default function HomePageMain({ socket }) {
+  const TIME_TO_RECONNECT = 20000
   const [gameMode, setGameMode] = useState('blitz')
   const [startGame, setStartGame] = useState(false)
+  const [timeoutExpired, setTimeoutExpired] = useState(false)
   const navigate = useNavigate()
   const { auth } = useAuth()
   const { toast } = useToast()
@@ -56,9 +58,14 @@ export default function HomePageMain({ socket }) {
     toast({
       title: 'Oh!',
       description: 'You have an unfinished game',
-      duration: 20000,
+      duration: TIME_TO_RECONNECT,
       action: (
-        <ToastAction altText="Reconnect" onClick={() => handleReconnect(data)}>
+        <ToastAction
+          altText="Reconnect"
+          onClick={() => {
+            timeoutExpired ? null : handleReconnect(data)
+          }}
+        >
           Reconnect
         </ToastAction>
       ),

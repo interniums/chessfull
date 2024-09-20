@@ -15,7 +15,7 @@ export default function GamePage() {
 
   return (
     <>
-      <main className="w-full h-full">
+      <main className="w-full h-full min-h-screen">
         <HomePageHeader variant={'play'} />
         <GamePageBoard mode={mode} players={players} roomId={roomId} orientation={orientation} sock={sock} />
         <HomePageFooter />

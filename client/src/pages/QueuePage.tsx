@@ -12,7 +12,6 @@ export default function QueuePage() {
   const { gameMode, id } = state || {}
   const [areInQueue, setAreInQueue] = useState(false)
   const [sock] = useOutletContext()
-  console.log(sock)
 
   useEffect(() => {
     if (!areInQueue) {

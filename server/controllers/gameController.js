@@ -14,7 +14,9 @@ const getGameState = asyncHandler(async (req, res, next) => {
   }
 
   const state = room.state
-  res.status(200).json(state)
+  const winner = room.winner
+  const endState = room.endState
+  res.status(200).json({ state, winner, endState })
 })
 
 const getReconnectRoom = asyncHandler(async (req, res, next) => {
