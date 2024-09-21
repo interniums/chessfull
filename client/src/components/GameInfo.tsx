@@ -1,6 +1,12 @@
 // @ts-nocheck
 
-import { ArrowLeftIcon, ArrowRightIcon, DoubleArrowLeftIcon, DoubleArrowRightIcon } from '@radix-ui/react-icons'
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  DoubleArrowLeftIcon,
+  DoubleArrowRightIcon,
+  ReloadIcon,
+} from '@radix-ui/react-icons'
 import { Button } from './ui/button'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -9,9 +15,9 @@ import { useToast } from '@/hooks/use-toast'
 
 export default function GameInfo({ mode, players, opponentDisconnected, roomId, sock, playerStats }) {
   const { auth } = useAuth()
+  const { toast } = useToast()
   const navigate = useNavigate()
   const location = useLocation()
-  const { toast } = useToast()
 
   const [loading, setLoading] = useState(false)
   const [game, setGame] = useState(true)
@@ -49,7 +55,14 @@ export default function GameInfo({ mode, players, opponentDisconnected, roomId, 
   return (
     <div className="w-full min-w-80 h-max border rounded-md py-2 grid content-between shadow-md">
       {loading ? (
-        <div>loading</div>
+        <div className="min-h-80 py-8 px-16">
+          <div className="grid gap-6 items-center justify-center">
+            <div className="w-full flex items-center justify-center">
+              <ReloadIcon className="animate-spin size-44" />
+            </div>
+            <div className="text-center text-2xl">Loading...</div>
+          </div>
+        </div>
       ) : (
         <>
           <div className="flex w-full min-h-24 items-center justify-center">

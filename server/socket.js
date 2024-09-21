@@ -55,7 +55,10 @@ function setupSocketIO(server) {
 
     socket.on('offerDraw', async (data) => {
       console.log('draw offered')
+      console.log(data)
       const room = await Room.findOne({ id: data.roomId })
+      console.log('socket id', socket.id)
+      console.log(room)
 
       const opponent = room.socketId.filter((id) => id !== data.socketId)
       socket.to(opponent[0]).emit('offerDraw')
@@ -185,6 +188,10 @@ function setupSocketIO(server) {
 
   async function endGame(roomId, dbId, reason) {
     const room = await Room.findOne({ id: roomId })
+    if (!room) {
+      console.log('room to end the game not found')
+      return
+    }
     room.active = false
 
     if (dbId) {
