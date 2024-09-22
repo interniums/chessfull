@@ -1,5 +1,6 @@
 const { Server } = require('socket.io')
 const Room = require('./models/gameRoomModel')
+const User = require('./models/userModel')
 const { v4: uuidV4 } = require('uuid')
 
 const TIME_TO_RECONNECT = 20000
@@ -39,12 +40,22 @@ function setupSocketIO(server) {
       }
     })
 
+    handleReconnection(dbId, socket)
+
     socket.on('move', async ({ roomId, move, fen }) => {
       await handleMove(roomId, move, fen)
     })
 
-    // Reconnection logic
-    handleReconnection(dbId, socket)
+    socket.on('updateHistory', async (data) => {
+      const room = await Room.findOne({ id: data.roomId })
+      if (!room) {
+        console.log('invalid roomId in history update')
+        return
+      }
+
+      room.history = data.history
+      await room.save()
+    })
 
     socket.on('sendFen', async (data) => {
       const room = await Room.findOne({ id: data.roomId })
@@ -55,28 +66,22 @@ function setupSocketIO(server) {
 
     socket.on('offerDraw', async (data) => {
       console.log('draw offered')
-      console.log(data)
-      const room = await Room.findOne({ id: data.roomId })
-      console.log('socket id', socket.id)
-      console.log(room)
-
-      const opponent = room.socketId.filter((id) => id !== data.socketId)
-      socket.to(opponent[0]).emit('offerDraw')
+      socket.to(data.roomId).emit('offerDraw')
     })
 
     socket.on('refuseDraw', async (data) => {
       console.log('draw refused')
-      const room = await Room.findOne({ id: data.roomId })
-
-      const opponent = room.socketId.filter((id) => id !== data.socketId)
-      socket.to(opponent[0]).emit('drawRefused')
+      socket.to(data.roomId).emit('drawRefused')
     })
 
     socket.on('acceptDraw', async (data) => {
       console.log('draw accepted')
-      const room = await Room.findOne({ id: data.roomId })
+      endGame(data.roomId, null, 'Draw by agreement', data.mode)
+    })
 
-      endGame(data.roomId, null, 'Draw by agreement')
+    socket.on('resign', async (data) => {
+      console.log(`user ${data?.id} resigned`)
+      endGame(data.roomId, data.id, 'Resign', data.mode)
     })
 
     // Handle socket disconnection
@@ -128,6 +133,10 @@ function setupSocketIO(server) {
 
   async function handleMove(roomId, move, fen) {
     const room = await Room.findOne({ id: roomId })
+    if (room.winner.length > 1) {
+      return
+    }
+
     room.state = fen
     await room.save()
     console.log(`move ${move} in ${roomId}`)
@@ -153,7 +162,6 @@ function setupSocketIO(server) {
     const roomToEdit = await Room.findById(room._id)
     roomToEdit.socketId.push(socket.id)
     socket.join(room.id)
-    io.to(socket.id).emit('useFen')
     io.to(roomToEdit.socketId[0]).emit('opponentReconnected')
     console.log(`user reconnected`)
 
@@ -176,17 +184,20 @@ function setupSocketIO(server) {
     console.log(`socket disconnected ${socketId}`)
     const room = await Room.findOne({ socketId: { $in: [socketId] } })
     if (!room) return
+    if (room.winner.length > 1) {
+      return
+    }
 
     room.socketId = room.socketId.filter((id) => id !== socketId)
     await room.save()
     io.to(room.socketId[0]).emit('opponentDisconnected')
 
     timeToReconnect = setTimeout(async () => {
-      await endGame(room, dbId)
+      await endGame(room.id, dbId, '', room.mode)
     }, TIME_TO_RECONNECT)
   }
 
-  async function endGame(roomId, dbId, reason) {
+  async function endGame(roomId, dbId, reason, mode) {
     const room = await Room.findOne({ id: roomId })
     if (!room) {
       console.log('room to end the game not found')
@@ -194,23 +205,79 @@ function setupSocketIO(server) {
     }
     room.active = false
 
-    if (dbId) {
+    // If a player abandoned the game
+    if (dbId && reason !== 'Resign') {
       room.disconnected = dbId
       room.endState = 'Abandon'
 
       const winner = room.players.filter((id) => id !== dbId)
       room.winner = winner[0]
+
+      // Adjust ELO for the winner and the player who abandoned
+      const winnerUser = await User.findById(winner[0])
+      const loserUser = await User.findById(dbId)
+
+      if (winnerUser && loserUser) {
+        updateElo(winnerUser, loserUser, mode, true)
+      }
     }
 
+    if (reason == 'Resign') {
+      const winner = room.players.filter((id) => id !== dbId)
+
+      room.endState = 'Resign'
+      room.winner = winner[0]
+
+      const winnerUser = await User.findById(winner[0])
+      const loserUser = await User.findById(dbId)
+
+      if (winnerUser && loserUser) {
+        updateElo(winnerUser, loserUser, mode, true)
+      }
+    }
+
+    // If the game ended in a draw
     if (reason == 'Draw by agreement') {
       room.endState = 'Draw by agreement'
       room.winner = 'Draw'
+
+      const player1 = await User.findById(room.players[0])
+      const player2 = await User.findById(room.players[1])
+
+      if (player1 && player2) {
+        updateElo(player1, player2, mode, false)
+      }
     }
 
     const result = await room.save()
 
+    // Emit game end event to the clients
     io.to(roomId).emit('gameEnd', { winner: result.winner, endState: result.endState })
-    console.log(`game eneded`)
+    console.log('game ended')
+  }
+
+  async function updateElo(player1, player2, mode, isWinLose) {
+    const modes = {
+      blitz: 'blitzElo',
+      bullet: 'bulletElo',
+      rapid: 'rapidElo',
+    }
+
+    const eloKey = modes[mode]
+
+    if (isWinLose) {
+      // Adjust Elo if there's a winner and loser
+      player1[eloKey] += 25
+      player2[eloKey] -= 25
+    } else {
+      // Adjust Elo for both players in case of a draw
+      player1[eloKey] += 1
+      player2[eloKey] += 1
+    }
+
+    // Save the updated Elo for both players
+    await player1.save()
+    await player2.save()
   }
 }
 

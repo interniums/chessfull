@@ -11,45 +11,51 @@ import { Button } from './ui/button'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import useAuth from '@/hooks/useAuth'
-import { useToast } from '@/hooks/use-toast'
 
-export default function GameInfo({ mode, players, opponentDisconnected, roomId, sock, playerStats }) {
+export default function GameInfo({
+  mode,
+  players,
+  opponentDisconnected,
+  roomId,
+  sock,
+  playerStats,
+  waitDrawAnswer,
+  setWaitDrawAnswer,
+  offerDraw,
+  setOfferDraw,
+  over,
+  winner,
+}) {
   const { auth } = useAuth()
-  const { toast } = useToast()
   const navigate = useNavigate()
   const location = useLocation()
 
   const [loading, setLoading] = useState(false)
   const [game, setGame] = useState(true)
-  const [offerDraw, setOfferDraw] = useState(null)
-  const [waitDrawAnswer, setWaitDrawAnswer] = useState(false)
-
-  useEffect(() => {
-    sock.on('offerDraw', () => {
-      setOfferDraw(true)
-    })
-    sock.on('drawRefused', () => {
-      setWaitDrawAnswer(false)
-      toast({
-        title: 'Draw refused',
-        description: 'Opponent refused taking draw',
-      })
-    })
-  }, [sock])
 
   const handleOfferDraw = () => {
+    if (over.length) {
+      return
+    }
     setWaitDrawAnswer(true)
     sock.emit('offerDraw', { roomId, id: auth.id, socketId: sock.id })
   }
 
   const handleAcceptDraw = () => {
-    sock.emit('acceptDraw', { roomId })
+    sock.emit('acceptDraw', { roomId, mode })
     setOfferDraw(null)
   }
 
   const handleRefuseDraw = () => {
     sock.emit('refuseDraw', { roomId, id: auth.id, socketId: sock.id })
     setOfferDraw(null)
+  }
+
+  const handleResign = () => {
+    if (over.length) {
+      return
+    }
+    sock.emit('resign', { roomId, id: auth.id, mode })
   }
 
   return (
@@ -69,14 +75,15 @@ export default function GameInfo({ mode, players, opponentDisconnected, roomId, 
             <div className="text-center w-full">
               <div className="px-4 text-l text-ellipsis">
                 <span className="font-bold">GM </span>
-                {playerStats[0]?.name}
-                {opponentDisconnected && playerStats[0].name == auth?.username ? (
-                  <h1 className="text-red-400">Waiting for opponent to connect...</h1>
-                ) : null}
+                {players[0] == auth.id ? playerStats[1]?.name : playerStats[0]?.name}
+                {opponentDisconnected && (
+                  <h1 className="text-red-400 animate-pulse">Waiting for opponent to connect...</h1>
+                )}
               </div>
               <hr className="mt-2" />
               <div className="text-center mt-2">
-                <span className="font-bold">{playerStats[0]?.elo}</span> elo
+                <span className="font-bold">{players[0] == auth.id ? playerStats[1]?.elo : playerStats[0]?.elo}</span>{' '}
+                elo{' '}
               </div>
             </div>
           </div>
@@ -194,7 +201,7 @@ export default function GameInfo({ mode, players, opponentDisconnected, roomId, 
                     <>
                       <div className={waitDrawAnswer ? 'animate-pulse' : ''}>
                         <Button
-                          disabled={waitDrawAnswer ? true : false}
+                          disabled={waitDrawAnswer || over.length ? true : false}
                           variant={'outline'}
                           onClick={() => handleOfferDraw()}
                         >
@@ -202,8 +209,12 @@ export default function GameInfo({ mode, players, opponentDisconnected, roomId, 
                         </Button>
                       </div>
                       <div>
-                        <Button variant={'outline'} onClick={() => handleSurrender()}>
-                          Surrender
+                        <Button
+                          disabled={over.length ? true : false}
+                          variant={'outline'}
+                          onClick={() => handleResign()}
+                        >
+                          Resign
                         </Button>
                       </div>
                     </>
@@ -224,15 +235,13 @@ export default function GameInfo({ mode, players, opponentDisconnected, roomId, 
           <div className="flex w-full min-h-24 items-center justify-center">
             <div className="text-center w-full">
               <div className="text-center mb-2">
-                <span className="font-bold">{playerStats[1]?.elo}</span> elo
+                <span className="font-bold">{players[0] == auth.id ? playerStats[0]?.elo : playerStats[1]?.elo}</span>{' '}
+                elo
               </div>
               <hr className="mb-2" />
               <div className="px-4 text-l text-ellipsis">
                 <span className="font-bold">GM </span>
-                {playerStats[1]?.name}
-                {opponentDisconnected && playerStats[1].name == auth?.username ? (
-                  <h1 className="text-red-400">Waiting for opponent to connect...</h1>
-                ) : null}
+                {players[0] == auth.id ? playerStats[0]?.name : playerStats[1]?.name}
               </div>
             </div>
           </div>
