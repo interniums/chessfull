@@ -3,16 +3,7 @@
 import { Chess } from 'chess.js'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Chessboard } from 'react-chessboard'
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  Cross1Icon,
-  DoubleArrowLeftIcon,
-  DoubleArrowRightIcon,
-} from '@radix-ui/react-icons'
 import { axiosPrivate } from '@/api/axios'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'
 import { useToast } from '@/hooks/use-toast'
 import useAxiosPrivate from '@/hooks/useAxiosPrivate'
@@ -26,8 +17,6 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
 
   const { toast } = useToast()
   const { auth } = useAuth()
-  const navigate = useNavigate()
-  const location = useLocation()
   const chess = useMemo(() => new Chess(), [])
   const axiosPrivate = useAxiosPrivate()
 
@@ -40,23 +29,36 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     history: [],
   })
   const [fen, setFen] = useState(chess.fen())
-  const [playerSide, setPlayerSide] = useState(auth.id == players[0] ? player1Orientation : player2Orientation)
+  const [playerSide, setPlayerSide] = useState(auth.id == players[0].id ? player1Orientation : player2Orientation)
   const [opponentDisconnected, setOpponentDisconnected] = useState(false)
-  const [playerStats, setPlayerStats] = useState([])
   const [offerDraw, setOfferDraw] = useState(null)
   const [waitDrawAnswer, setWaitDrawAnswer] = useState(null)
   const [openEndDialog, setOpenEndDialog] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [capturedPieces, setCapturedPieces] = useState({ white: [], black: [] })
+
+  const [rightClickedSquares, setRightClickedSquares] = useState({})
+  const [showPromotionDialog, setShowPromotionDialog] = useState(false)
+  const [moveSquares, setMoveSquares] = useState({})
+  const [optionSquares, setOptionSquares] = useState({})
+  const [moveFrom, setMoveFrom] = useState('')
+  const [moveTo, setMoveTo] = useState<Square | null>(null)
+  const [allowPremoves, setAllowPremoves] = useState(history ? false : true)
+  const [isPieceDragged, setIsPieceDragged] = useState(false)
 
   const waitDrawAnswerRef = useRef(waitDrawAnswer)
   const overRef = useRef(gameState?.over)
 
-  console.log(fen)
+  // console.log(fen)
   // console.log(history)
   // console.log(gameState)
+  // console.log(chess.turn())
+  // console.log(gameState)
+  // console.log(chess)
+  console.log('is peice dragged', isPieceDragged)
 
   useEffect(() => {
-    if (!gameState?.over.length) sock.emit('updateHistory', { roomId, history })
+    if (!gameState?.over.length && history.length) sock.emit('updateHistory', { roomId, history })
   }, [history])
 
   useEffect(() => {
@@ -97,6 +99,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     return () => {
       isMounted = false
       controller.abort()
+      setLoading(false)
     }
   }, [])
 
@@ -107,13 +110,41 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
         setFen(chess.fen())
         setHistory(chess.history())
 
+        if (result) {
+          if (result.captured) {
+            const piece = result.captured
+            const color = result.color === 'w' ? 'black' : 'white'
+            setCapturedPieces((prev) => ({
+              ...prev,
+              [color]: [...prev[color], piece],
+            }))
+          }
+        }
+
         console.log('over, checkmate', chess.isGameOver(), chess.isCheckmate())
 
-        if (chess.isGameOver()) {
-          if (chess.isCheckmate() && !gameState?.winner.length) {
-            setGameState((prev) => ({ ...prev, over: `Checkmate! ${chess.turn() === 'w' ? 'black' : 'white'} wins!` }))
-          } else if (chess.isDraw() && !gameState?.winner.length) {
-            setGameState((prev) => ({ ...prev, over: `Draw` }))
+        if (gameState?.winner.length < 1) {
+          if (chess.isGameOver()) {
+            if (chess.isCheckmate()) {
+              console.log('checkmate')
+
+              const color = chess.turn() === 'w' ? 'black' : 'white'
+              const winner = orientation == color ? players[0].id : players[1].id
+
+              sock.emit('checkmate', { roomId, winner, mode })
+            } else if (chess.isInsufficientMaterial()) {
+              console.log('draw due to insufficient material')
+
+              sock.emit('insufficient material', { roomId, mode })
+            } else if (chess.isStalemate()) {
+              console.log('stalemate')
+
+              sock.emit('stalemate', { roomId, mode })
+            } else if (chess.isThreefoldRepetition()) {
+              console.log('draw due to threefold repetition')
+
+              sock.emit('threefold repetition', { roomId, mode })
+            }
           }
         }
 
@@ -125,28 +156,24 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     [chess]
   )
 
-  // onDrop function
-  function onDrop(sourceSquare, targetSquare) {
-    if (!overRef.current.length) {
-      if (chess.turn() !== playerSide[0]) {
-        console.log('no')
-        return false
-      }
-    }
+  function onPromotionPieceSelect(piece) {
+    if (!piece) return false
+    console.log(moveFrom, moveTo, piece)
 
     const moveData = {
-      from: sourceSquare,
-      to: targetSquare,
-      color: chess.turn(),
-      promotion: 'q',
+      from: moveFrom,
+      to: moveTo,
+      promotion: piece[1].toLowerCase(),
     }
 
     const move = makeAMove(moveData)
 
-    // illegal move
-    if (move === null) return false
+    if (move === null) {
+      console.error('Invalid move during promotion')
+      return false
+    }
 
-    if (gameState?.over.length < 1) {
+    if (!gameState?.over.length) {
       sock.emit('move', {
         move,
         roomId,
@@ -154,7 +181,156 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
       })
     }
 
+    setMoveFrom('')
+    setMoveTo(null)
+    setShowPromotionDialog(false)
+    setOptionSquares({})
+
     return true
+  }
+
+  function onDrop(sourceSquare, targetSquare, piece) {
+    if (!overRef.current.length && chess.turn() !== playerSide[0]) {
+      console.log('Not your turn.')
+      return false
+    }
+    if (!allowPremoves) {
+      setAllowPremoves(true)
+    }
+
+    const moveData = {
+      from: sourceSquare,
+      to: targetSquare,
+      promotion: piece[1].toLowerCase(),
+    }
+
+    const move = makeAMove(moveData)
+
+    if (move === null) return false
+
+    if (!gameState?.over.length) {
+      sock.emit('move', {
+        move,
+        roomId,
+        fen: chess.fen(),
+      })
+    }
+    setOptionSquares({})
+    return true
+  }
+
+  function getMoveOptions(square) {
+    const moves = chess.moves({
+      square,
+      verbose: true,
+    })
+    if (moves.length === 0) {
+      setOptionSquares({})
+      return false
+    }
+    const newSquares = {}
+    moves.map((move) => {
+      newSquares[move.to] = {
+        background:
+          chess.get(move.to) && chess.get(move.to).color !== chess.get(square).color
+            ? 'radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)'
+            : 'radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)',
+        borderRadius: '50%',
+      }
+      return move
+    })
+    newSquares[square] = {
+      background: 'rgba(255, 255, 0, 0.4)',
+    }
+    setOptionSquares(newSquares)
+    return true
+  }
+
+  function onSquareRightClick(square) {
+    console.log('right click')
+
+    const colour = 'rgba(255, 0, 0, 0.65)'
+    setRightClickedSquares({
+      ...rightClickedSquares,
+      [square]:
+        rightClickedSquares[square] && rightClickedSquares[square].backgroundColor === colour
+          ? undefined
+          : { backgroundColor: colour },
+    })
+
+    setIsPieceDragged(false)
+    setOptionSquares({})
+    setMoveSquares({})
+    setMoveFrom('')
+  }
+
+  function onSquareClick(square) {
+    console.log('squere clicked')
+    setRightClickedSquares({})
+    setIsPieceDragged(false)
+
+    if (!overRef.current.length && chess.turn() !== playerSide[0]) {
+      console.log('Not your turn.')
+      return false
+    }
+
+    // Handle the selection of the piece to move (from square)
+    if (!moveFrom) {
+      const hasMoveOptions = getMoveOptions(square)
+      if (hasMoveOptions) setMoveFrom(square)
+      return
+    }
+
+    // Handle the target square (to square)
+    if (!moveTo) {
+      const moves = chess.moves({ square: moveFrom, verbose: true })
+      const foundMove = moves.find((m) => m.from === moveFrom && m.to === square)
+
+      if (!foundMove) {
+        // If a new piece is clicked, set the new "moveFrom" square
+        const hasMoveOptions = getMoveOptions(square)
+        setMoveFrom(hasMoveOptions ? square : '')
+        return
+      }
+
+      setMoveTo(square)
+      // If it's a promotion move, show the promotion dialog
+      if (
+        (foundMove.color === 'w' && foundMove.piece === 'p' && square[1] === '8') ||
+        (foundMove.color === 'b' && foundMove.piece === 'p' && square[1] === '1')
+      ) {
+        setShowPromotionDialog(true)
+        return
+      }
+
+      // Make the move if it's not a promotion
+      const moveData = {
+        from: moveFrom,
+        to: square,
+        promotion: 'q',
+      }
+
+      const move = makeAMove(moveData)
+
+      if (move === null) {
+        const hasMoveOptions = getMoveOptions(square)
+        setMoveFrom(hasMoveOptions ? square : '')
+        return
+      }
+
+      if (!gameState?.over.length) {
+        sock.emit('move', {
+          move,
+          roomId,
+          fen: chess.fen(),
+        })
+      }
+
+      setMoveFrom('')
+      setMoveTo(null)
+      setOptionSquares({})
+      return
+    }
   }
 
   useEffect(() => {
@@ -165,6 +341,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
 
   useEffect(() => {
     sock.on('opponentDisconnected', () => {
+      console.log('opponent disconnected')
       if (!gameState?.over.length) {
         setOpponentDisconnected(true)
         sock.emit('sendFen', { fen: chess.fen(), roomId })
@@ -208,50 +385,6 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     })
   }, [sock])
 
-  useEffect(() => {
-    if (playerStats.length < 2) {
-      let isMounted = true
-      const controller = new AbortController()
-      setLoading(true)
-
-      const getUsers = async () => {
-        try {
-          players.forEach(async (playerID) => {
-            const response = await axiosPrivate.get(`http://localhost:3000/user/${playerID}`, {
-              signal: controller.signal,
-            })
-            isMounted &&
-              setPlayerStats((prev) => [
-                ...prev,
-                {
-                  name: response.data.name,
-                  elo:
-                    mode == 'blitz'
-                      ? response.data.blitzElo
-                      : mode === 'rapid'
-                      ? response.data.rapidElo
-                      : mode == 'bullet'
-                      ? response.data.bulletElo
-                      : null,
-                },
-              ])
-            setLoading(false)
-          })
-        } catch (err) {
-          console.error(err)
-        }
-      }
-
-      getUsers()
-
-      return () => {
-        isMounted = false
-        controller.abort()
-        setLoading(false)
-      }
-    }
-  }, [])
-
   const loadGameState = (data) => {
     setGameState((prev) => ({
       ...prev,
@@ -276,9 +409,10 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
         {openEndDialog ? (
           <GameEndDialog
             setOpenEndDialog={setOpenEndDialog}
-            playerStats={playerStats}
+            players={players}
             gameState={gameState}
             mode={mode}
+            loading={loading}
           />
         ) : null}
         <div className="w-full h-full pr-24 min-h-screen">
@@ -287,17 +421,20 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
               opponentDisconnected={opponentDisconnected}
               mode={mode}
               players={players}
-              moves={moves}
               roomId={roomId}
-              orientation={orientation}
               sock={sock}
-              playerStats={playerStats}
               offerDraw={offerDraw}
               setOfferDraw={setOfferDraw}
               waitDrawAnswer={waitDrawAnswer}
               setWaitDrawAnswer={setWaitDrawAnswer}
               over={gameState?.over}
               winner={gameState?.winner}
+              loading={loading}
+              history={history}
+              capturedPieces={capturedPieces}
+              orientation={orientation}
+              player1Orientation={player1Orientation}
+              player2Orientation={player2Orientation}
             />
           </div>
         </div>
@@ -307,12 +444,35 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
             <div className="text-2xl">|</div>
             <div className="text-2xl">B 1:53</div>
           </div>
-          <div className="board" style={{ maxWidth: '85vh', width: '85vh' }}>
+          <div
+            className="board"
+            style={{
+              maxWidth: '85vh',
+              width: '85vh',
+            }}
+          >
             <Chessboard
-              arePremovesAllowed={true}
+              arePremovesAllowed={allowPremoves}
               position={fen}
               onPieceDrop={onDrop}
-              boardOrientation={auth.id === players[0] ? player1Orientation : player2Orientation}
+              boardOrientation={auth.id === players[0].id ? player1Orientation : player2Orientation}
+              onPieceClick={() => {
+                !allowPremoves ? setAllowPremoves(true) : null
+              }}
+              onPieceDragBegin={() => {
+                setIsPieceDragged(true)
+              }}
+              onSquareClick={onSquareClick}
+              onSquareRightClick={onSquareRightClick}
+              onPromotionPieceSelect={!isPieceDragged ? onPromotionPieceSelect : undefined}
+              promotionToSquare={!isPieceDragged ? moveTo : undefined}
+              promotionDialogVariant="modal"
+              showPromotionDialog={!isPieceDragged ? showPromotionDialog : undefined}
+              customSquareStyles={{
+                ...moveSquares,
+                ...optionSquares,
+                ...rightClickedSquares,
+              }}
               customBoardStyle={{
                 borderRadius: '4px',
               }}

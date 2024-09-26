@@ -22,7 +22,12 @@ const getUser = asyncHandler(async (req, res, next) => {
   }
 
   res
-    .json({ name: user.username, blitzElo: user.blitzElo, bulletElo: user.bulletElo, rapidElo: user.rapidElo })
+    .json({
+      name: user.username,
+      blitzElo: user.blitzElo,
+      bulletElo: user.bulletElo,
+      rapidElo: user.rapidElo,
+    })
     .status(200)
 })
 

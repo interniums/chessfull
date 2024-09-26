@@ -28,7 +28,7 @@ const getReconnectRoom = asyncHandler(async (req, res, next) => {
     return res.status(400).json({ message: 'No id provided' })
   }
 
-  const room = await Room.find({ players: { $in: id } })
+  const room = await Room.find({ 'players.id': id })
   if (!room) {
     console.log('no rooms to reconnect')
     return res.status(100).json({ message: 'No room to reconnect' })

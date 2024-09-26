@@ -10,10 +10,10 @@ const queues = {
   blitz: [],
 }
 
-let winner
 let timeToReconnect
 
-function setupSocketIO(server) {
+async function setupSocketIO(server) {
+  // await Room.deleteMany({})
   const io = new Server(server, {
     cors: {
       origin: 'http://localhost:5173',
@@ -84,6 +84,26 @@ function setupSocketIO(server) {
       endGame(data.roomId, data.id, 'Resign', data.mode)
     })
 
+    socket.on('checkmate', (data) => {
+      console.log('game end due to checkmate', data)
+      endGame(data.roomId, data.winner, 'Checkmate', data.mode)
+    })
+
+    socket.on('insufficient material', (data) => {
+      console.log('game end due to insufficient material', data)
+      endGame(data.roomId, '', 'insufficient material', data.mode)
+    })
+
+    socket.on('stalemate', (data) => {
+      console.log('game end due to stalemate', data)
+      endGame(data.roomId, '', 'stalemate', data.mode)
+    })
+
+    socket.on('threefold repetition', (data) => {
+      console.log('game end due to threefold repetition', data)
+      endGame(data.roomId, '', 'threefold repetition', data.mode)
+    })
+
     // Handle socket disconnection
     socket.on('disconnect', async () => {
       handleSocketDisconnect(socket.id)
@@ -92,20 +112,22 @@ function setupSocketIO(server) {
   })
 
   async function startGame(gameMode) {
-    const player1 = getPlayerFromQueue(gameMode)
-    const player2 = getPlayerFromQueue(gameMode)
+    const player1 = await getPlayerFromQueue(gameMode)
+    const player2 = await getPlayerFromQueue(gameMode)
 
     const roomId = uuidV4()
     const orientation = Math.random() < 0.5 ? 'white' : 'black'
 
     const room = await Room.create({
       id: roomId,
-      players: [player1.id, player2.id],
+      players: [
+        { id: player1.id, name: player1.name, elo: player1.elo },
+        { id: player2.id, name: player2.name, elo: player2.elo },
+      ],
       disconnected: '',
       mode: gameMode,
       orientation,
       socketId: [player1.socketId, player2.socketId],
-      active: true,
     })
 
     player1.socket.join(roomId)
@@ -121,11 +143,26 @@ function setupSocketIO(server) {
     console.log(`${gameMode} game created in ${roomId} between ${player1.id} and ${player2.id}`)
   }
 
-  function getPlayerFromQueue(gameMode) {
+  async function getPlayerFromQueue(gameMode) {
+    const getPlayer = await User.findById(queues[gameMode][0][1])
+    if (!getPlayer) {
+      console.log('invalid user id provided')
+      return
+    }
+
     const player = {
       socket: queues[gameMode][0][0],
       id: queues[gameMode][0][1],
       socketId: queues[gameMode][0][2],
+      name: getPlayer.username,
+      elo:
+        gameMode == 'blitz'
+          ? getPlayer.blitzElo
+          : mode === 'rapid'
+          ? getPlayer.rapidElo
+          : mode == 'bullet'
+          ? getPlayer.bulletElo
+          : null,
     }
     queues[gameMode].shift()
     return player
@@ -144,7 +181,7 @@ function setupSocketIO(server) {
   }
 
   async function handleReconnection(dbId, socket) {
-    const existingRooms = await Room.find({ players: { $in: [dbId] } })
+    const existingRooms = await Room.find({ 'players.id': dbId })
 
     const roomToReconnect = existingRooms.filter((item) => item.active)
     if (roomToReconnect.length) {
@@ -206,15 +243,15 @@ function setupSocketIO(server) {
     room.active = false
 
     // If a player abandoned the game
-    if (dbId && reason !== 'Resign') {
+    if (dbId && reason !== 'Resign' && reason !== 'Checkmate') {
       room.disconnected = dbId
       room.endState = 'Abandon'
 
-      const winner = room.players.filter((id) => id !== dbId)
-      room.winner = winner[0]
+      const winner = room.players.find((player) => player.id !== dbId)
+      room.winner = winner.id
 
       // Adjust ELO for the winner and the player who abandoned
-      const winnerUser = await User.findById(winner[0])
+      const winnerUser = await User.findById(winner.id)
       const loserUser = await User.findById(dbId)
 
       if (winnerUser && loserUser) {
@@ -223,12 +260,12 @@ function setupSocketIO(server) {
     }
 
     if (reason == 'Resign') {
-      const winner = room.players.filter((id) => id !== dbId)
+      const winner = room.players.find((player) => player.id !== dbId)
 
       room.endState = 'Resign'
-      room.winner = winner[0]
+      room.winner = winner.id
 
-      const winnerUser = await User.findById(winner[0])
+      const winnerUser = await User.findById(winner.id)
       const loserUser = await User.findById(dbId)
 
       if (winnerUser && loserUser) {
@@ -241,9 +278,54 @@ function setupSocketIO(server) {
       room.endState = 'Draw by agreement'
       room.winner = 'Draw'
 
-      const player1 = await User.findById(room.players[0])
-      const player2 = await User.findById(room.players[1])
+      const player1 = await User.findById(room.players[0].id)
+      const player2 = await User.findById(room.players[1].id)
 
+      if (player1 && player2) {
+        updateElo(player1, player2, mode, false)
+      }
+    }
+
+    if (reason == 'Checkmate') {
+      room.endState = 'Checkmate'
+      room.winner = dbId
+
+      const loserId = room.players.find((player) => player.id !== dbId)
+      const loserUser = await User.findById(loserId.id)
+      const winnerUser = await User.findById(dbId)
+      if (winnerUser && loserUser) {
+        updateElo(winnerUser, loserUser, mode, true)
+      }
+    }
+
+    if (reason == 'insufficient material') {
+      room.endState = 'Insufficient material'
+      room.winner = 'Draw'
+
+      const player1 = await User.findById(room.players[0].id)
+      const player2 = await User.findById(room.players[1].id)
+      if (player1 && player2) {
+        updateElo(player1, player2, mode, false)
+      }
+    }
+
+    if (reason == 'stalemate') {
+      room.endState = 'Stalemate'
+      room.winner = 'Draw'
+
+      const player1 = await User.findById(room.players[0].id)
+      const player2 = await User.findById(room.players[1].id)
+      if (player1 && player2) {
+        updateElo(player1, player2, mode, false)
+      }
+    }
+
+    if (reason == 'threefold repetition') {
+      room.endState = 'threefold repetition'
+      room.winner = 'Draw'
+
+      const player1 = await User.findById(room.players[0].id)
+      const player2 = await User.findById(room.players[1].id)
       if (player1 && player2) {
         updateElo(player1, player2, mode, false)
       }
@@ -266,16 +348,13 @@ function setupSocketIO(server) {
     const eloKey = modes[mode]
 
     if (isWinLose) {
-      // Adjust Elo if there's a winner and loser
       player1[eloKey] += 25
       player2[eloKey] -= 25
     } else {
-      // Adjust Elo for both players in case of a draw
       player1[eloKey] += 1
       player2[eloKey] += 1
     }
 
-    // Save the updated Elo for both players
     await player1.save()
     await player2.save()
   }

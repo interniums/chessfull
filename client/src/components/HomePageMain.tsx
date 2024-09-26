@@ -18,13 +18,63 @@ import { ToastAction } from './ui/toast'
 
 export default function HomePageMain({ socket }) {
   const TIME_TO_RECONNECT = 20000
+  const TIER_S = 2000
+  const TIER_A = 1500
+  const TIER_B = 1200
+  const TIER_C = 950
+  const TIER_D = 600
+  const TBD = 599
+
+  const getRank = (value) => {
+    if (value > TIER_S) {
+      return 'S'
+    } else if (value > TIER_A) {
+      return 'A'
+    } else if (value > TIER_B) {
+      return 'B'
+    } else if (value > TIER_C) {
+      return 'C'
+    } else if (value > TIER_D) {
+      return 'D'
+    } else if (value < TBD) {
+      return 'TBD'
+    }
+  }
+
+  const { auth } = useAuth()
+  const { toast } = useToast()
+  const navigate = useNavigate()
+  const axiosPrivate = useAxiosPrivate()
+
   const [gameMode, setGameMode] = useState('blitz')
   const [startGame, setStartGame] = useState(false)
   const [timeoutExpired, setTimeoutExpired] = useState(false)
-  const navigate = useNavigate()
-  const { auth } = useAuth()
-  const { toast } = useToast()
-  const axiosPrivate = useAxiosPrivate()
+  const [user, setUser] = useState({})
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const getUserData = async () => {
+      try {
+        const response = await axiosPrivate.get(`http://localhost:3000/user/${auth.id}`, {
+          signal: controller.signal,
+        })
+        setUser({
+          name: response.data.name,
+          blitzElo: response.data.blitzElo,
+          bulletElo: response.data.bulletElo,
+          rapidElo: response.data.rapidElo,
+        })
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    getUserData()
+
+    return () => {
+      controller.abort()
+    }
+  }, [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -37,6 +87,10 @@ export default function HomePageMain({ socket }) {
         if (response.status === 200) {
           showReconnectToast(response.data)
         }
+        if (response.status === 100) {
+          console.log('no game to reconnect')
+          return
+        }
       } catch (err) {
         console.error(err)
       }
@@ -45,6 +99,7 @@ export default function HomePageMain({ socket }) {
 
     return () => {
       controller.abort()
+      setLoading(false)
     }
   }, [])
 
@@ -101,21 +156,21 @@ export default function HomePageMain({ socket }) {
             className="h-max py-4 px-8 rounded-md"
             onClick={() => handleGameModeChange('bullet')}
           >
-            <GameModeCard title="Bullet" image={rook} rank="A" elo="2500" />
+            <GameModeCard title="Bullet" image={rook} rank={getRank(user?.bulletElo)} elo={user?.bulletElo} />
           </ToggleGroupItem>
           <ToggleGroupItem
             value="blitz"
             className="h-max py-4 px-8 rounded-md"
             onClick={() => handleGameModeChange('blitz')}
           >
-            <GameModeCard title="Blitz" image={queen} rank="B" elo="2100" />
+            <GameModeCard title="Blitz" image={queen} rank={getRank(user?.blitzElo)} elo={user?.blitzElo} />
           </ToggleGroupItem>
           <ToggleGroupItem
             onClick={() => handleGameModeChange('rapid')}
             value="rapid"
             className="h-max py-4 px-8 rounded-md"
           >
-            <GameModeCard title="Rapid" image={pawn} rank="S" elo="1200" />
+            <GameModeCard title="Rapid" image={pawn} rank={getRank(user?.rapidElo)} elo={user?.rapidElo} />
           </ToggleGroupItem>
         </ToggleGroup>
         <Button onClick={() => setStartGame(true)} className="text-2xl py-6 w-full mt-8" variant={'outline'}>
