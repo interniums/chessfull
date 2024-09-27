@@ -44,13 +44,6 @@ export default function GameInfoHeader({
               }}
             >
               {players[0].id == auth.id ? players[1]?.name : players[0]?.name}
-              <div className="ml-2">
-                {winner !== auth.id && winner?.length ? (
-                  <>
-                    <img src={queen} alt="queen" className="size-7" />
-                  </>
-                ) : null}
-              </div>
             </div>
           </div>
         </div>

@@ -31,7 +31,46 @@ const getUser = asyncHandler(async (req, res, next) => {
     .status(200)
 })
 
+const changeUserPreferences = asyncHandler(async (req, res, next) => {
+  if (!req.body.id) {
+    return res.status(400).json({ message: 'No id provided' })
+  }
+
+  const user = await User.findById(req.body.id)
+  if (!user) {
+    return res.status(404).json({ message: 'No user found' })
+  }
+
+  const userPreferences = {
+    pieceSpeedAnimation: req.body.pieceSpeedAnimation,
+    pieceMoveType: req.body.pieceMoveType,
+    premovesAllowed: req.body.premovesAllowed,
+    queenPromotion: req.body.queenPromotion,
+  }
+
+  user.userPreferences = userPreferences
+  const result = await user.save()
+
+  res.status(200).json({ message: 'User updated' })
+})
+
+const getUserPreferences = asyncHandler(async (req, res, next) => {
+  const { id } = req.params
+  if (!id) {
+    return res.status(400).json({ message: 'Invalid id' })
+  }
+
+  const user = await User.findById(id)
+  if (!user) {
+    return res.status(404).json({ message: 'Invalid user id' })
+  }
+
+  res.status(200).json(user.userPreferences)
+})
+
 module.exports = {
   getAllUsers,
   getUser,
+  changeUserPreferences,
+  getUserPreferences,
 }

@@ -43,8 +43,14 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
   const [optionSquares, setOptionSquares] = useState({})
   const [moveFrom, setMoveFrom] = useState('')
   const [moveTo, setMoveTo] = useState<Square | null>(null)
-  const [allowPremoves, setAllowPremoves] = useState(history ? false : true)
   const [isPieceDragged, setIsPieceDragged] = useState(false)
+
+  // fix not working drag and drop after reconnect
+  const [allowPremoves, setAllowPremoves] = useState(history ? false : true)
+
+  // user preferences
+  const [userPreferences, setUserPreferences] = useState({})
+  console.log(userPreferences.queenPromotion)
 
   const waitDrawAnswerRef = useRef(waitDrawAnswer)
   const overRef = useRef(gameState?.over)
@@ -55,26 +61,68 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
   // console.log(chess.turn())
   // console.log(gameState)
   // console.log(chess)
-  console.log('is peice dragged', isPieceDragged)
 
+  // get user preferences
   useEffect(() => {
-    if (!gameState?.over.length && history.length) sock.emit('updateHistory', { roomId, history })
-  }, [history])
+    console.log('getting user preferences')
 
-  useEffect(() => {
-    waitDrawAnswerRef.current = waitDrawAnswer
-  }, [waitDrawAnswer])
+    setLoading(true)
+    let isMounted = true
+    const controller = new AbortController()
 
-  useEffect(() => {
-    overRef.current = gameState?.over
-  }, [gameState])
-
-  useEffect(() => {
-    if (gameState?.over.length && openEndDialog == null) {
-      setOpenEndDialog(true)
+    const getUserPreferences = async () => {
+      try {
+        const response = await axiosPrivate.get(`http://localhost:3000/user//${auth?.id}/getPreferences`, {
+          signal: controller.signal,
+        })
+        isMounted && setUserPreferences(response.data)
+      } catch (err) {
+        console.error(err)
+      }
     }
-  }, [gameState])
 
+    getUserPreferences()
+
+    return () => {
+      isMounted = false
+      controller.abort()
+      setLoading(false)
+    }
+  }, [])
+
+  // update user preferences logic
+  useEffect(() => {
+    console.log('updating user preferences')
+
+    let isMounted = true
+    const controller = new AbortController()
+
+    const updateUserPreferences = async () => {
+      try {
+        const response = await axiosPrivate.patch(`http://localhost:3000/user/update/preferences`, {
+          signal: controller.signal,
+          pieceSpeedAnimation: userPreferences?.pieceSpeedAnimation,
+          pieceMoveType: userPreferences?.pieceMoveType,
+          premovesAllowed: userPreferences?.premovesAllowed,
+          queenPromotion: userPreferences?.queenPromotion,
+          id: auth.id,
+        })
+
+        console.log('user preferences updated')
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    updateUserPreferences()
+
+    return () => {
+      isMounted = false
+      controller.abort()
+    }
+  }, [userPreferences])
+
+  // getting game state on mount
   useEffect(() => {
     console.log('getting game state')
 
@@ -87,7 +135,6 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
         const response = await axiosPrivate.get(`http://localhost:3000/game/state/${roomId}`, {
           signal: controller.signal,
         })
-        console.log('setting winner if possible')
         isMounted && loadGameState(response.data)
       } catch (err) {
         console.error(err)
@@ -103,6 +150,28 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     }
   }, [])
 
+  // updating game history (sending to the db)
+  useEffect(() => {
+    if (!gameState?.over.length && history.length) sock.emit('updateHistory', { roomId, history })
+  }, [history])
+
+  // updating states
+  useEffect(() => {
+    waitDrawAnswerRef.current = waitDrawAnswer
+  }, [waitDrawAnswer])
+
+  useEffect(() => {
+    overRef.current = gameState?.over
+  }, [gameState])
+
+  // show end game dialog
+  useEffect(() => {
+    if (gameState?.over.length && openEndDialog == null) {
+      setOpenEndDialog(true)
+    }
+  }, [gameState])
+
+  // make move logic
   const makeAMove = useCallback(
     (move) => {
       try {
@@ -156,6 +225,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     [chess]
   )
 
+  // promotion logic for click to move piece method
   function onPromotionPieceSelect(piece) {
     if (!piece) return false
     console.log(moveFrom, moveTo, piece)
@@ -189,6 +259,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     return true
   }
 
+  // move logic for drag and drop
   function onDrop(sourceSquare, targetSquare, piece) {
     if (!overRef.current.length && chess.turn() !== playerSide[0]) {
       console.log('Not your turn.')
@@ -201,7 +272,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     const moveData = {
       from: sourceSquare,
       to: targetSquare,
-      promotion: piece[1].toLowerCase(),
+      promotion: userPreferences?.queenPromotion ? 'q' : piece[1].toLowerCase(),
     }
 
     const move = makeAMove(moveData)
@@ -219,6 +290,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     return true
   }
 
+  // move options for click to move method
   function getMoveOptions(square) {
     const moves = chess.moves({
       square,
@@ -264,6 +336,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     setMoveFrom('')
   }
 
+  // click to move logic
   function onSquareClick(square) {
     console.log('squere clicked')
     setRightClickedSquares({})
@@ -294,13 +367,16 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
       }
 
       setMoveTo(square)
-      // If it's a promotion move, show the promotion dialog
-      if (
-        (foundMove.color === 'w' && foundMove.piece === 'p' && square[1] === '8') ||
-        (foundMove.color === 'b' && foundMove.piece === 'p' && square[1] === '1')
-      ) {
-        setShowPromotionDialog(true)
-        return
+
+      if (!userPreferences?.queenPromotion) {
+        // If it's a promotion move, show the promotion dialog
+        if (
+          (foundMove.color === 'w' && foundMove.piece === 'p' && square[1] === '8') ||
+          (foundMove.color === 'b' && foundMove.piece === 'p' && square[1] === '1')
+        ) {
+          setShowPromotionDialog(true)
+          return
+        }
       }
 
       // Make the move if it's not a promotion
@@ -333,13 +409,16 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     }
   }
 
+  // getting move from db
   useEffect(() => {
     sock.on('move', (move) => {
       makeAMove(move)
     })
   }, [makeAMove])
 
+  // socket listeners
   useEffect(() => {
+    // opponent disonnected logic
     sock.on('opponentDisconnected', () => {
       console.log('opponent disconnected')
       if (!gameState?.over.length) {
@@ -348,10 +427,12 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
       }
     })
 
+    // opponent reconnected logic
     sock.on('opponentReconnected', () => {
       setOpponentDisconnected(false)
     })
 
+    // game end logic
     sock.on('gameEnd', (data) => {
       if (data.winner.length > 1) {
         setGameState((prev) => ({ ...prev, over: data.endState, winner: data.winner }))
@@ -361,6 +442,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
       }
     })
 
+    // offer draw listener
     sock.on('offerDraw', () => {
       if (waitDrawAnswer) {
         return
@@ -368,6 +450,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
       setOfferDraw(true)
     })
 
+    // draw refused listener
     sock.on('drawRefused', () => {
       if (!waitDrawAnswerRef.current) {
         return
@@ -385,6 +468,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     })
   }, [sock])
 
+  // loading game state on mount
   const loadGameState = (data) => {
     setGameState((prev) => ({
       ...prev,
@@ -435,6 +519,8 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
               orientation={orientation}
               player1Orientation={player1Orientation}
               player2Orientation={player2Orientation}
+              userPreferences={userPreferences}
+              setUserPreferences={setUserPreferences}
             />
           </div>
         </div>
@@ -452,8 +538,12 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
             }}
           >
             <Chessboard
-              arePremovesAllowed={allowPremoves}
+              arePremovesAllowed={userPreferences?.premovesAllowed ? allowPremoves : false}
+              animationDuration={userPreferences?.pieceSpeedAnimation}
               position={fen}
+              arePiecesDraggable={
+                userPreferences?.pieceMoveType == 1 || userPreferences?.pieceMoveType == 3 ? true : false
+              }
               onPieceDrop={onDrop}
               boardOrientation={auth.id === players[0].id ? player1Orientation : player2Orientation}
               onPieceClick={() => {
@@ -462,12 +552,17 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
               onPieceDragBegin={() => {
                 setIsPieceDragged(true)
               }}
-              onSquareClick={onSquareClick}
+              onSquareClick={
+                userPreferences?.pieceMoveType == 1 || userPreferences?.pieceMoveType == 2 ? onSquareClick : undefined
+              }
               onSquareRightClick={onSquareRightClick}
-              onPromotionPieceSelect={!isPieceDragged ? onPromotionPieceSelect : undefined}
-              promotionToSquare={!isPieceDragged ? moveTo : undefined}
-              promotionDialogVariant="modal"
+              onPromotionPieceSelect={
+                !isPieceDragged && !userPreferences?.queenPromotion ? onPromotionPieceSelect : undefined
+              }
+              promotionToSquare={!isPieceDragged && !userPreferences?.queenPromotion ? moveTo : undefined}
+              promotionDialogVariant={'modal'}
               showPromotionDialog={!isPieceDragged ? showPromotionDialog : undefined}
+              autoPromoteToQueen={userPreferences?.queenPromotion ? true : false}
               customSquareStyles={{
                 ...moveSquares,
                 ...optionSquares,

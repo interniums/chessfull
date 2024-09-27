@@ -6,4 +6,8 @@ userRoutes.route('/').get(userController.getAllUsers)
 
 userRoutes.route('/:id').get(userController.getUser)
 
+userRoutes.route('/update/preferences').patch(userController.changeUserPreferences)
+
+userRoutes.route('/:id/getPreferences').get(userController.getUserPreferences)
+
 module.exports = userRoutes

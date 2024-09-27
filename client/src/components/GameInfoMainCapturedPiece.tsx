@@ -1,10 +1,17 @@
 // @ts-nocheck
 
-import p from '../assets/pawn.png'
-import r from '../assets/rook.png'
-import k from '../assets/knight.png'
-import b from '../assets/bishop.png'
-import q from '../assets/queen.png'
+import bP from '../assets/pawn.png'
+import bR from '../assets/rook.png'
+import bK from '../assets/knight.png'
+import bB from '../assets/bishop.png'
+import bQ from '../assets/queen.png'
+
+import wP from '../assets/pawn white.png'
+import wR from '../assets/rook white.png'
+import wK from '../assets/knight white.png'
+import wB from '../assets/bishop white.png'
+import wQ from '../assets/queen white.png'
+
 import { useEffect, useState } from 'react'
 
 const pieceValues = {
@@ -14,12 +21,20 @@ const pieceValues = {
   r: 5,
   q: 9,
 }
-const pieceIcons = {
-  p: p,
-  r: r,
-  n: k,
-  b: b,
-  q: q,
+const pieceIconsBlack = {
+  p: bP,
+  r: bR,
+  n: bK,
+  b: bB,
+  q: bQ,
+}
+
+const pieceIconsWhite = {
+  p: wP,
+  r: wR,
+  n: wK,
+  b: wB,
+  q: wQ,
 }
 
 export default function CapturedPieces({ color, capturedPieces }) {
@@ -69,7 +84,7 @@ export default function CapturedPieces({ color, capturedPieces }) {
         <div className="flex items-center justify-center">
           {capturedPiecesEdited?.white.map((piece, index) => (
             <div key={index}>
-              <img src={pieceIcons[piece]} className="size-6"></img>
+              <img src={pieceIconsWhite[piece]} className="size-6"></img>
             </div>
           ))}
           <div className="text-center ml-2">
@@ -80,7 +95,7 @@ export default function CapturedPieces({ color, capturedPieces }) {
         <div className="flex items-center justify-center ">
           {capturedPiecesEdited?.black.map((piece, index) => (
             <div key={index}>
-              <img src={pieceIcons[piece]} className="size-6"></img>
+              <img src={pieceIconsBlack[piece]} className="size-6"></img>
             </div>
           ))}
           <div className="text-center ml-2">

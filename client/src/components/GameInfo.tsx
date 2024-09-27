@@ -26,6 +26,8 @@ export default function GameInfo({
   player1Orientation,
   player2Orientation,
   orientation,
+  userPreferences,
+  setUserPreferences,
 }) {
   const { auth } = useAuth()
   const handleOfferDraw = () => {
@@ -94,6 +96,8 @@ export default function GameInfo({
               player1Orientation={player1Orientation}
               player2Orientation={player2Orientation}
               orientation={orientation}
+              userPreferences={userPreferences}
+              setUserPreferences={setUserPreferences}
             />
           </div>
         </>

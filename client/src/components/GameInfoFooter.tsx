@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import avatar from '../assets/avatar.svg'
 import queen from '../assets/queen.png'
 import CapturedPieces from './GameInfoMainCapturedPiece'
-import { GearIcon } from '@radix-ui/react-icons'
+import InGameSettings from './InGameSettings'
 
 export default function GameInfoFooter({
   players,
@@ -16,6 +16,8 @@ export default function GameInfoFooter({
   orientation,
   player1Orientation,
   player2Orientation,
+  userPreferences,
+  setUserPreferences,
 }) {
   const navigate = useNavigate()
   const { auth } = useAuth()
@@ -47,18 +49,10 @@ export default function GameInfoFooter({
               }}
             >
               {players[0].id == auth.id ? players[0]?.name : players[1]?.name}
-              <div className="ml-2">
-                {winner === auth.id && winner?.length ? (
-                  <>
-                    <img src={queen} alt="quuen" className="size-7" />
-                  </>
-                ) : null}
-              </div>
+              <div className="ml-2"></div>
             </div>
           </div>
-          <div className="flex items-center justify-center">
-            <GearIcon className="size-5" />
-          </div>
+          <InGameSettings userPreferences={userPreferences} setUserPreferences={setUserPreferences} />
         </div>
         <CapturedPieces
           color={auth?.id == players[0].id ? player2Orientation : player1Orientation}

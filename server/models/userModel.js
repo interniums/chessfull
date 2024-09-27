@@ -44,6 +44,15 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  userPreferences: {
+    type: Object,
+    default: {
+      pieceSpeedAnimation: 300,
+      pieceMoveType: 1,
+      premovesAllowed: true,
+      queenPromotion: false,
+    },
+  },
 })
 
 module.exports = mongoose.model('User', UserSchema)
