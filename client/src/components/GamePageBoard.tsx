@@ -10,10 +10,25 @@ import useAxiosPrivate from '@/hooks/useAxiosPrivate'
 import GameInfo from './GameInfo'
 import GameEndDialog from './GameEndDialog'
 import useAuth from '@/hooks/useAuth'
+import moveSound from '../assets/move.mp3'
+import captureSound from '../assets/capture.mp3'
+import endGameSound from '../assets/endGame.mp3'
+import UIfx from 'uifx'
 
 export default function GamePageBoard({ mode, players, moves, setMoves, roomId, orientation, sock }) {
   const player1Orientation = orientation
   const player2Orientation = orientation === 'white' ? 'black' : 'white'
+
+  // sounds
+  const moveSoundPlay = new UIfx(moveSound, {
+    volume: 1,
+  })
+  const captureSoundPlay = new UIfx(captureSound, {
+    volume: 1,
+  })
+  const endGameSoundPlay = new UIfx(endGameSound, {
+    volume: 1,
+  })
 
   const { toast } = useToast()
   const { auth } = useAuth()
@@ -44,14 +59,14 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
   const [moveFrom, setMoveFrom] = useState('')
   const [moveTo, setMoveTo] = useState<Square | null>(null)
   const [isPieceDragged, setIsPieceDragged] = useState(false)
-
+  const [highlightedSquare, setHighlightedSquare] = useState(null)
+  // moves navigation logic
+  const [currentMoveIndex, setCurrentMoveIndex] = useState(0)
+  const [fenHistory, setFenHistory] = useState([])
   // fix not working drag and drop after reconnect
   const [allowPremoves, setAllowPremoves] = useState(history ? false : true)
-
   // user preferences
   const [userPreferences, setUserPreferences] = useState({})
-  console.log(userPreferences.queenPromotion)
-
   const waitDrawAnswerRef = useRef(waitDrawAnswer)
   const overRef = useRef(gameState?.over)
 
@@ -60,12 +75,59 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
   // console.log(gameState)
   // console.log(chess.turn())
   // console.log(gameState)
+  // console.log(currentMoveIndex)
+  // console.log(fenHistory.length)
   // console.log(chess)
+
+  // Function to go to the first move
+  const goToFirstMove = () => {
+    setCurrentMoveIndex(0)
+    chess.load(fenHistory[0])
+    setFen(fenHistory[0])
+  }
+
+  const goToIndexMove = (index) => {
+    if (index == fenHistory.length - 1) {
+      return
+    }
+    setCurrentMoveIndex(index)
+    chess.load(fenHistory[index])
+    setFen(fenHistory[index])
+  }
+
+  // Function to go to the previous move
+  const goToPreviousMove = () => {
+    console.log('previus move called')
+    if (currentMoveIndex > 0) {
+      const newIndex = currentMoveIndex - 1
+      setCurrentMoveIndex(newIndex)
+      chess.load(fenHistory[newIndex])
+      setFen(fenHistory[newIndex])
+    }
+  }
+
+  // Function to go to the next move
+  const goToNextMove = () => {
+    if (currentMoveIndex < fenHistory.length - 1) {
+      const newIndex = currentMoveIndex + 1
+      setCurrentMoveIndex(newIndex)
+      chess.load(fenHistory[newIndex])
+      setFen(fenHistory[newIndex])
+    }
+  }
+
+  // Function to go to the last move
+  const goToLastMove = () => {
+    if (currentMoveIndex !== fenHistory.length - 1) {
+      const lastIndex = fenHistory.length - 1
+      setCurrentMoveIndex(lastIndex)
+      chess.load(fenHistory[lastIndex])
+      setFen(fenHistory[lastIndex])
+    }
+  }
 
   // get user preferences
   useEffect(() => {
-    console.log('getting user preferences')
-
     setLoading(true)
     let isMounted = true
     const controller = new AbortController()
@@ -92,8 +154,6 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
 
   // update user preferences logic
   useEffect(() => {
-    console.log('updating user preferences')
-
     let isMounted = true
     const controller = new AbortController()
 
@@ -124,8 +184,6 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
 
   // getting game state on mount
   useEffect(() => {
-    console.log('getting game state')
-
     let isMounted = true
     const controller = new AbortController()
     setLoading(true)
@@ -152,8 +210,14 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
 
   // updating game history (sending to the db)
   useEffect(() => {
-    if (!gameState?.over.length && history.length) sock.emit('updateHistory', { roomId, history })
+    if (!gameState?.over.length && history.length) {
+      sock.emit('updateHistory', { roomId, history })
+    }
   }, [history])
+
+  useEffect(() => {
+    setCurrentMoveIndex(fenHistory.length)
+  }, [fenHistory])
 
   // updating states
   useEffect(() => {
@@ -171,15 +235,37 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     }
   }, [gameState])
 
+  const findKingInCheck = () => {
+    const kingColor = chess.turn()
+    const board = chess.board()
+
+    for (let row = 0; row < board.length; row++) {
+      for (let col = 0; col < board[row].length; col++) {
+        const piece = board[row][col]
+        if (piece && piece.type === 'k' && piece.color === kingColor) {
+          // Convert row and col to algebraic notation
+          return String.fromCharCode(97 + col) + (8 - row) // e.g., 'e1'
+        }
+      }
+    }
+    return null
+  }
+
   // make move logic
   const makeAMove = useCallback(
     (move) => {
       try {
         const result = chess.move(move)
         setFen(chess.fen())
-        setHistory(chess.history())
 
         if (result) {
+          if (!gameState?.winner.length) {
+            setHistory(chess.history())
+            // Save the FEN to state
+            const currentFEN = chess.fen()
+            setFenHistory((prevFenHistory) => [...prevFenHistory, currentFEN])
+          }
+
           if (result.captured) {
             const piece = result.captured
             const color = result.color === 'w' ? 'black' : 'white'
@@ -190,7 +276,14 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
           }
         }
 
-        console.log('over, checkmate', chess.isGameOver(), chess.isCheckmate())
+        // highlighting check or checkmated king
+        if (chess.inCheck() || chess.isCheckmate()) {
+          console.log('checked')
+          const kingSquare = findKingInCheck(chess)
+          setHighlightedSquare(kingSquare)
+        } else {
+          setHighlightedSquare(null)
+        }
 
         if (gameState?.winner.length < 1) {
           if (chess.isGameOver()) {
@@ -222,7 +315,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
         return null
       }
     },
-    [chess]
+    [currentMoveIndex, fenHistory]
   )
 
   // promotion logic for click to move piece method
@@ -338,7 +431,11 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
 
   // click to move logic
   function onSquareClick(square) {
-    console.log('squere clicked')
+    if (currentMoveIndex !== fenHistory.length) {
+      syncToLatestMove()
+      return
+    }
+
     setRightClickedSquares({})
     setIsPieceDragged(false)
 
@@ -409,64 +506,122 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     }
   }
 
-  // getting move from db
+  // Socket listener for move updates
   useEffect(() => {
     sock.on('move', (move) => {
+      if (fenHistory.length == currentMoveIndex) {
+        console.log('moving')
+        const m = makeAMove(move)
+        if (m?.captured) {
+          captureSoundPlay.play()
+        } else {
+          moveSoundPlay.play()
+        }
+      } else {
+        syncToLatestMove(move)
+      }
+    })
+
+    return () => {
+      sock.off('move')
+    }
+  }, [sock, fenHistory, currentMoveIndex, makeAMove])
+
+  const syncToLatestMove = (newMove) => {
+    console.log('syncing')
+    // Make the new move and update the board to the latest state
+    chess.load('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+    console.log(history)
+    setCapturedPieces({ white: [], black: [] })
+    history.forEach((move) => {
       makeAMove(move)
     })
-  }, [makeAMove])
 
-  // socket listeners
+    if (newMove) {
+      makeAMove(newMove)
+    }
+
+    // Reset the current move index to the last move
+    setCurrentMoveIndex(fenHistory.length)
+  }
+
+  // General socket listeners
   useEffect(() => {
-    // opponent disonnected logic
-    sock.on('opponentDisconnected', () => {
+    const handleOpponentDisconnected = () => {
       console.log('opponent disconnected')
       if (!gameState?.over.length) {
         setOpponentDisconnected(true)
         sock.emit('sendFen', { fen: chess.fen(), roomId })
       }
-    })
+    }
 
-    // opponent reconnected logic
-    sock.on('opponentReconnected', () => {
+    const handleOpponentReconnected = () => {
       setOpponentDisconnected(false)
-    })
+    }
 
-    // game end logic
-    sock.on('gameEnd', (data) => {
+    const handleGameEnd = (data) => {
       if (data.winner.length > 1) {
-        setGameState((prev) => ({ ...prev, over: data.endState, winner: data.winner }))
+        endGameSoundPlay.play()
+        setGameState((prev) => ({
+          ...prev,
+          over: data.endState,
+          winner: data.winner,
+        }))
         setOfferDraw(null)
         setOpponentDisconnected(false)
         setWaitDrawAnswer(false)
       }
-    })
+    }
 
-    // offer draw listener
-    sock.on('offerDraw', () => {
-      if (waitDrawAnswer) {
-        return
-      }
+    const handleOfferDraw = () => {
+      if (waitDrawAnswer) return
       setOfferDraw(true)
-    })
+    }
 
-    // draw refused listener
-    sock.on('drawRefused', () => {
-      if (!waitDrawAnswerRef.current) {
-        return
-      }
+    const handleDrawRefused = () => {
+      if (!waitDrawAnswerRef.current) return
       toast({
         title: 'Draw refused',
         duration: 2000,
         description: 'Opponent refused taking draw',
       })
       setWaitDrawAnswer(null)
-    })
+    }
 
-    sock.on('disconnect', () => {
+    const handleDisconnect = () => {
       console.log('server stopped')
-    })
-  }, [sock])
+    }
+
+    // Register listeners
+    sock.on('opponentDisconnected', handleOpponentDisconnected)
+    sock.on('opponentReconnected', handleOpponentReconnected)
+    sock.on('gameEnd', handleGameEnd)
+    sock.on('offerDraw', handleOfferDraw)
+    sock.on('drawRefused', handleDrawRefused)
+    sock.on('disconnect', handleDisconnect)
+
+    // Cleanup listeners on unmount or socket change
+    return () => {
+      sock.off('opponentDisconnected', handleOpponentDisconnected)
+      sock.off('opponentReconnected', handleOpponentReconnected)
+      sock.off('gameEnd', handleGameEnd)
+      sock.off('offerDraw', handleOfferDraw)
+      sock.off('drawRefused', handleDrawRefused)
+      sock.off('disconnect', handleDisconnect)
+    }
+  }, [
+    sock,
+    gameState?.over.length,
+    chess,
+    roomId,
+    setGameState,
+    setOpponentDisconnected,
+    setOfferDraw,
+    setWaitDrawAnswer,
+    waitDrawAnswer,
+    toast,
+    endGameSoundPlay,
+  ])
 
   // loading game state on mount
   const loadGameState = (data) => {
@@ -485,6 +640,14 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     })
 
     setLoading(false)
+  }
+
+  // styles for check and checkmate
+  const customSquareStyles = {
+    ...moveSquares,
+    ...optionSquares,
+    ...rightClickedSquares,
+    ...(highlightedSquare ? { [highlightedSquare]: { backgroundColor: 'rgba(200, 0, 0, 0.3)' } } : {}),
   }
 
   return (
@@ -521,6 +684,13 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
               player2Orientation={player2Orientation}
               userPreferences={userPreferences}
               setUserPreferences={setUserPreferences}
+              fenHistory={fenHistory}
+              currentMoveIndex={currentMoveIndex}
+              goToFirstMove={goToFirstMove}
+              goToPreviousMove={goToPreviousMove}
+              goToNextMove={goToNextMove}
+              goToLastMove={goToLastMove}
+              goToIndexMove={goToIndexMove}
             />
           </div>
         </div>
@@ -542,7 +712,10 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
               animationDuration={userPreferences?.pieceSpeedAnimation}
               position={fen}
               arePiecesDraggable={
-                userPreferences?.pieceMoveType == 1 || userPreferences?.pieceMoveType == 3 ? true : false
+                (userPreferences?.pieceMoveType == 1 && currentMoveIndex == fenHistory.length) ||
+                (userPreferences?.pieceMoveType == 3 && currentMoveIndex == fenHistory.length)
+                  ? true
+                  : false
               }
               onPieceDrop={onDrop}
               boardOrientation={auth.id === players[0].id ? player1Orientation : player2Orientation}
@@ -563,11 +736,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
               promotionDialogVariant={'modal'}
               showPromotionDialog={!isPieceDragged ? showPromotionDialog : undefined}
               autoPromoteToQueen={userPreferences?.queenPromotion ? true : false}
-              customSquareStyles={{
-                ...moveSquares,
-                ...optionSquares,
-                ...rightClickedSquares,
-              }}
+              customSquareStyles={customSquareStyles}
               customBoardStyle={{
                 borderRadius: '4px',
               }}

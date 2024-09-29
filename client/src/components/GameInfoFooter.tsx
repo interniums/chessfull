@@ -58,7 +58,6 @@ export default function GameInfoFooter({
           color={auth?.id == players[0].id ? player2Orientation : player1Orientation}
           capturedPieces={capturedPieces}
         />
-        {opponentDisconnected && <h1 className="text-red-400 animate-pulse">Waiting for opponent to connect...</h1>}
       </div>
     </div>
   )

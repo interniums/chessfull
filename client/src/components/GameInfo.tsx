@@ -28,6 +28,13 @@ export default function GameInfo({
   orientation,
   userPreferences,
   setUserPreferences,
+  fenHistory,
+  currentMoveIndex,
+  goToFirstMove,
+  goToPreviousMove,
+  goToNextMove,
+  goToLastMove,
+  goToIndexMove,
 }) {
   const { auth } = useAuth()
   const handleOfferDraw = () => {
@@ -86,6 +93,13 @@ export default function GameInfo({
             handleResign={handleResign}
             history={history}
             waitDrawAnswer={waitDrawAnswer}
+            fenHistory={fenHistory}
+            currentMoveIndex={currentMoveIndex}
+            goToFirstMove={goToFirstMove}
+            goToPreviousMove={goToPreviousMove}
+            goToNextMove={goToNextMove}
+            goToLastMove={goToLastMove}
+            goToIndexMove={goToIndexMove}
           />
           <div className="self-end">
             <GameInfoFooter

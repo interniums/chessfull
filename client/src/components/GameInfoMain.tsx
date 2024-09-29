@@ -14,6 +14,13 @@ export default function GameInfoMain({
   handleResign,
   history,
   waitDrawAnswer,
+  fenHistory,
+  currentMoveIndex,
+  goToFirstMove,
+  goToPreviousMove,
+  goToNextMove,
+  goToLastMove,
+  goToIndexMove,
 }) {
   const { auth } = useAuth()
   const [pairs, setPairs] = useState([])
@@ -70,40 +77,63 @@ export default function GameInfoMain({
         <div className="min-h-80">
           <div className="w-full flex items-center justify-center gap-8">
             <div>
-              <DoubleArrowLeftIcon className="size-8 rounded cursor-pointer hover:bg-slate-300 py-1 px-1" />
+              <Button variant={'ghost'} disabled={currentMoveIndex === 0} onClick={goToFirstMove}>
+                <DoubleArrowLeftIcon className="size-8 py-1 px-1" />
+              </Button>
             </div>
             <div>
-              <ArrowLeftIcon className="size-8 rounded cursor-pointer hover:bg-slate-300 py-1 px-1" />
+              <Button variant={'ghost'} onClick={goToPreviousMove} disabled={currentMoveIndex === 0}>
+                <ArrowLeftIcon className="size-8 py-1 px-1" />
+              </Button>
             </div>
             <div className="cursor-pointer">
-              <ArrowRightIcon className="size-8 rounded cursor-pointer hover:bg-slate-300 py-1 px-1" />
+              <Button variant={'ghost'} onClick={goToNextMove} disabled={currentMoveIndex >= fenHistory.length - 1}>
+                <ArrowRightIcon className="size-8 py-1 px-1" />
+              </Button>
             </div>
             <div className="cursor-pointer">
-              <DoubleArrowRightIcon className="size-8 rounded cursor-pointer hover:bg-slate-300 py-1 px-1" />
+              <Button variant={'ghost'} onClick={goToLastMove} disabled={currentMoveIndex >= fenHistory.length - 1}>
+                <DoubleArrowRightIcon className="size-8 py-1 px-1" />
+              </Button>
             </div>
           </div>
           <div ref={scrollBottom} className="flex py-4 w-full max-h-64 overflow-y-auto items-start min-h-64 mt-6">
             <div className="border-r w-min pr-2">
               {pairs.map((item, index) => (
-                <div key={index} className="text-center hover:bg-slate-300 cursor-pointer">
-                  {index}
+                <div key={index} className="text-center">
+                  {index + 1}
                 </div>
               ))}
             </div>
             <div className="flex w-full px-2 justify-center items-center">
-              <div className="w-full">
-                {pairs.map((item, index) => (
-                  <div key={index} className="text-center hover:bg-slate-300 cursor-pointer">
-                    {item?.length ? item[0] : ' - '}
-                  </div>
-                ))}
-              </div>
-              <div className="w-full">
-                {pairs.map((item, index) => (
-                  <div key={index} className="text-center hover:bg-slate-300 cursor-pointer">
-                    {item?.length ? item[1] : ' - '}
-                  </div>
-                ))}
+              <div className="w-full grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                <div>
+                  {pairs.map((item, index) => (
+                    <div
+                      onClick={() => {
+                        console.log(index == 0 ? 0 : index * 2)
+                        goToIndexMove(index == 0 ? 0 : index * 2)
+                      }}
+                      key={index}
+                      className="text-center hover:bg-slate-300 cursor-pointer rounded-sm"
+                    >
+                      {item?.length ? item[0] : ' 1 '}
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  {pairs.map((item, index) => (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        goToIndexMove(index == 0 ? 1 : index * 2 + 1)
+                      }}
+                      className="text-center hover:bg-slate-300 cursor-pointer rounded-sm"
+                    >
+                      {item?.length ? item[1] : ' 1 '}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

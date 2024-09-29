@@ -15,7 +15,7 @@ export default function InGameSettings({ userPreferences, setUserPreferences }) 
 
   return (
     <div className="flex items-center justify-center">
-      <GearIcon className="size-7 cursor-pointer p-1 hover:bg-slate-300 rounded-md" onClick={() => setOpen(!open)} />
+      <GearIcon className="size-8 cursor-pointer p-1 hover:bg-slate-300 rounded-md" onClick={() => setOpen(!open)} />
       {open && (
         <div className="absolute inset-0 z-40 flex justify-center items-center">
           <div className="rounded-md py-6 px-10 border bg-white relative">
