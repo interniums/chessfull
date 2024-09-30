@@ -257,6 +257,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
       try {
         const result = chess.move(move)
         setFen(chess.fen())
+        setHighlightedSquare(null)
 
         if (result) {
           if (!gameState?.winner.length) {
@@ -273,6 +274,12 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
               ...prev,
               [color]: [...prev[color], piece],
             }))
+            if (gameState?.winner.length) {
+              captureSoundPlay.play()
+            }
+          }
+          if (gameState?.winner.length) {
+            moveSoundPlay.play()
           }
         }
 
