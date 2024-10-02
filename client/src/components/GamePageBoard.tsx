@@ -67,6 +67,11 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
   const [allowPremoves, setAllowPremoves] = useState(history ? false : true)
   // user preferences
   const [userPreferences, setUserPreferences] = useState({})
+  // timers
+  const [whiteTime, setWhiteTime] = useState(300)
+  const [blackTime, setBlackTime] = useState(300)
+  const [activePlayer, setActivePlayer] = useState('white')
+
   const waitDrawAnswerRef = useRef(waitDrawAnswer)
   const overRef = useRef(gameState?.over)
 
@@ -78,6 +83,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
   // console.log(currentMoveIndex)
   // console.log(fenHistory.length)
   // console.log(chess)
+  console.log(userPreferences)
 
   // Function to go to the first move
   const goToFirstMove = () => {
@@ -165,6 +171,8 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
           pieceMoveType: userPreferences?.pieceMoveType,
           premovesAllowed: userPreferences?.premovesAllowed,
           queenPromotion: userPreferences?.queenPromotion,
+          pieceSet: userPreferences?.pieceSet,
+          board: userPreferences?.board,
           id: auth.id,
         })
 
@@ -419,17 +427,20 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
   }
 
   function onSquareRightClick(square) {
-    console.log('right click')
+    // Set the square background color to light orange
+    const squareBackgroundStyle = {
+      backgroundColor: 'rgba(255, 165, 0, 0.5)', // Light orange background
+    }
 
-    const colour = 'rgba(255, 0, 0, 0.65)'
-    setRightClickedSquares({
-      ...rightClickedSquares,
-      [square]:
-        rightClickedSquares[square] && rightClickedSquares[square].backgroundColor === colour
-          ? undefined
-          : { backgroundColor: colour },
-    })
+    // Toggle the background color for the clicked square
+    setRightClickedSquares((prevState) => ({
+      ...prevState,
+      [square]: prevState[square]
+        ? undefined // Remove the highlight if already clicked
+        : squareBackgroundStyle, // Apply the light orange background
+    }))
 
+    // Reset other states
     setIsPieceDragged(false)
     setOptionSquares({})
     setMoveSquares({})
@@ -606,6 +617,12 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     sock.on('offerDraw', handleOfferDraw)
     sock.on('drawRefused', handleDrawRefused)
     sock.on('disconnect', handleDisconnect)
+    // timer update
+    sock.on('timerUpdate', (data) => {
+      setWhiteTime(data.whiteTime)
+      setBlackTime(data.blackTime)
+      setActivePlayer(data.activePlayer)
+    })
 
     // Cleanup listeners on unmount or socket change
     return () => {
@@ -615,6 +632,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
       sock.off('offerDraw', handleOfferDraw)
       sock.off('drawRefused', handleDrawRefused)
       sock.off('disconnect', handleDisconnect)
+      sock.off('timerUpdate')
     }
   }, [
     sock,
@@ -654,8 +672,32 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     ...moveSquares,
     ...optionSquares,
     ...rightClickedSquares,
-    ...(highlightedSquare ? { [highlightedSquare]: { backgroundColor: 'rgba(200, 0, 0, 0.3)' } } : {}),
+    ...(highlightedSquare ? { [highlightedSquare]: { backgroundColor: 'rgba(255, 0, 0, 0.6)' } } : {}),
   }
+
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60)
+    const seconds = time % 60
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`
+  }
+
+  const pieces = ['wP', 'wN', 'wB', 'wR', 'wQ', 'wK', 'bP', 'bN', 'bB', 'bR', 'bQ', 'bK']
+  const customPieces = useMemo(() => {
+    const pieceComponents = {}
+    pieces.forEach((piece) => {
+      pieceComponents[piece] = ({ squareWidth }) => (
+        <div
+          style={{
+            width: squareWidth,
+            height: squareWidth,
+            backgroundImage: `url(/assets/piece/${userPreferences?.pieceSet}/${piece}.svg)`,
+            backgroundSize: '100%',
+          }}
+        />
+      )
+    })
+    return pieceComponents
+  }, [userPreferences])
 
   return (
     <>
@@ -703,18 +745,41 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
         </div>
         <div className="grid gap-1 h-full min-h-screen" style={{ maxWidth: '85vh', width: '85vh' }}>
           <div className="w-full flex items-center justify-center gap-8 py-2">
-            <div className="text-2xl">W 3:02</div>
+            <div
+              className={
+                chess.turn() === 'w' && !gameState?.winner.length
+                  ? 'text-2xl p-2 rounded-md bg-green-200'
+                  : 'text-2xl p-2 rounded-md'
+              }
+            >
+              W {formatTime(whiteTime)}
+            </div>
             <div className="text-2xl">|</div>
-            <div className="text-2xl">B 1:53</div>
+            <div
+              className={
+                chess.turn() === 'b' && !gameState?.winner.length
+                  ? 'text-2xl p-2 rounded-md bg-green-200'
+                  : 'text-2xl p-2 rounded-md'
+              }
+            >
+              B {formatTime(blackTime)}
+            </div>
           </div>
           <div
-            className="board"
+            className="board h-fit rounded-md"
             style={{
               maxWidth: '85vh',
               width: '85vh',
+              boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 10px',
             }}
           >
             <Chessboard
+              customLightSquareStyle={{
+                backgroundColor: userPreferences.board ? userPreferences?.board.lightSquare : null,
+              }}
+              customDarkSquareStyle={{
+                backgroundColor: userPreferences.board ? userPreferences?.board.darkSquare : null,
+              }}
               arePremovesAllowed={userPreferences?.premovesAllowed ? allowPremoves : false}
               animationDuration={userPreferences?.pieceSpeedAnimation}
               position={fen}
@@ -747,6 +812,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
               customBoardStyle={{
                 borderRadius: '4px',
               }}
+              customPieces={customPieces}
             />
           </div>
         </div>

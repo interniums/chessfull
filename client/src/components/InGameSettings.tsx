@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 import { Cross1Icon, GearIcon } from '@radix-ui/react-icons'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Label } from './ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { axiosPrivate } from '@/api/axios'
@@ -12,6 +12,24 @@ export default function InGameSettings({ userPreferences, setUserPreferences }) 
   const axiosPrivate = useAxiosPrivate()
   const { auth } = useAuth()
   const [open, setOpen] = useState(false)
+
+  const pieces = ['wP', 'wN', 'wB', 'wR', 'wQ', 'wK', 'bP', 'bN', 'bB', 'bR', 'bQ', 'bK']
+  const customPieces = useMemo(() => {
+    const pieceComponents = {}
+    pieces.forEach((piece) => {
+      pieceComponents[piece] = ({ squareWidth }) => (
+        <div
+          style={{
+            width: squareWidth,
+            height: squareWidth,
+            backgroundImage: `url(/assets/piece/${userPreferences?.pieceSet}/${piece}.svg)`,
+            backgroundSize: '100%',
+          }}
+        />
+      )
+    })
+    return pieceComponents
+  }, [userPreferences])
 
   return (
     <div className="flex items-center justify-center">
@@ -29,6 +47,8 @@ export default function InGameSettings({ userPreferences, setUserPreferences }) 
                 <div className="text-l text-start">Piece move method</div>
                 <div className="text-l text-start">Allow premoves</div>
                 <div className="text-l text-start">Always promote to queen</div>
+                <div className="text-l text-start">Choose piece set</div>
+                <div className="text-l text-start">Choose board</div>
               </div>
               <div className="grid gap-5 items-center justify-center">
                 <div className="speedAnimation flex gap-4 items-center justify-center">
@@ -87,6 +107,81 @@ export default function InGameSettings({ userPreferences, setUserPreferences }) 
                     <SelectContent>
                       <SelectItem value={true}>True</SelectItem>
                       <SelectItem value={false}>False</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="moveType flex gap-4 items-center justify-center">
+                  <Select
+                    value={userPreferences?.pieceSet}
+                    onValueChange={(value) => setUserPreferences((prev) => ({ ...prev, pieceSet: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={userPreferences?.pieceSet} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={'alpha'}>alpha</SelectItem>
+                      <SelectItem value={'caliente'}>caliente</SelectItem>
+                      <SelectItem value={'cardinal'}>cardinal</SelectItem>
+                      <SelectItem value={'cburnett'}>cburnett</SelectItem>
+                      <SelectItem value={'chessnut'}>chessnut</SelectItem>
+                      <SelectItem value={'cooke'}>cooke</SelectItem>
+                      <SelectItem value={'gioco'}>gioco</SelectItem>
+                      <SelectItem value={'governor'}>governor</SelectItem>
+                      <SelectItem value={'icpieces'}>icpieces</SelectItem>
+                      <SelectItem value={'kiwen-suwi'}>kiwen-suwi</SelectItem>
+                      <SelectItem value={'kosal'}>kosal</SelectItem>
+                      <SelectItem value={'maestro'}>maestro</SelectItem>
+                      <SelectItem value={'merida'}>merida</SelectItem>
+                      <SelectItem value={'monarchy'}>monarchy</SelectItem>
+                      <SelectItem value={'mpchess'}>mpchess</SelectItem>
+                      <SelectItem value={'pirouetti'}>pirouetti</SelectItem>
+                      <SelectItem value={'pixel'}>pixel</SelectItem>
+                      <SelectItem value={'staunty'}>staunty</SelectItem>
+                      <SelectItem value={'tatiana'}>tatiana</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="moveType flex gap-4 items-center justify-center">
+                  <Select
+                    value={userPreferences?.board}
+                    onValueChange={(value) =>
+                      setUserPreferences((prev) => ({
+                        ...prev,
+                        board: value,
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={userPreferences?.board.name}>{userPreferences?.board.name}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={{ lightSquare: '#ffffff', darkSquare: '#008000', name: 'Green' }}>
+                        Green
+                      </SelectItem>
+                      <SelectItem value={{ lightSquare: '#d2b48c', darkSquare: '#654321', name: 'Dark Wood' }}>
+                        Dark Wood
+                      </SelectItem>
+                      <SelectItem value={{ lightSquare: '#f7deab', darkSquare: '#b58863', name: 'Brown' }}>
+                        Brown
+                      </SelectItem>
+                      <SelectItem value={{ lightSquare: '#e0e4e8', darkSquare: '#779ab6', name: 'Ice Sea' }}>
+                        Ice Sea
+                      </SelectItem>
+                      <SelectItem value={{ lightSquare: '#ffffff', darkSquare: '#586e75', name: 'Bases' }}>
+                        Bases
+                      </SelectItem>
+                      <SelectItem
+                        value={{
+                          lightSquare: 'rgba(255, 255, 255, 0.75)',
+                          darkSquare: 'rgba(0, 0, 0, 0.6)',
+                          name: 'Transculent',
+                        }}
+                      >
+                        Translucent
+                      </SelectItem>
+                      <SelectItem value={{ lightSquare: '#add8e6', darkSquare: '#4682b4', name: 'Blue' }}>
+                        Blue
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

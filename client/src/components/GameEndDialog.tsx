@@ -63,7 +63,7 @@ export default function GameEndDialog({ setOpenEndDialog, gameState, mode, loadi
                   <div>
                     <div className="text-center text-xl text-ellipsis flex items-center justify-center">
                       <span
-                        className="mr-2 text-ellipsis text-center w-full"
+                        className="text-ellipsis text-center w-full"
                         style={{
                           textDecorationLine: gameState?.winner === players[0]?.id ? 'underline' : 'none',
                         }}
@@ -72,7 +72,7 @@ export default function GameEndDialog({ setOpenEndDialog, gameState, mode, loadi
                       </span>{' '}
                       vs{' '}
                       <span
-                        className="ml-2 text-ellipsis text-center w-full"
+                        className="ml-4 text-ellipsis text-center w-full"
                         style={{
                           textDecorationLine: gameState?.winner === players[1]?.id ? 'underline' : 'none',
                         }}

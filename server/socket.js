@@ -9,7 +9,7 @@ const queues = {
   rapid: [],
   blitz: [],
 }
-
+let games = {}
 let timeToReconnect
 
 async function setupSocketIO(server) {
@@ -112,6 +112,8 @@ async function setupSocketIO(server) {
   })
 
   async function startGame(gameMode) {
+    const timeControl = gameMode == 'bullet' ? 60 : gameMode == 'blitz' ? 180 : gameMode == 'rapid' ? 600 : 999
+
     const player1 = await getPlayerFromQueue(gameMode)
     const player2 = await getPlayerFromQueue(gameMode)
 
@@ -140,7 +142,56 @@ async function setupSocketIO(server) {
       orientation: room.orientation,
     })
 
+    const playerInfo = [{ id: player1.id }, { id: player2.id }]
+    games[roomId] = {
+      whiteTime: timeControl,
+      blackTime: timeControl,
+      activePlayer: 'white',
+      timerInterval: null,
+    }
+    startTimer(roomId, gameMode, orientation, playerInfo)
+
     console.log(`${gameMode} game created in ${roomId} between ${player1.id} and ${player2.id}`)
+  }
+
+  async function startTimer(roomId, mode, orientation, playerInfo) {
+    const game = games[roomId]
+    clearInterval(game.timerInterval)
+
+    const room = await Room.findOne({ id: roomId })
+    if (!room) {
+      console.log('no room finded with provided id')
+      return
+    }
+
+    game.timerInterval = setInterval(async () => {
+      if (game.activePlayer === 'white') {
+        game.whiteTime = Math.max(game.whiteTime - 1, 0)
+      } else {
+        game.blackTime = Math.max(game.blackTime - 1, 0)
+      }
+
+      io.to(roomId).emit('timerUpdate', {
+        whiteTime: game.whiteTime,
+        blackTime: game.blackTime,
+        activePlayer: game.activePlayer,
+      })
+
+      // Check for time expiry
+      if (game.whiteTime === 0 || game.blackTime === 0) {
+        clearInterval(game.timerInterval)
+        const winner = game.whiteTime === 0 ? 'black' : 'white'
+        const winnerId = orientation == winner ? playerInfo[0].id : playerInfo[1].id
+        endGame(roomId, winnerId, 'time', mode)
+      } else {
+        room.timer = {
+          whiteTime: game.whiteTime,
+          blackTime: game.blackTime,
+          activePlayer: game.activePlayer,
+        }
+        await room.save()
+      }
+    }, 1000)
   }
 
   async function getPlayerFromQueue(gameMode) {
@@ -158,9 +209,9 @@ async function setupSocketIO(server) {
       elo:
         gameMode == 'blitz'
           ? getPlayer.blitzElo
-          : mode === 'rapid'
+          : gameMode === 'rapid'
           ? getPlayer.rapidElo
-          : mode == 'bullet'
+          : gameMode === 'bullet'
           ? getPlayer.bulletElo
           : null,
     }
@@ -172,6 +223,13 @@ async function setupSocketIO(server) {
     const room = await Room.findOne({ id: roomId })
     if (room.winner.length > 1) {
       return
+    }
+
+    const game = games[roomId]
+    if (game.activePlayer === 'white') {
+      game.activePlayer = 'black'
+    } else {
+      game.activePlayer = 'white'
     }
 
     room.state = fen
@@ -235,6 +293,9 @@ async function setupSocketIO(server) {
   }
 
   async function endGame(roomId, dbId, reason, mode) {
+    const game = games[roomId]
+    delete games[roomId]
+
     const room = await Room.findOne({ id: roomId })
     if (!room) {
       console.log('room to end the game not found')
@@ -328,6 +389,18 @@ async function setupSocketIO(server) {
       const player2 = await User.findById(room.players[1].id)
       if (player1 && player2) {
         updateElo(player1, player2, mode, false)
+      }
+    }
+
+    if (reason == 'time') {
+      room.endState = 'time'
+      room.winner = dbId
+
+      const loserId = room.players.find((player) => player.id !== dbId)
+      const loserUser = await User.findById(loserId.id)
+      const winnerUser = await User.findById(dbId)
+      if (winnerUser && loserUser) {
+        updateElo(winnerUser, loserUser, mode, true)
       }
     }
 

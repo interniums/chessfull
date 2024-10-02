@@ -45,6 +45,14 @@ const RoomSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  timer: {
+    type: Object,
+    default: {
+      whiteTime: 99,
+      blackTime: 99,
+      activePlayer: 'white',
+    },
+  },
 })
 
 module.exports = mongoose.model('Room', RoomSchema)

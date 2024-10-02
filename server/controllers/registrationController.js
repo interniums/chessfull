@@ -22,7 +22,7 @@ const registrationHandler = asyncHandler(async (req, res, next) => {
     return res.status(400).json({ message: 'Error with hashing password' })
   }
 
-  const user = await User.create({ username, email, password: hash })
+  const user = await User.create({ username, email, password: hash, joined: Date.now() })
   if (!user) {
     return res.status(400).json({ message: 'Error with creating user' })
   }

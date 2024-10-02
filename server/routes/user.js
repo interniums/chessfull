@@ -10,4 +10,6 @@ userRoutes.route('/update/preferences').patch(userController.changeUserPreferenc
 
 userRoutes.route('/:id/getPreferences').get(userController.getUserPreferences)
 
+userRoutes.route('/:id/profile').get(userController.getProfile)
+
 module.exports = userRoutes

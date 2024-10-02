@@ -9,6 +9,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  joined: {
+    type: Date,
+    default: Date.now(),
+  },
   password: {
     type: String,
     required: true,
@@ -44,6 +48,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  accountLevel: {
+    type: Number,
+    default: 3,
+  },
   userPreferences: {
     type: Object,
     default: {
@@ -51,6 +59,8 @@ const UserSchema = new mongoose.Schema({
       pieceMoveType: 1,
       premovesAllowed: true,
       queenPromotion: false,
+      pieceSet: 'alpha',
+      board: { lightSquare: '#eeeed2', darkSquare: '#769656', name: 'Brown' },
     },
   },
 })
