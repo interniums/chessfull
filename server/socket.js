@@ -53,8 +53,7 @@ async function setupSocketIO(server) {
         return
       }
 
-      room.history = data.history
-      await room.save()
+      await Room.findByIdAndUpdate(room._id, { $set: { history: data.history } })
     })
 
     socket.on('sendFen', async (data) => {
@@ -156,7 +155,7 @@ async function setupSocketIO(server) {
 
   async function startTimer(roomId, mode, orientation, playerInfo) {
     const game = games[roomId]
-    clearInterval(game.timerInterval)
+    clearInterval(game?.timerInterval)
 
     const room = await Room.findOne({ id: roomId })
     if (!room) {
@@ -294,7 +293,7 @@ async function setupSocketIO(server) {
 
   async function endGame(roomId, dbId, reason, mode) {
     const game = games[roomId]
-    delete games[roomId]
+    clearInterval(game?.timerInterval)
 
     const room = await Room.findOne({ id: roomId })
     if (!room) {
@@ -409,6 +408,13 @@ async function setupSocketIO(server) {
     // Emit game end event to the clients
     io.to(roomId).emit('gameEnd', { winner: result.winner, endState: result.endState })
     console.log('game ended')
+
+    const socketsInRoom = await io.in(roomId).fetchSockets() // Fetch all sockets in the room
+
+    // Make all sockets leave the room
+    socketsInRoom.forEach((socket) => {
+      socket.leave(roomId)
+    })
   }
 
   async function updateElo(player1, player2, mode, isWinLose) {

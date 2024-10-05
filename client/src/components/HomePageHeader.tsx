@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 import { Link } from 'react-router-dom'
-import rook from '../assets/rook.svg'
+import rook from '../assets/images/rook.svg'
 import useAuth from '@/hooks/useAuth'
 import { Button } from './ui/button'
 import useLogout from '@/hooks/useLogout'
@@ -20,7 +20,7 @@ export default function HomePageHeader({ variant }) {
         <Link
           style={{ justifyContent: variant === 'play' ? 'start' : 'center' }}
           className="flex items-center justify-center w-max"
-          to={'/home'}
+          to={'/socket/home'}
         >
           <h1 className="text-4xl font-bold cursor-pointer">Chessfull</h1>
           <img src={rook} alt="rook" className="size-10 mb-2" />

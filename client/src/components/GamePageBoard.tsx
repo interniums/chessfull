@@ -10,9 +10,9 @@ import useAxiosPrivate from '@/hooks/useAxiosPrivate'
 import GameInfo from './GameInfo'
 import GameEndDialog from './GameEndDialog'
 import useAuth from '@/hooks/useAuth'
-import moveSound from '../assets/move.mp3'
-import captureSound from '../assets/capture.mp3'
-import endGameSound from '../assets/endGame.mp3'
+import moveSound from '../assets/sounds/move.mp3'
+import captureSound from '../assets/sounds/capture.mp3'
+import endGameSound from '../assets/sounds/endGame.mp3'
 import UIfx from 'uifx'
 
 export default function GamePageBoard({ mode, players, moves, setMoves, roomId, orientation, sock }) {
@@ -74,6 +74,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
 
   const waitDrawAnswerRef = useRef(waitDrawAnswer)
   const overRef = useRef(gameState?.over)
+  const isFirstRender = useRef(true)
 
   // console.log(fen)
   // console.log(history)
@@ -83,7 +84,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
   // console.log(currentMoveIndex)
   // console.log(fenHistory.length)
   // console.log(chess)
-  console.log(userPreferences)
+  // console.log(userPreferences)
 
   // Function to go to the first move
   const goToFirstMove = () => {
@@ -132,33 +133,6 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     }
   }
 
-  // get user preferences
-  useEffect(() => {
-    setLoading(true)
-    let isMounted = true
-    const controller = new AbortController()
-
-    const getUserPreferences = async () => {
-      try {
-        const response = await axiosPrivate.get(`http://localhost:3000/user//${auth?.id}/getPreferences`, {
-          signal: controller.signal,
-        })
-        isMounted && setUserPreferences(response.data)
-      } catch (err) {
-        console.error(err)
-      }
-    }
-
-    getUserPreferences()
-
-    return () => {
-      isMounted = false
-      controller.abort()
-      setLoading(false)
-    }
-  }, [])
-
-  // update user preferences logic
   useEffect(() => {
     let isMounted = true
     const controller = new AbortController()
@@ -182,13 +156,44 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
       }
     }
 
-    updateUserPreferences()
+    // Prevent function call on initial mount
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+    } else {
+      updateUserPreferences()
+    }
 
     return () => {
       isMounted = false
       controller.abort()
     }
   }, [userPreferences])
+
+  // get user preferences
+  useEffect(() => {
+    setLoading(true)
+    let isMounted = true
+    const controller = new AbortController()
+
+    const getUserPreferences = async () => {
+      try {
+        const response = await axiosPrivate.get(`http://localhost:3000/user/${auth?.id}/getPreferences`, {
+          signal: controller.signal,
+        })
+        isMounted && setUserPreferences(response.data)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    getUserPreferences()
+
+    return () => {
+      isMounted = false
+      controller.abort()
+      setLoading(false)
+    }
+  }, [])
 
   // getting game state on mount
   useEffect(() => {

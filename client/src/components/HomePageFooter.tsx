@@ -1,21 +1,23 @@
 // @ts-nocheck
 
 import { Button } from './ui/button'
-import avatar from '../assets/avatar.svg'
+import avatar from '../assets/images/avatar.svg'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import useAuth from '@/hooks/useAuth'
 
-import rank1 from '../assets/frame1.png'
-import rank2 from '../assets/frame2.png'
-import rank3 from '../assets/frame3.png'
-import rank4 from '../assets/frame4.png'
-import rank5 from '../assets/frame5.png'
-import rank6 from '../assets/frame6.png'
+import rank1 from '../assets/images/frame1.png'
+import rank2 from '../assets/images/frame2.png'
+import rank3 from '../assets/images/frame3.png'
+import rank4 from '../assets/images/frame4.png'
+import rank5 from '../assets/images/frame5.png'
+import rank6 from '../assets/images/frame6.png'
 import { axiosPrivate } from '@/api/axios'
 import useAxiosPrivate from '@/hooks/useAxiosPrivate'
+import FriendsBox from './FriendsBox'
+import { useGlobalContext } from '@/context/GlobalContext'
 
 export default function HomePageFooter() {
   const { auth, setAuth } = useAuth()
@@ -23,6 +25,12 @@ export default function HomePageFooter() {
   const [accountLevel, setAccountLevel] = useState(0)
   const [rankAvatar, setRankAvatar] = useState(rank1)
   const axiosPrivate = useAxiosPrivate()
+  const { globalState, setGlobalState } = useGlobalContext()
+  const [friendsOpen, setFriendsOpen] = useState(globalState.friendsOpen)
+
+  useEffect(() => {
+    setFriendsOpen(globalState.friendsOpen)
+  }, [globalState])
 
   useEffect(() => {
     setLoading(true)
@@ -34,7 +42,6 @@ export default function HomePageFooter() {
         const response = await axiosPrivate.get(`http://localhost:3000/user/${auth?.id}`, {
           signal: controller.signal,
         })
-        console.log(response)
         isMounted && setAccountLevel(response?.data.accountLevel)
         setLoading(false)
       } catch (err) {
@@ -74,8 +81,8 @@ export default function HomePageFooter() {
   return (
     <footer className="absolute bottom-0 left-0 px-4 py-4 z-0 h-min">
       <div className="w-full justify-end items-center grid">
-        <div className="grid items-center justify-items-center gap-2 border rounded py-4 px-4 avatarCard shadow-md">
-          <Link to={`/profile/${auth?.id}`}>
+        <div className="grid items-center justify-items-center gap-2 border rounded py-4 px-8 avatarCard shadow-md">
+          <Link to={`/socket/profile/${auth?.id}`}>
             <Avatar className="size-12">
               <AvatarImage />
               <AvatarFallback>
@@ -86,12 +93,16 @@ export default function HomePageFooter() {
             </Avatar>
           </Link>
           <p>{auth?.username}</p>
-          <Link to={`/profile/${auth?.id}`} className="w-full">
+          <Link to={`/socket/profile/${auth?.id}`} className="w-full">
             <Button className="w-full" variant={'outline'}>
               Profile
             </Button>
           </Link>
-          <Button className="w-full" variant={'outline'}>
+          <Button
+            onClick={() => setGlobalState((prev) => ({ ...prev, friendsOpen: !friendsOpen }))}
+            className="w-full"
+            variant={'outline'}
+          >
             Friends
           </Button>
         </div>

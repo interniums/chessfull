@@ -3,8 +3,8 @@
 import useAuth from '@/hooks/useAuth'
 import { Avatar, AvatarImage } from './ui/avatar'
 import { useNavigate } from 'react-router-dom'
-import avatar from '../assets/avatar.svg'
-import queen from '../assets/queen.png'
+import avatar from '../assets/images/avatar.svg'
+import queen from '../assets/images/queen.png'
 import CapturedPieces from './GameInfoMainCapturedPiece'
 import InGameSettings from './InGameSettings'
 
@@ -43,7 +43,7 @@ export default function GameInfoFooter({
               onClick={() => {
                 navigate(`/profile/${players[0].id == auth.id ? players[0]?.id : players[1]?.id}`)
               }}
-              className="px-4 text-l text-ellipsis cursor-pointer flex items-center justify-center"
+              className="px-4 text-l text-ellipsis cursor-pointer flex items-center justify-center font-medium"
               style={{
                 textDecoration: winner === auth.id ? 'underline green' : 'none',
               }}

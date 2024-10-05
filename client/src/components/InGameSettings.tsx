@@ -13,23 +13,7 @@ export default function InGameSettings({ userPreferences, setUserPreferences }) 
   const { auth } = useAuth()
   const [open, setOpen] = useState(false)
 
-  const pieces = ['wP', 'wN', 'wB', 'wR', 'wQ', 'wK', 'bP', 'bN', 'bB', 'bR', 'bQ', 'bK']
-  const customPieces = useMemo(() => {
-    const pieceComponents = {}
-    pieces.forEach((piece) => {
-      pieceComponents[piece] = ({ squareWidth }) => (
-        <div
-          style={{
-            width: squareWidth,
-            height: squareWidth,
-            backgroundImage: `url(/assets/piece/${userPreferences?.pieceSet}/${piece}.svg)`,
-            backgroundSize: '100%',
-          }}
-        />
-      )
-    })
-    return pieceComponents
-  }, [userPreferences])
+  console.log(userPreferences)
 
   return (
     <div className="flex items-center justify-center">
@@ -54,7 +38,9 @@ export default function InGameSettings({ userPreferences, setUserPreferences }) 
                 <div className="speedAnimation flex gap-4 items-center justify-center">
                   <Select
                     value={userPreferences?.pieceSpeedAnimation}
-                    onValueChange={(value) => setUserPreferences((prev) => ({ ...prev, pieceSpeedAnimation: value }))}
+                    onValueChange={(value) => {
+                      setUserPreferences((prev) => ({ ...prev, pieceSpeedAnimation: value }))
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={userPreferences?.pieceSpeedAnimation} />
@@ -70,7 +56,9 @@ export default function InGameSettings({ userPreferences, setUserPreferences }) 
                 <div className="moveType flex gap-4 items-center justify-center">
                   <Select
                     value={userPreferences?.pieceMoveType}
-                    onValueChange={(value) => setUserPreferences((prev) => ({ ...prev, pieceMoveType: value }))}
+                    onValueChange={(value) => {
+                      setUserPreferences((prev) => ({ ...prev, pieceMoveType: value }))
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={userPreferences?.pieceMoveType} />
@@ -85,7 +73,9 @@ export default function InGameSettings({ userPreferences, setUserPreferences }) 
                 <div className="moveType flex gap-4 items-center justify-center">
                   <Select
                     value={userPreferences?.premovesAllowed}
-                    onValueChange={(value) => setUserPreferences((prev) => ({ ...prev, premovesAllowed: value }))}
+                    onValueChange={(value) => {
+                      setUserPreferences((prev) => ({ ...prev, premovesAllowed: value }))
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={userPreferences?.premovesAllowed} />
@@ -99,7 +89,9 @@ export default function InGameSettings({ userPreferences, setUserPreferences }) 
                 <div className="moveType flex gap-4 items-center justify-center">
                   <Select
                     value={userPreferences?.queenPromotion}
-                    onValueChange={(value) => setUserPreferences((prev) => ({ ...prev, queenPromotion: value }))}
+                    onValueChange={(value) => {
+                      setUserPreferences((prev) => ({ ...prev, queenPromotion: value }))
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={userPreferences?.queenPromotion} />
@@ -113,7 +105,9 @@ export default function InGameSettings({ userPreferences, setUserPreferences }) 
                 <div className="moveType flex gap-4 items-center justify-center">
                   <Select
                     value={userPreferences?.pieceSet}
-                    onValueChange={(value) => setUserPreferences((prev) => ({ ...prev, pieceSet: value }))}
+                    onValueChange={(value) => {
+                      setUserPreferences((prev) => ({ ...prev, pieceSet: value }))
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={userPreferences?.pieceSet} />
@@ -144,18 +138,18 @@ export default function InGameSettings({ userPreferences, setUserPreferences }) 
                 <div className="moveType flex gap-4 items-center justify-center">
                   <Select
                     value={userPreferences?.board}
-                    onValueChange={(value) =>
+                    onValueChange={(value) => {
                       setUserPreferences((prev) => ({
                         ...prev,
                         board: value,
                       }))
-                    }
+                    }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder={userPreferences?.board.name}>{userPreferences?.board.name}</SelectValue>
+                      <SelectValue>{userPreferences?.board.name}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={{ lightSquare: '#ffffff', darkSquare: '#008000', name: 'Green' }}>
+                      <SelectItem value={{ lightSquare: '#eeeed2', darkSquare: '#769656', name: 'Green' }}>
                         Green
                       </SelectItem>
                       <SelectItem value={{ lightSquare: '#d2b48c', darkSquare: '#654321', name: 'Dark Wood' }}>

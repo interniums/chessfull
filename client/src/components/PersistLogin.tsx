@@ -1,15 +1,18 @@
 // @ts-nocheck
 
 import { Outlet } from 'react-router-dom'
-import { useState, useEffect } from 'react'
 import useRefreshToken from '../hooks/useRefreshToken'
 import useAuth from '../hooks/useAuth'
 import Loading from './Loading'
+import getSocket from '@/socket'
+import { useEffect, useMemo, useState } from 'react'
+import { io } from 'socket.io-client'
 
 const PersistLogin = () => {
+  const { auth, persist } = useAuth()
   const [isLoading, setIsLoading] = useState(true)
   const refresh = useRefreshToken()
-  const { auth, persist } = useAuth()
+  console.log('game provider mounted')
 
   useEffect(() => {
     let isMounted = true
@@ -30,11 +33,6 @@ const PersistLogin = () => {
 
     return () => (isMounted = false)
   }, [])
-
-  // useEffect(() => {
-  //   console.log(`isLoading: ${isLoading}`)
-  //   console.log(`aT: ${JSON.stringify(auth?.accessToken)}`)
-  // }, [isLoading])
 
   return <>{!persist ? <Outlet /> : isLoading ? <Loading /> : <Outlet />}</>
 }

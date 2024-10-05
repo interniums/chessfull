@@ -34,7 +34,7 @@ export default function QueuePage() {
   }
 
   const handleStartGame = ({ roomId, players, mode, orientation }) => {
-    navigate(`/game/${roomId}`, { state: { roomId, players, mode, orientation } })
+    navigate(`/socket/game/${roomId}`, { state: { roomId, players, mode, orientation } })
   }
 
   return (

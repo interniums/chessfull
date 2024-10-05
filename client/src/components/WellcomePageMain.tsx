@@ -1,14 +1,14 @@
 // @ts-nocheck
 
 import { Button } from './ui/button'
-import mainImage from '../assets/main-imge.jpg'
+import mainImage from '../assets/images/main-imge.jpg'
 import { Link } from 'react-router-dom'
 import HomePageHeader from './HomePageHeader'
-import rook from '../assets/rook.png'
-import pawn from '../assets/pawn.png'
-import queen from '../assets/queen.png'
-import bishop from '../assets/bishop.png'
-import knight from '../assets/knight.png'
+import rook from '../assets/images/rook.png'
+import pawn from '../assets/images/pawn.png'
+import queen from '../assets/images/queen.png'
+import bishop from '../assets/images/bishop.png'
+import knight from '../assets/images/knight.png'
 
 export default function WellcomePageMain() {
   return (

@@ -11,7 +11,8 @@ import ProfilePage from './pages/ProfilePage.tsx'
 import ErrorPage from './components/Error.tsx'
 import PersistLogin from './components/PersistLogin.tsx'
 import RequireAuth from './components/RequireAuth.tsx'
-import GameProvider from './pages/GameProvider.tsx'
+import SocketProvider from './pages/SocketProvider.tsx'
+// import GameProvider from './pages/GameProvider.tsx'
 
 export const routes: RouteObject[] = [
   {
@@ -39,26 +40,26 @@ export const routes: RouteObject[] = [
             element: <RequireAuth />,
             children: [
               {
-                path: '/home',
-                element: <HomePage />,
-              },
-              {
-                path: '/game',
-                element: <GameProvider />,
+                path: '/socket',
+                element: <SocketProvider />,
                 children: [
                   {
-                    path: '/game/:id',
+                    path: '/socket/home',
+                    element: <HomePage />,
+                  },
+                  {
+                    path: '/socket/game/:id',
                     element: <GamePage />,
                   },
                   {
-                    path: '/game/queue/:mode',
+                    path: '/socket/game/queue/:mode',
                     element: <QueuePage />,
                   },
+                  {
+                    path: '/socket/profile/:id',
+                    element: <ProfilePage />,
+                  },
                 ],
-              },
-              {
-                path: '/profile/:id',
-                element: <ProfilePage />,
               },
             ],
           },

@@ -10,6 +10,7 @@ export const GlobalProvider = ({ children }) => {
   const [globalState, setGlobalState] = useState({
     successRegisterMessage: '',
     unauthorizedRedirectMessage: '',
+    friendsOpen: false,
   })
 
   return <GlobalContext.Provider value={{ globalState, setGlobalState }}>{children}</GlobalContext.Provider>

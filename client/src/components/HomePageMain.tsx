@@ -2,9 +2,9 @@
 
 import HomePageFooter from './HomePageFooter'
 import HomePageHeader from './HomePageHeader'
-import pawn from '../assets/pawn.png'
-import queen from '../assets/queen.png'
-import rook from '../assets/rook.png'
+import pawn from '../assets/images/pawn.png'
+import queen from '../assets/images/queen.png'
+import rook from '../assets/images/rook.png'
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group'
 import { Button } from './ui/button'
 import { useEffect, useState } from 'react'
@@ -128,7 +128,7 @@ export default function HomePageMain({ socket }) {
   }
 
   const handleReconnect = (data) => {
-    navigate(`/game/${data.roomId}`, {
+    navigate(`/socket/game/${data.roomId}`, {
       state: {
         roomId: data.roomId,
         players: data.players,
@@ -139,7 +139,7 @@ export default function HomePageMain({ socket }) {
   }
 
   const navigateToQueue = () => {
-    navigate(`/game/queue/${gameMode}`, { state: { gameMode, id: auth.id } })
+    navigate(`/socket/game/queue/${gameMode}`, { state: { gameMode, id: auth.id } })
   }
 
   const handleGameModeChange = (mode) => {
@@ -147,20 +147,20 @@ export default function HomePageMain({ socket }) {
   }
 
   return (
-    <main className="h-full">
+    <main className="h-full w-full absolute">
       <HomePageHeader />
       <div className="w-full h-full items-center content-center justify-center grid">
         <ToggleGroup type="single" className="flex justify-center gap-20" value={gameMode}>
           <ToggleGroupItem
             value="bullet"
-            className="h-max py-4 px-8 rounded-md"
+            className="h-max py-4 px-8 rounded-md font-bold"
             onClick={() => handleGameModeChange('bullet')}
           >
             <GameModeCard title="Bullet" image={rook} rank={getRank(user?.bulletElo)} elo={user?.bulletElo} />
           </ToggleGroupItem>
           <ToggleGroupItem
             value="blitz"
-            className="h-max py-4 px-8 rounded-md"
+            className="h-max py-4 px-8 rounded-md font-bold"
             onClick={() => handleGameModeChange('blitz')}
           >
             <GameModeCard title="Blitz" image={queen} rank={getRank(user?.blitzElo)} elo={user?.blitzElo} />
@@ -168,12 +168,12 @@ export default function HomePageMain({ socket }) {
           <ToggleGroupItem
             onClick={() => handleGameModeChange('rapid')}
             value="rapid"
-            className="h-max py-4 px-8 rounded-md"
+            className="h-max py-4 px-8 rounded-md font-bold"
           >
             <GameModeCard title="Rapid" image={pawn} rank={getRank(user?.rapidElo)} elo={user?.rapidElo} />
           </ToggleGroupItem>
         </ToggleGroup>
-        <Button onClick={() => setStartGame(true)} className="text-2xl py-6 w-full mt-8" variant={'outline'}>
+        <Button onClick={() => setStartGame(true)} className="text-2xl py-6 w-full mt-8 font-bold" variant={'outline'}>
           {`Find ${gameMode} game`}
         </Button>
       </div>
@@ -188,10 +188,10 @@ function GameModeCard({ title, image, rank, elo }) {
       <h1 className="text-2xl text-center">{title}</h1>
       <img src={image} alt={title} className="size-32" />
       <div>
-        <h1 className="text-xl text-center">
+        <h1 className="text-xl text-center font-medium">
           Rank: <span>{rank}</span>
         </h1>
-        <h1 className="text-xl text-center">
+        <h1 className="text-xl text-center font-medium">
           Elo: <span>{elo}</span>
         </h1>
       </div>

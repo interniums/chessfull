@@ -1,6 +1,7 @@
 const User = require('../models/userModel')
 const Room = require('../models/gameRoomModel')
 const asyncHandler = require('express-async-handler')
+const bcrypt = require('bcrypt')
 
 const getAllUsers = asyncHandler(async (req, res, next) => {
   const users = await User.find()
@@ -67,9 +68,53 @@ const getProfile = asyncHandler(async (req, res, next) => {
   const rapidWins = rapidGames.filter((room) => room.winner === id)
   const rapidWinPrecentage = (rapidWins.length / rapidGames.length) * 100 || 0
 
-  console.log(user.joined)
   const joinedDate = new Date(user?.joined)
   const formattedDate = joinedDate.toLocaleDateString()
+
+  // user.friends = [
+  //   // '66e4691593519af7091aff78',
+  //   // '66d98bf297f5ce7332b067d7',
+  //   // // '66e4691593519af7091aff78',
+  //   // // '66d98bf297f5ce7332b067d7',
+  //   // // '66e4691593519af7091aff78',
+  //   // // '66d98bf297f5ce7332b067d7',
+  //   // // '66e4691593519af7091aff78',
+  //   // // '66d98bf297f5ce7332b067d7',
+  //   // // '66e4691593519af7091aff78',
+  //   // // '66d98bf297f5ce7332b067d7',
+  //   // // '66e4691593519af7091aff78',
+  //   // // '66d98bf297f5ce7332b067d7',
+  //   // // '66e4691593519af7091aff78',
+  //   // // '66d98bf297f5ce7332b067d7',
+  //   // // '66e4691593519af7091aff78',
+  //   // // '66d98bf297f5ce7332b067d7',
+  //   // // '66e4691593519af7091aff78',
+  //   // // '66d98bf297f5ce7332b067d7',
+  // ]
+
+  // await user.save()
+
+  // user.friendsInvites = [
+  //   '66e4691593519af7091aff78',
+  //   '66d98bf297f5ce7332b067d7',
+  //   // '66e4691593519af7091aff78',
+  //   // '66d98bf297f5ce7332b067d7',
+  //   // '66e4691593519af7091aff78',
+  //   // '66d98bf297f5ce7332b067d7',
+  //   // '66e4691593519af7091aff78',
+  //   // '66d98bf297f5ce7332b067d7',
+  //   // '66e4691593519af7091aff78',
+  //   // '66d98bf297f5ce7332b067d7',
+  //   // '66e4691593519af7091aff78',
+  //   // '66d98bf297f5ce7332b067d7',
+  //   // '66e4691593519af7091aff78',
+  //   // '66d98bf297f5ce7332b067d7',
+  //   // '66e4691593519af7091aff78',
+  //   // '66d98bf297f5ce7332b067d7',
+  //   // '66e4691593519af7091aff78',
+  //   // '66d98bf297f5ce7332b067d7',
+  // ]
+  // await user.save()
 
   res
     .json({
@@ -87,6 +132,9 @@ const getProfile = asyncHandler(async (req, res, next) => {
       bulletGames: bulletGames?.length,
       bulletWinPrecentage: Math.round(bulletWinPrecentage),
       joined: formattedDate,
+      email: user.email,
+      friends: user.friends,
+      friendsInvites: user.friendsInvites,
     })
     .status(200)
 })
@@ -113,6 +161,8 @@ const changeUserPreferences = asyncHandler(async (req, res, next) => {
   user.userPreferences = userPreferences
   const result = await user.save()
 
+  console.log(result.userPreferences)
+
   res.status(200).json({ message: 'User updated' })
 })
 
@@ -130,10 +180,233 @@ const getUserPreferences = asyncHandler(async (req, res, next) => {
   res.status(200).json(user.userPreferences)
 })
 
+const changePassword = asyncHandler(async (req, res, next) => {
+  const { id } = req.params
+  const { oldPassword, newPassword } = req.body
+
+  console.log(oldPassword, newPassword, id)
+
+  if (!oldPassword || !id || !newPassword) {
+    return res.status(400).json({ mesage: 'Invalid data' })
+  }
+
+  const user = await User.findById(id)
+  if (!user) {
+    return res.status(404).json({ message: 'Invalid id' })
+  }
+
+  const match = await bcrypt.compare(oldPassword, user.password)
+  if (!match) {
+    return res.status(401).json({ message: 'Invalid password' })
+  }
+
+  const hash = await bcrypt.hash(newPassword, 10)
+  if (!hash) {
+    return res.status(400).json({ message: 'Error with hashing password' })
+  }
+
+  user.password = hash
+  const result = await user.save()
+  return res.status(200).json({ message: 'Successs' })
+})
+
+const changeEmail = asyncHandler(async (req, res, next) => {
+  const { id } = req.params
+  const { email } = req.body
+
+  if (!email || !id) {
+    return res.status(400).json({ mesage: 'Invalid data' })
+  }
+
+  const user = await User.findById(id)
+  if (!user) {
+    return res.status(404).json({ message: 'Invalid id' })
+  }
+
+  if (email == user.email) {
+    return res.status(401).json({ message: 'Dublicate email' })
+  }
+  const dublicateEmail = await User.findOne({ email }).lean().exec()
+  if (dublicateEmail) {
+    return res.status(409).json({ message: 'Email already registred' })
+  }
+
+  user.email = email
+  const result = await user.save()
+  return res.status(200).json({ message: 'Successs' })
+})
+
+const changeUsername = asyncHandler(async (req, res, next) => {
+  const { id } = req.params
+  const { name } = req.body
+
+  if (!name || !id) {
+    return res.status(400).json({ mesage: 'Invalid data' })
+  }
+
+  const user = await User.findById(id)
+  if (!user) {
+    return res.status(404).json({ message: 'Invalid id' })
+  }
+
+  if (name == user.username) {
+    return res.status(401).json({ message: 'Dublicate name' })
+  }
+  const dublicateName = await User.findOne({ username: name }).lean().exec()
+  if (dublicateName) {
+    return res.status(409).json({ message: 'Username already registred' })
+  }
+
+  user.username = name
+  const result = await user.save()
+  return res.status(200).json({ message: 'Successs' })
+})
+
+const getFriends = asyncHandler(async (req, res, next) => {
+  const { id } = req.params
+  if (!id) {
+    return res.status(400).json({ message: 'Invalid data' })
+  }
+
+  const user = await User.findById(id)
+  if (!user) {
+    return res.status(404).json({ message: 'User nor found' })
+  }
+
+  const userFriendsInfo = []
+  const userInvitesInfo = []
+
+  const getFriendInfo = async (id, mode) => {
+    try {
+      const user = await User.findById(id)
+      if (!user) {
+        return
+      }
+
+      if (mode === 'friends') {
+        userFriendsInfo.push({ accountLevel: user.accountLevel, id: user._id, name: user.username })
+      }
+      if (mode === 'invites') {
+        userInvitesInfo.push({ accountLevel: user.accountLevel, id: user._id, name: user.username })
+      }
+    } catch (err) {
+      console.error('Error fetching friend info:', err)
+    }
+  }
+
+  const getAllFriendsInfo = async () => {
+    for (const friendId of user.friends) {
+      await getFriendInfo(friendId, 'friends')
+    }
+    for (const inviteId of user.friendsInvites) {
+      await getFriendInfo(inviteId, 'invites')
+    }
+    return res.json({ userFriendsInfo, userInvitesInfo }).status(200)
+  }
+  getAllFriendsInfo()
+})
+
+const addFriend = asyncHandler(async (req, res, next) => {
+  const { id } = req.params
+  const { friendId } = req.body
+  if (!id || !friendId) {
+    return res.status(400).json({ message: 'Invalid data' })
+  }
+
+  const user = await User.findById(friendId)
+  if (!user) {
+    return res.status(404).json({ message: 'Invalid id' })
+  }
+
+  if (user.friendsInvites.includes(id)) {
+    return res.status(101).json({ message: 'Invite already sent' })
+  }
+
+  user.friendsInvites.push(id)
+  await user.save()
+  return res.status(200).json({ message: 'Success' })
+})
+
+const removeFriend = asyncHandler(async (req, res, next) => {
+  const { id } = req.params
+  const { deleteId } = req.body
+  console.log(id, deleteId)
+
+  if (!id || !deleteId) {
+    return res.status(400).json({ message: 'Invalid data' })
+  }
+
+  const user = await User.findById(id)
+  if (!user) {
+    return res.status(404).json({ message: 'Invalid id' })
+  }
+  const deleteUser = await User.findById(deleteId)
+  if (!user) {
+    return res.status(400).json({ message: 'Invalid id' })
+  }
+
+  const newFriends = user.friends.filter((item) => item !== deleteId)
+  const newDeleteUserFriends = deleteUser.friends.filter((item) => item !== id)
+
+  deleteUser.friends = newDeleteUserFriends
+  user.friends = newFriends
+  await user.save()
+  await deleteUser.save()
+  return res.status(200).json({ message: 'success' })
+})
+
+const acceptFriend = asyncHandler(async (req, res, next) => {
+  const { id } = req.params
+  const { acceptedId } = req.body
+  if (!id || !acceptedId) {
+    return res.status(400).json({ message: 'Invalid data' })
+  }
+
+  const user = await User.findById(id)
+  if (!user) {
+    return res.status(404).json({ message: 'Invalid id' })
+  }
+
+  user.friendsInvites = user.friendsInvites.filter((item) => item !== acceptedId)
+  user.friends.push(acceptedId)
+  await user.save()
+
+  return res.status(200).json({ message: 'Success' })
+})
+
+const rejectFriend = asyncHandler(async (req, res, next) => {
+  const { id } = req.params
+  const { rejectedId } = req.body
+
+  if (!id || !rejectedId) {
+    return res.status(400).json({ message: 'Invalid data' })
+  }
+
+  const user = await User.findById(id)
+  if (!user) {
+    return res.status(404).json({ message: 'Invalid id' })
+  }
+
+  console.log(user.friendsInvites.filter((item) => item !== rejectedId))
+
+  user.friendsInvites = user.friendsInvites.filter((item) => item !== rejectedId)
+  await user.save()
+
+  return res.status(200).json({ message: 'Success' })
+})
+
 module.exports = {
   getAllUsers,
   getUser,
   changeUserPreferences,
   getUserPreferences,
   getProfile,
+  changePassword,
+  changeEmail,
+  changeUsername,
+  getFriends,
+  removeFriend,
+  addFriend,
+  acceptFriend,
+  rejectFriend,
 }

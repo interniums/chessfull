@@ -1,16 +1,16 @@
 // @ts-nocheck
 
-import bP from '../assets/pawn.png'
-import bR from '../assets/rook.png'
-import bK from '../assets/knight.png'
-import bB from '../assets/bishop.png'
-import bQ from '../assets/queen.png'
+import bP from '../assets/images/pawn.png'
+import bR from '../assets/images/rook.png'
+import bK from '../assets/images/knight.png'
+import bB from '../assets/images/bishop.png'
+import bQ from '../assets/images/queen.png'
 
-import wP from '../assets/pawn white.png'
-import wR from '../assets/rook white.png'
-import wK from '../assets/knight white.png'
-import wB from '../assets/bishop white.png'
-import wQ from '../assets/queen white.png'
+import wP from '../assets/images/pawn white.png'
+import wR from '../assets/images/rook white.png'
+import wK from '../assets/images/knight white.png'
+import wB from '../assets/images/bishop white.png'
+import wQ from '../assets/images/queen white.png'
 
 import { useEffect, useState } from 'react'
 

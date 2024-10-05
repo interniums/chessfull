@@ -4,8 +4,8 @@ import useAuth from '@/hooks/useAuth'
 import { AvatarImage } from './ui/avatar'
 import { Avatar } from '@radix-ui/react-avatar'
 import { useNavigate } from 'react-router-dom'
-import avatar from '../assets/avatar.svg'
-import queen from '../assets/queen.png'
+import avatar from '../assets/images/avatar.svg'
+import queen from '../assets/images/queen.png'
 import CapturedPieces from './GameInfoMainCapturedPiece'
 import { GearIcon } from '@radix-ui/react-icons'
 
@@ -38,7 +38,7 @@ export default function GameInfoHeader({
               onClick={() => {
                 navigate(`/profile/${players[0].id == auth.id ? players[1]?.id : players[0]?.id}`)
               }}
-              className="px-4 text-l text-ellipsis cursor-pointer flex items-center justify-center gap-2"
+              className="px-4 text-l text-ellipsis cursor-pointer flex items-center justify-center gap-2 font-medium"
               style={{
                 textDecoration: winner !== auth.id && winner !== 'Draw' && winner.length ? 'underline green' : 'none',
               }}
