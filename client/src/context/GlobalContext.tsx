@@ -11,6 +11,11 @@ export const GlobalProvider = ({ children }) => {
     successRegisterMessage: '',
     unauthorizedRedirectMessage: '',
     friendsOpen: false,
+    gameInvite: {
+      from: '',
+      name: '',
+      gamemode: '',
+    },
   })
 
   return <GlobalContext.Provider value={{ globalState, setGlobalState }}>{children}</GlobalContext.Provider>

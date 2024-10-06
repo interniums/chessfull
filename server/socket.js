@@ -56,6 +56,11 @@ async function setupSocketIO(server) {
       await Room.findByIdAndUpdate(room._id, { $set: { history: data.history } })
     })
 
+    socket.on('gameInvite', ({ from, to, gamemode }) => {
+      console.log('server got invite')
+      io.emit('gameInviteForAll', { from, to, gamemode })
+    })
+
     socket.on('sendFen', async (data) => {
       const room = await Room.findOne({ id: data.roomId })
 
@@ -101,6 +106,11 @@ async function setupSocketIO(server) {
     socket.on('threefold repetition', (data) => {
       console.log('game end due to threefold repetition', data)
       endGame(data.roomId, '', 'threefold repetition', data.mode)
+    })
+
+    socket.on('cancel queue', () => {
+      console.log(`User ${socket.id} left queue`)
+      handleSocketDisconnect(socket.id)
     })
 
     // Handle socket disconnection

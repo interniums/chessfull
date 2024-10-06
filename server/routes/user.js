@@ -28,4 +28,6 @@ userRoutes.route('/:id/acceptFriend').post(userController.acceptFriend)
 
 userRoutes.route('/:id/rejectFriend').post(userController.rejectFriend)
 
+userRoutes.route('/userSearch').post(userController.userSearch)
+
 module.exports = userRoutes

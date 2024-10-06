@@ -1,12 +1,6 @@
 // @ts-nocheck
 
-import {
-  Link,
-  Navigate,
-  replace,
-  useLocation,
-  useNavigate,
-} from 'react-router-dom'
+import { Link, Navigate, replace, useLocation, useNavigate } from 'react-router-dom'
 import HomePageHeader from './HomePageHeader'
 import { Button } from './ui/button'
 import { useGlobalContext } from '@/context/GlobalContext'
@@ -64,10 +58,7 @@ export default function LoginPageMain() {
       }, 10000)
     }
 
-    if (
-      globalState.unauthorizedRedirectMessage.length > 1 &&
-      !auth?.accessToken
-    ) {
+    if (globalState.unauthorizedRedirectMessage.length > 1 && !auth?.accessToken) {
       toast({
         description: globalState.unauthorizedRedirectMessage,
       })
@@ -75,10 +66,7 @@ export default function LoginPageMain() {
         setGlobalState((prev) => ({ ...prev, unauthorizedRedirectMessage: '' }))
       }, 10000)
     }
-  }, [
-    globalState.successRegisterMessage,
-    globalState.unauthorizedRedirectMessage,
-  ])
+  }, [globalState.successRegisterMessage, globalState.unauthorizedRedirectMessage])
 
   const onSubmit = async (data) => {
     setLoading(true)
@@ -132,9 +120,7 @@ export default function LoginPageMain() {
 
   return (
     <main className="w-full h-full">
-      {success ? (
-        <Navigate to="/home" state={{ from: location }} replace />
-      ) : null}
+      {success ? <Navigate to="/socket/home" state={{ from: location }} replace /> : null}
       <div className="w-full h-full flex items-center justify-center">
         <HomePageHeader />
         <div className="py-4 px-8 w-2/5">
@@ -146,11 +132,7 @@ export default function LoginPageMain() {
                 {...register('email')}
                 className={
                   'rounded py-5 cursor-pointer hover:bg-slate-100' +
-                  `${
-                    errors.email && watch('email').length
-                      ? ' border-red-500 border-2 focus-visible:ring-0'
-                      : ' '
-                  }`
+                  `${errors.email && watch('email').length ? ' border-red-500 border-2 focus-visible:ring-0' : ' '}`
                 }
                 placeholder="email"
                 aria-invalid={errors.email ? 'true' : 'false'}
@@ -177,9 +159,7 @@ export default function LoginPageMain() {
                 className={
                   'rounded py-5 cursor-pointer hover:bg-slate-100' +
                   `${
-                    errors.password && watch('password').length
-                      ? ' border-red-500 border-2 focus-visible:ring-0'
-                      : ' '
+                    errors.password && watch('password').length ? ' border-red-500 border-2 focus-visible:ring-0' : ' '
                   }`
                 }
                 type="password"
@@ -220,10 +200,7 @@ export default function LoginPageMain() {
             </div>
           </form>
           <div className="w-full grid mt-4">
-            <Link
-              to={'/registration'}
-              className="flex items-center justify-center"
-            >
+            <Link to={'/registration'} className="flex items-center justify-center">
               <Button variant={'link'} className="text-center">
                 Don't have an account? Register here.
               </Button>

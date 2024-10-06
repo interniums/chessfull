@@ -366,10 +366,17 @@ const acceptFriend = asyncHandler(async (req, res, next) => {
   if (!user) {
     return res.status(404).json({ message: 'Invalid id' })
   }
+  const acceptedUser = await User.findById(acceptedId)
+  if (!acceptedUser) {
+    return res.status(404).json({ message: 'Invalid id' })
+  }
 
   user.friendsInvites = user.friendsInvites.filter((item) => item !== acceptedId)
   user.friends.push(acceptedId)
   await user.save()
+
+  acceptedUser.friends.push(id)
+  await acceptedUser.save()
 
   return res.status(200).json({ message: 'Success' })
 })
@@ -395,6 +402,21 @@ const rejectFriend = asyncHandler(async (req, res, next) => {
   return res.status(200).json({ message: 'Success' })
 })
 
+const userSearch = asyncHandler(async (req, res, next) => {
+  const { input } = req.body
+  if (!input) {
+    return res.status(400).json({ message: 'Invalid data' })
+  }
+
+  const users = await User.find({ username: new RegExp(input, 'i') }).select('username _id accountLevel')
+
+  if (!users) {
+    return res.status(404).json({ message: 'No users found' })
+  }
+
+  return res.json(users).status(200)
+})
+
 module.exports = {
   getAllUsers,
   getUser,
@@ -409,4 +431,5 @@ module.exports = {
   addFriend,
   acceptFriend,
   rejectFriend,
+  userSearch,
 }

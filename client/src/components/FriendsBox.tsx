@@ -3,7 +3,7 @@
 import { axiosPrivate } from '@/api/axios'
 import useAuth from '@/hooks/useAuth'
 import useAxiosPrivate from '@/hooks/useAxiosPrivate'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Dialog,
   DialogClose,
@@ -15,14 +15,14 @@ import {
 } from './ui/dialog'
 import { useGlobalContext } from '@/context/GlobalContext'
 import { Avatar, AvatarImage } from './ui/avatar'
-import { ReloadIcon } from '@radix-ui/react-icons'
+import { MagnifyingGlassIcon, ReloadIcon } from '@radix-ui/react-icons'
 import rank1 from '../assets/images/frame1.png'
 import rank2 from '../assets/images/frame2.png'
 import rank3 from '../assets/images/frame3.png'
 import rank4 from '../assets/images/frame4.png'
 import rank5 from '../assets/images/frame5.png'
 import rank6 from '../assets/images/frame6.png'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import chat from '../assets/images/chat-round-unread-svgrepo-com.svg'
 import plus from '../assets/images/plus-square-svgrepo-com.svg'
 import cancel from '../assets/images/cancel-presentation-svgrepo-com.svg'
@@ -31,6 +31,9 @@ import { useToast } from '@/hooks/use-toast'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import reject from '../assets/images/delete-remove-uncheck-svgrepo-com.svg'
 import accept from '../assets/images/accept-check-good-mark-ok-tick-svgrepo-com.svg'
+import { Input } from './ui/input'
+import { Button } from './ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 
 export default function FriendsBox() {
   const axiosPrivate = useAxiosPrivate()
@@ -42,13 +45,17 @@ export default function FriendsBox() {
   const [friendsOpen, setFriendsOpen] = useState(globalState.friendsOpen)
   const [friendsInvites, setFriendsInvites] = useState([])
   const [forceUpdate, setForceUpdate] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [input, setInput] = useState('')
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [searchResult, setSearchResult] = useState([])
   const navigate = useNavigate()
+  const dropDownRef = useRef(null)
+  const dropDownRef2 = useRef(null)
 
   useEffect(() => {
     setGlobalState((prev) => ({ ...prev, friendsOpen: friendsOpen }))
   }, [friendsOpen])
-
-  console.log(friendsInvites)
 
   useEffect(() => {
     setLoading(true)
@@ -173,12 +180,129 @@ export default function FriendsBox() {
     }
   }
 
+  useEffect(() => {
+    if (searchOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [searchOpen])
+
+  useEffect(() => {
+    if (searchResult.length) {
+      setSearchOpen(true)
+    }
+  }, [searchResult])
+
+  const handleClickOutside = (event) => {
+    if (
+      dropDownRef.current &&
+      dropDownRef2.current &&
+      !dropDownRef.current.contains(event.target) &&
+      !dropDownRef2.current.contains(event.target)
+    ) {
+      setSearchOpen(false)
+    }
+  }
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (input) {
+        searchUsers(input)
+      }
+    }, 300)
+
+    return () => clearTimeout(delayDebounceFn)
+  }, [input])
+
+  useEffect(() => {
+    if (!input.length) {
+      setSearchOpen(false)
+    }
+  }, [input])
+
+  const searchUsers = async () => {
+    let isMounted = true
+    const controller = new AbortController()
+    setSearchLoading(true)
+
+    try {
+      const response = await axiosPrivate.post(`http://localhost:3000/user/userSearch`, {
+        signal: controller.signal,
+        input,
+      })
+      setSearchLoading(false)
+      if (response.status === 200) {
+        setSearchResult(response.data)
+      }
+    } catch (err) {
+      if (err.response.status === 404) {
+        setSearchResult([])
+      }
+    }
+
+    return () => {
+      setSearchLoading(false)
+      isMounted = false
+      controller.abort()
+    }
+  }
+
   return (
     <Dialog open={friendsOpen} onOpenChange={setFriendsOpen}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Friends</DialogTitle>
           <DialogDescription className="font-medium">make new friends and chat</DialogDescription>
+          <div className="flex gap-4 items-center">
+            <div className="relative w-full" ref={dropDownRef}>
+              <input
+                onChange={(e) => setInput(e.target.value)}
+                autoComplete="off"
+                className={
+                  !searchOpen
+                    ? 'hover:bg-slate-100 w-full border py-2 px-3 cursor-pointer outline-none font-medium text-sm'
+                    : 'hover:bg-slate-100 w-full border py-2 px-3 cursor-pointer outline-none font-medium text-sm border-b-0'
+                }
+                style={{
+                  borderBottomLeftRadius: searchOpen ? '0px' : '6px',
+                  borderBottomRightRadius: searchOpen ? '0px' : '6px',
+                  borderTopLeftRadius: '6px',
+                  borderTopRightRadius: '6px',
+                }}
+                placeholder="search for other players"
+              />
+              {searchOpen ? (
+                <div
+                  ref={dropDownRef2}
+                  className="absolute w-full bg-white border rounded-lg p-2 grid z-50 gap-2 border-t-0 max-h-40 transition-all ease-in-out h-min overflow-y-auto"
+                  style={{
+                    borderTopLeftRadius: searchOpen ? '0px' : '6px',
+                    borderTopRightRadius: searchOpen ? '0px' : '6px',
+                  }}
+                >
+                  <hr />
+                  {searchResult?.map((item, index) => (
+                    <div
+                      className="hover:bg-slate-300 cursor-pointer p-2 flex items-center justify-between text-ellipsis rounded"
+                      key={item._id || index}
+                      onClick={() => navigateTo(item._id)}
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        <Avatar>
+                          <AvatarImage title="account level" src={getImg(item.accountLevel)}></AvatarImage>
+                        </Avatar>
+                        <div className="font-medium">{item.username}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </div>
           <div>
             <hr className="mt-2" />
           </div>
@@ -218,14 +342,6 @@ export default function FriendsBox() {
                           className="p-1 hover:scale-110"
                         >
                           <img className="size-7" src={remove} title="remove from friednds" alt="remove" />
-                        </div>
-                        <div
-                          onClick={(e) => {
-                            e.stopPropagation()
-                          }}
-                          className="p-1 hover:scale-110"
-                        >
-                          <img className="size-7" src={plus} alt="invite" title="invite to game" />
                         </div>
                         <div
                           onClick={(e) => {
