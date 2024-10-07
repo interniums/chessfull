@@ -41,6 +41,9 @@ async function setupSocketIO(server) {
     })
 
     handleReconnection(dbId, socket)
+    socket.on('reconnectUser', () => {
+      handleReconnection(dbId, socket)
+    })
 
     socket.on('move', async ({ roomId, move, fen }) => {
       await handleMove(roomId, move, fen)
@@ -56,13 +59,44 @@ async function setupSocketIO(server) {
       await Room.findByIdAndUpdate(room._id, { $set: { history: data.history } })
     })
 
+    socket.on('offerRematch', ({ from, to, fromName }) => {
+      console.log('server got reamtch')
+      io.emit('offerRematch', { from, to, fromName, socketId: socket.id })
+    })
+
+    socket.on('rematchRejected', ({ from, to }) => {
+      io.emit('rematchRejected', { from, to })
+    })
+
+    socket.on('rematchAccepted', async ({ from, to, fromName, socketId, gamemode }) => {
+      if (!from || !to || !gamemode || !socketId || !fromName) {
+        console.log('error with invite', from, to, gamemode, socketId, fromName)
+        return
+      }
+      const player1 = await User.findById(from)
+      const player2 = await User.findById(to)
+
+      if (player1.inGame) {
+        console.log('player1 ingame, invite inactive')
+        socket.emit('inviteExpired', { to, from })
+        return
+      } else if (player2.inGame) {
+        console.log('player2 ingame, invite inactive')
+        socket.emit('inviteExpired', { to, from })
+        return
+      } else {
+        await inviteGameStart(from, to, gamemode, socketId, fromName, socket)
+      }
+    })
+
     socket.on('gameInvite', ({ from, to, gamemode, fromName }) => {
+      console.log('server got invite')
       io.emit('gameInviteForAll', { from, to, gamemode, socketId: socket.id, fromName })
     })
 
     socket.on('gameInviteAccepted', async ({ from, to, gamemode, socketId, fromName }) => {
       if (!from || !to || !gamemode || !socketId || !fromName) {
-        consol.log('error with invite')
+        console.log('error with invite', from, to, gamemode, socketId, fromName)
         return
       }
       const player1 = await User.findById(from)
@@ -136,6 +170,11 @@ async function setupSocketIO(server) {
     // Handle socket disconnection
     socket.on('disconnect', async () => {
       handleSocketDisconnect(socket.id)
+      await handleDisconnection(socket.id, dbId)
+    })
+
+    socket.on('leaveRoom', async () => {
+      console.log('leave room recieved')
       await handleDisconnection(socket.id, dbId)
     })
   })

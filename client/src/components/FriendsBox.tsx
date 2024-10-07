@@ -195,7 +195,15 @@ export default function FriendsBox() {
 
   console.log(searchResult)
   return (
-    <Dialog open={globalState.friendsOpen} onOpenChange={setGlobalState}>
+    <Dialog
+      open={globalState.friendsOpen}
+      onOpenChange={() => {
+        setGlobalState((prevState) => ({
+          ...prevState,
+          friendsOpen: !prevState.friendsOpen,
+        }))
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Friends</DialogTitle>

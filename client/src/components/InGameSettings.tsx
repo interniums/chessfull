@@ -13,8 +13,6 @@ export default function InGameSettings({ userPreferences, setUserPreferences }) 
   const { auth } = useAuth()
   const [open, setOpen] = useState(false)
 
-  console.log(userPreferences)
-
   return (
     <div className="flex items-center justify-center">
       <GearIcon className="size-8 cursor-pointer p-1 hover:bg-slate-300 rounded-md" onClick={() => setOpen(!open)} />

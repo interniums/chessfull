@@ -20,18 +20,6 @@ export default function QueuePage() {
     }
   }, [areInQueue])
 
-  useEffect(() => {
-    sock.on('startGame', handleStartGame)
-
-    return () => {
-      sock.off('startGame', handleStartGame)
-    }
-  }, [navigate])
-
-  const handleStartGame = ({ roomId, players, mode, orientation }) => {
-    navigate(`/socket/game/${roomId}`, { state: { roomId, players, mode, orientation } })
-  }
-
   const joinQueue = () => {
     sock.emit('joinQueue', { gameMode, id })
     setAreInQueue(true)

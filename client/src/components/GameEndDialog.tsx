@@ -7,9 +7,68 @@ import queen from '../assets/images/queen.png'
 import rook from '../assets/images/rook.png'
 import { Button } from './ui/button'
 import { motion } from 'framer-motion'
+import { useOutletContext } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { toast, useToast } from '@/hooks/use-toast'
 
 export default function GameEndDialog({ setOpenEndDialog, gameState, mode, loading, players }) {
   const { auth } = useAuth()
+  const { toast } = useToast()
+  const [sock] = useOutletContext()
+  const [showRematch, setShowRematch] = useState(false)
+  const [rematchAccepted, setRematchAccepted] = useState(null)
+  const [rematchData, setReamatchData] = useState({})
+  const [rematchSent, setRematchSent] = useState(false)
+
+  const handleRematch = () => {
+    setRematchSent(true)
+    const opponent = players.filter((item) => item.id !== auth.id)
+    console.log(opponent)
+    sock.emit('offerRematch', { from: auth.id, to: opponent[0].id, fromName: auth.username })
+  }
+
+  useEffect(() => {
+    sock.on('offerRematch', ({ from, to, fromName, socketId }) => {
+      if (to === auth.id) {
+        setReamatchData({ from, to, fromName, socketId, gamemode: mode })
+        setShowRematch(true)
+      }
+    })
+
+    sock.on('rematchRejected', ({ from, to }) => {
+      if (auth.id === from) {
+        setShowRematch(false)
+        setRematchAccepted(null)
+        toast({
+          title: 'Rematch rejected',
+        })
+        setRematchSent(false)
+      }
+    })
+
+    if (rematchAccepted === 'true') {
+      console.log(rematchData)
+      sock.emit('rematchAccepted', {
+        from: rematchData?.from,
+        to: rematchData?.to,
+        fromName: rematchData?.fromName,
+        socketId: rematchData?.socketId,
+        gamemode: rematchData?.gamemode,
+      })
+    }
+    if (rematchAccepted === 'false') {
+      sock.emit('rematchRejected', { from: rematchData?.from, to: rematchData?.to })
+      setShowRematch(false)
+      setRematchSent(false)
+      setRematchAccepted(null)
+      setReamatchData({})
+    }
+
+    return () => {
+      sock.off('offerRematch')
+      sock.off('rematchRejected')
+    }
+  }, [sock, rematchAccepted, rematchData, rematchSent, showRematch])
 
   return (
     <>
@@ -84,12 +143,45 @@ export default function GameEndDialog({ setOpenEndDialog, gameState, mode, loadi
                 </header>
                 <main className="grid items-center justify-center pt-8">
                   <div className="flex items-center justify-center gap-8">
-                    <Button variant={'outline'} className="w-full text-xl">
-                      Offer a rematch
-                    </Button>
-                    <Button variant={'outline'} className="w-full text-xl">
-                      New {mode} game
-                    </Button>
+                    {showRematch ? (
+                      <div className="text-center font-medium animate-pulse w-full">
+                        Opponent offering a rematch
+                        <Button
+                          onClick={() => {
+                            setRematchAccepted('true')
+                          }}
+                          variant={'outline'}
+                          className="w-full text-l font-bold mb-1  mt-2"
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setRematchAccepted('false')
+                          }}
+                          variant={'outline'}
+                          className="w-full text-l font-bold mt-2"
+                        >
+                          Reject
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <Button
+                          onClick={() => {
+                            handleRematch()
+                          }}
+                          variant={'outline'}
+                          className="w-full text-l font-bold"
+                          disabled={rematchSent ? true : false}
+                        >
+                          {rematchSent ? 'Rematch sent' : 'Offer rematch'}
+                        </Button>
+                        <Button variant={'outline'} className="w-full text-l font-bold">
+                          New {mode} game
+                        </Button>
+                      </>
+                    )}
                   </div>
                   <div className="pt-8 grid gap-2">
                     <p className="text-center font-bold">

@@ -126,12 +126,12 @@ export default function LoginPageMain() {
         <div className="py-4 px-8 w-2/5">
           <form className="grid gap-5" onSubmit={handleSubmit(onSubmit)}>
             <div className="grid gap-1.5 relative">
-              <Label className="text-xl">Email</Label>
+              <Label className="text-2xl font-bold">Email</Label>
               <Input
                 disabled={loading ? true : false}
                 {...register('email')}
                 className={
-                  'rounded py-5 cursor-pointer hover:bg-slate-100' +
+                  'rounded py-5 cursor-pointer hover:bg-slate-100 font-medium' +
                   `${errors.email && watch('email').length ? ' border-red-500 border-2 focus-visible:ring-0' : ' '}`
                 }
                 placeholder="email"
@@ -152,12 +152,12 @@ export default function LoginPageMain() {
               ) : null}
             </div>
             <div className="grid gap-1.5 relative">
-              <Label className="text-xl">Password</Label>
+              <Label className="text-2xl">Password</Label>
               <Input
                 disabled={loading ? true : false}
                 {...register('password')}
                 className={
-                  'rounded py-5 cursor-pointer hover:bg-slate-100' +
+                  'rounded py-5 cursor-pointer hover:bg-slate-100 font-medium' +
                   `${
                     errors.password && watch('password').length ? ' border-red-500 border-2 focus-visible:ring-0' : ' '
                   }`

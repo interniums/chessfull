@@ -98,7 +98,7 @@ export default function GameInfoMain({
             </div>
           </div>
           <div ref={scrollBottom} className="flex py-4 w-full max-h-64 overflow-y-auto items-start min-h-64 mt-6">
-            <div className="border-r w-min pr-2">
+            <div className="border-r w-min pr-2 font-medium">
               {pairs.map((item, index) => (
                 <div key={index} className="text-center">
                   {index + 1}
@@ -115,7 +115,7 @@ export default function GameInfoMain({
                         goToIndexMove(index == 0 ? 0 : index * 2)
                       }}
                       key={index}
-                      className="text-center hover:bg-slate-300 cursor-pointer rounded-sm"
+                      className="text-center hover:bg-slate-300 cursor-pointer rounded-sm font-medium"
                     >
                       {item?.length ? item[0] : ' 1 '}
                     </div>
@@ -128,7 +128,7 @@ export default function GameInfoMain({
                       onClick={() => {
                         goToIndexMove(index == 0 ? 1 : index * 2 + 1)
                       }}
-                      className="text-center hover:bg-slate-300 cursor-pointer rounded-sm"
+                      className="text-center hover:bg-slate-300 cursor-pointer rounded-sm font-medium"
                     >
                       {item?.length ? item[1] : ' 1 '}
                     </div>

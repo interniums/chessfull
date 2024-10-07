@@ -86,18 +86,14 @@ export default function RegisterPageMain() {
         <div className="py-4 px-8 w-2/5">
           <form className="grid gap-5" onSubmit={handleSubmit(onSubmit)}>
             <div className="grid gap-1.5 relative">
-              <Label className="text-xl">Email</Label>
+              <Label className="text-2xl">Email</Label>
               <Input
                 {...register('email')}
                 disabled={loading ? true : false}
                 autoComplete="off"
                 className={
-                  'rounded py-5 cursor-pointer hover:bg-slate-100' +
-                  `${
-                    errors.email && watch('email').length
-                      ? ' border-red-500 border-2 focus-visible:ring-0'
-                      : ' '
-                  }`
+                  'rounded py-5 cursor-pointer hover:bg-slate-100 font-medium' +
+                  `${errors.email && watch('email').length ? ' border-red-500 border-2 focus-visible:ring-0' : ' '}`
                 }
                 placeholder="email"
                 aria-invalid={errors.email ? 'true' : 'false'}
@@ -117,17 +113,15 @@ export default function RegisterPageMain() {
               ) : null}
             </div>
             <div className="grid gap-1.5 relative">
-              <Label className="text-xl">Username</Label>
+              <Label className="text-2xl">Username</Label>
               <Input
                 {...register('username')}
                 disabled={loading ? true : false}
                 autoComplete="off"
                 className={
-                  'rounded py-5 cursor-pointer hover:bg-slate-100' +
+                  'rounded py-5 cursor-pointer hover:bg-slate-100 font-medium' +
                   `${
-                    errors.username && watch('username').length
-                      ? ' border-red-500 border-2 focus-visible:ring-0'
-                      : ' '
+                    errors.username && watch('username').length ? ' border-red-500 border-2 focus-visible:ring-0' : ' '
                   }`
                 }
                 type="text"
@@ -149,17 +143,15 @@ export default function RegisterPageMain() {
               ) : null}
             </div>
             <div className="grid gap-1.5 relative">
-              <Label className="text-xl">Password</Label>
+              <Label className="text-2xl">Password</Label>
               <Input
                 {...register('password')}
                 disabled={loading ? true : false}
                 autoComplete="off"
                 className={
-                  'rounded py-5 cursor-pointer hover:bg-slate-100' +
+                  'rounded py-5 cursor-pointer hover:bg-slate-100 font-medium' +
                   `${
-                    errors.password && watch('password').length
-                      ? ' border-red-500 border-2 focus-visible:ring-0'
-                      : ' '
+                    errors.password && watch('password').length ? ' border-red-500 border-2 focus-visible:ring-0' : ' '
                   }`
                 }
                 type="password"
@@ -180,25 +172,23 @@ export default function RegisterPageMain() {
               ) : null}
             </div>
             <div className="grid gap-1.5 relative">
-              <Label className="text-xl">Confirm password</Label>
+              <Label className="text-2xl">Confirm password</Label>
               <Input
                 disabled={loading ? true : false}
                 {...register('passwordConfirmation')}
                 autoComplete="off"
                 type="password"
                 className={
-                  'rounded py-5 cursor-pointer hover:bg-slate-100' +
+                  'rounded py-5 cursor-pointer hover:bg-slate-100 font-medium' +
                   `${
-                    errors.passwordConfirmation &&
-                    watch('passwordConfirmation').length
+                    errors.passwordConfirmation && watch('passwordConfirmation').length
                       ? ' border-red-500 border-2 focus-visible:ring-0'
                       : ' '
                   }`
                 }
                 placeholder="confirm password"
               />
-              {errors.passwordConfirmation &&
-              watch('passwordConfirmation').length ? (
+              {errors.passwordConfirmation && watch('passwordConfirmation').length ? (
                 <ErrorInput
                   top={'-10%'}
                   right={'-20%'}

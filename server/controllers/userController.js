@@ -161,8 +161,6 @@ const changeUserPreferences = asyncHandler(async (req, res, next) => {
   user.userPreferences = userPreferences
   const result = await user.save()
 
-  console.log(result.userPreferences)
-
   res.status(200).json({ message: 'User updated' })
 })
 

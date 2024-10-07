@@ -25,7 +25,7 @@ import useAuth from '@/hooks/useAuth'
 import { CheckIcon, Cross1Icon, Pencil1Icon, Pencil2Icon, PlusCircledIcon, ReloadIcon } from '@radix-ui/react-icons'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Button } from './ui/button'
-import { useLocation, useParams } from 'react-router-dom'
+import { useLocation, useOutletContext, useParams } from 'react-router-dom'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import { Label } from './ui/label'
@@ -38,11 +38,14 @@ import ChangeEmailSettings from './ChangeEmailSettings'
 import ChangeUsernameSettings from './ChangeUsernameSettings'
 import remove from '../assets/images/remove-square-svgrepo-com.svg'
 import GameSettings from './GameSettings'
+import { ToastAction } from './ui/toast'
+import { useGlobalContext } from '@/context/GlobalContext'
 
 export default function ProfilePageMain() {
   const { id } = useParams()
   const { toast } = useToast()
   const axiosPrivate = useAxiosPrivate()
+  const { globalState, setGlobalState } = useGlobalContext()
   const { auth } = useAuth()
   const [loading, setLoading] = useState(true)
   const [statsSelection, setStatsSelection] = useState('Blitz')

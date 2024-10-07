@@ -40,7 +40,6 @@ export default function HomePageMain() {
   const [friendsInfo, setFriendsInfo] = useState([])
   const [inviteInfo, setInviteInfo] = useState({ from: auth?.id, to: '', gamemode: '', fromName: auth?.username })
   const [user, setUser] = useState({})
-  const [newInvite, setNewInvite] = useState(false)
   const [sock] = useOutletContext()
 
   useEffect(() => {
@@ -67,22 +66,8 @@ export default function HomePageMain() {
         })
       )
 
-    const checkForReconnect = async () => {
-      try {
-        const response = await axiosPrivate.get(`http://localhost:3000/game/reconnect/${auth.id}`, {
-          signal: controller.signal,
-        })
-        if (response.status === 200) {
-          showReconnectToast(response.data)
-        }
-      } catch (err) {
-        console.error(err)
-      }
-    }
-
     getFriendsInfo()
     getUserData()
-    checkForReconnect()
 
     return () => controller.abort()
   }, [auth.id])
@@ -92,7 +77,7 @@ export default function HomePageMain() {
   const handleSendInvite = () => {
     sock.emit('gameInvite', inviteInfo)
     setShowCreateGameDialog(false)
-    toast({ title: 'Invite sent. Wait for response' })
+    toast({ title: 'Invite sent. Wait for response', duration: 2750 })
     setInviteInfo({ from: auth.id, to: '', gamemode: '', fromName: auth?.name })
   }
 
@@ -101,62 +86,6 @@ export default function HomePageMain() {
       navigate(`/socket/game/queue/${gameMode}`, { state: { gameMode, id: auth.id } })
     }
   }, [startGame, gameMode, navigate, auth.id])
-
-  useEffect(() => {
-    if (globalState?.gameInvite.gamemode && !newInvite) {
-      setNewInvite(true)
-      toast({
-        title: 'New game invite',
-        description: `User ${globalState?.gameInvite.name} invited you to play ${globalState?.gameInvite.gamemode}`,
-        duration: 20000,
-        action: (
-          <ToastAction altText="Accept" onClick={handleAcceptGameInvite}>
-            Accept
-          </ToastAction>
-        ),
-      })
-    }
-    if (globalState?.gameInvite.expired) {
-      toast({
-        title: 'Invite expired',
-      })
-    }
-  }, [globalState, newInvite, toast])
-
-  const handleAcceptGameInvite = () => {
-    sock.emit('gameInviteAccepted', {
-      to: auth.id,
-      from: globalState?.gameInvite.from,
-      gamemode: globalState?.gameInvite.gamemode,
-      socketId: globalState?.gameInvite.socketId,
-      fromName: globalState?.gameInvite.name,
-    })
-    setGlobalState((prev) => ({
-      ...prev,
-      gameInvite: {
-        ...prev.gameInvite,
-        from: '',
-        gamemode: '',
-        socketId: '',
-        name: '',
-        expired: false,
-      },
-    }))
-    setNewInvite(false)
-  }
-
-  const showReconnectToast = (data) => {
-    toast({
-      title: 'Oh!',
-      description: 'You have an unfinished game',
-      duration: TIME_TO_RECONNECT,
-      action: (
-        <ToastAction altText="Reconnect" onClick={() => navigate(`/socket/game/${data.roomId}`, { state: data })}>
-          Reconnect
-        </ToastAction>
-      ),
-    })
-  }
 
   const getRankImage = (value) => {
     const ranks = [rank1, rank2, rank3, rank4, rank5, rank6]

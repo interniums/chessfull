@@ -16,6 +16,7 @@ export const GlobalProvider = ({ children }) => {
       name: '',
       gamemode: '',
       expired: false,
+      socketId: '',
     },
   })
 
