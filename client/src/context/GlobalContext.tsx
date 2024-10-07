@@ -15,6 +15,7 @@ export const GlobalProvider = ({ children }) => {
       from: '',
       name: '',
       gamemode: '',
+      expired: false,
     },
   })
 

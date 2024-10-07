@@ -28,14 +28,14 @@ export default function QueuePage() {
     }
   }, [navigate])
 
+  const handleStartGame = ({ roomId, players, mode, orientation }) => {
+    navigate(`/socket/game/${roomId}`, { state: { roomId, players, mode, orientation } })
+  }
+
   const joinQueue = () => {
     sock.emit('joinQueue', { gameMode, id })
     setAreInQueue(true)
     console.log('joined queue')
-  }
-
-  const handleStartGame = ({ roomId, players, mode, orientation }) => {
-    navigate(`/socket/game/${roomId}`, { state: { roomId, players, mode, orientation } })
   }
 
   const handleCancel = () => {

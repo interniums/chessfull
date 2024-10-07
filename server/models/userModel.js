@@ -81,6 +81,10 @@ const UserSchema = new mongoose.Schema({
       board: { lightSquare: '#eeeed2', darkSquare: '#769656', name: 'Green' },
     },
   },
+  inGame: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 module.exports = mongoose.model('User', UserSchema)

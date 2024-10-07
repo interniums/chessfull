@@ -5,66 +5,61 @@ import useAuth from '@/hooks/useAuth'
 import useAxiosPrivate from '@/hooks/useAxiosPrivate'
 import getSocket from '@/socket'
 import { useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 
 export default function SocketProvider() {
   const axiosPrivate = useAxiosPrivate()
-  const [sock] = useState(getSocket()) // Keep socket instance in state
+  const [sock] = useState(getSocket())
   const { globalState, setGlobalState } = useGlobalContext()
   const { auth } = useAuth()
-  console.log('game provider mounted')
+  const navigate = useNavigate()
 
   useEffect(() => {
-    // Connect to socket if not already connected
     if (!sock.connected) {
       sock.connect()
     }
 
-    // Register event listener
-    const handleGameInviteForAll = async ({ from, to, gamemode }) => {
-      console.log('all event gotten')
+    const handleGameInviteForAll = async ({ from, to, gamemode, socketId, fromName }) => {
       if (auth.id === to) {
-        console.log('new invite')
-        await searchName(from)
         setGlobalState((prev) => ({
           ...prev,
           gameInvite: {
             ...prev.gameInvite,
             from,
             gamemode,
+            socketId,
+            name: fromName,
           },
         }))
       }
     }
 
+    const handleExpiredInvite = ({ to, from }) => {
+      if (auth?.id === to || auth?.id === from) {
+        setGlobalState((prev) => ({
+          ...prev,
+          gameInvite: {
+            ...prev.gameInvite,
+            expired: true,
+          },
+        }))
+      }
+    }
+
+    const handleStartGame = ({ roomId, players, mode, orientation }) => {
+      navigate(`/socket/game/${roomId}`, { state: { roomId, players, mode, orientation } })
+    }
+
+    sock.on('inviteExpired', handleExpiredInvite)
+    sock.on('startGame', handleStartGame)
     sock.on('gameInviteForAll', handleGameInviteForAll)
 
     // Cleanup function
     return () => {
-      sock.off('gameInviteForAll', handleGameInviteForAll) // Remove listener on cleanup
-      sock.disconnect() // Disconnect socket
+      sock.off('startGame', handleStartGame)
+      sock.off('gameInviteForAll', handleGameInviteForAll) / sock.disconnect()
     }
-  }, [sock, auth.id, setGlobalState]) // Add auth.id to dependencies
-
-  const searchName = async (from) => {
-    const controller = new AbortController()
-    try {
-      const response = await axiosPrivate.get(`http://localhost:3000/user/${from}`, {
-        signal: controller.signal,
-      })
-      console.log(response)
-      setGlobalState((prev) => ({
-        ...prev,
-        gameInvite: {
-          ...prev.gameInvite,
-          name: response.data.name,
-        },
-      }))
-    } catch (err) {
-      console.error(err)
-    }
-    controller.abort() // Abort the fetch if the component unmounts
-  }
+  }, [sock, auth.id, setGlobalState, navigate])
 
   return <Outlet context={[sock]} />
 }

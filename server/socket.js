@@ -56,9 +56,29 @@ async function setupSocketIO(server) {
       await Room.findByIdAndUpdate(room._id, { $set: { history: data.history } })
     })
 
-    socket.on('gameInvite', ({ from, to, gamemode }) => {
-      console.log('server got invite')
-      io.emit('gameInviteForAll', { from, to, gamemode })
+    socket.on('gameInvite', ({ from, to, gamemode, fromName }) => {
+      io.emit('gameInviteForAll', { from, to, gamemode, socketId: socket.id, fromName })
+    })
+
+    socket.on('gameInviteAccepted', async ({ from, to, gamemode, socketId, fromName }) => {
+      if (!from || !to || !gamemode || !socketId || !fromName) {
+        consol.log('error with invite')
+        return
+      }
+      const player1 = await User.findById(from)
+      const player2 = await User.findById(to)
+
+      if (player1.inGame) {
+        console.log('player1 ingame, invite inactive')
+        socket.emit('inviteExpired', { to, from })
+        return
+      } else if (player2.inGame) {
+        console.log('player2 ingame, invite inactive')
+        socket.emit('inviteExpired', { to, from })
+        return
+      } else {
+        await inviteGameStart(from, to, gamemode, socketId, fromName, socket)
+      }
     })
 
     socket.on('sendFen', async (data) => {
@@ -120,11 +140,103 @@ async function setupSocketIO(server) {
     })
   })
 
+  async function inviteGameStart(from, to, gamemode, socketId, fromName, socket) {
+    const timeControl = gamemode == 'bullet' ? 60 : gamemode == 'blitz' ? 180 : gamemode == 'rapid' ? 600 : 999
+
+    const user1 = await User.findById(from)
+    if (!user1) {
+      consol.log('invalid id user1')
+      return
+    }
+    const user2 = await User.findById(to)
+    if (!user2) {
+      consol.log('ivalid id user2')
+      return
+    }
+    const socket1 = io.sockets.sockets.get(socketId)
+    const socket2 = socket
+
+    const player1 = {
+      socket: socket1,
+      id: from,
+      socketId,
+      name: fromName,
+      elo:
+        gamemode == 'blitz'
+          ? user1.blitzElo
+          : gamemode === 'rapid'
+          ? user1.rapidElo
+          : gamemode === 'bullet'
+          ? user1.bulletElo
+          : null,
+    }
+    const player2 = {
+      socket: socket2,
+      id: to,
+      socketId: socket.id,
+      name: user2.username,
+      elo:
+        gamemode == 'blitz'
+          ? user2.blitzElo
+          : gamemode === 'rapid'
+          ? user2.rapidElo
+          : gamemode === 'bullet'
+          ? user2.bulletElo
+          : null,
+    }
+
+    const roomId = uuidV4()
+    const orientation = Math.random() < 0.5 ? 'white' : 'black'
+
+    const room = await Room.create({
+      id: roomId,
+      players: [
+        { id: player1.id, name: player1.name, elo: player1.elo },
+        { id: player2.id, name: player2.name, elo: player2.elo },
+      ],
+      disconnected: '',
+      mode: gamemode,
+      orientation,
+      socketId: [player1.socketId, player2.socketId],
+    })
+
+    player1.socket.join(roomId)
+    player2.socket.join(roomId)
+
+    io.to(roomId).emit('startGame', {
+      roomId: roomId,
+      players: room.players,
+      mode: gamemode,
+      orientation: room.orientation,
+    })
+
+    const playerInfo = [{ id: player1.id }, { id: player2.id }]
+    games[roomId] = {
+      whiteTime: timeControl,
+      blackTime: timeControl,
+      activePlayer: 'white',
+      timerInterval: null,
+    }
+    startTimer(roomId, gamemode, orientation, playerInfo)
+
+    user1.inGame = true
+    user2.inGame = true
+    await user1.save()
+    await user2.save()
+
+    console.log(`${gamemode} game created in ${roomId} between ${player1.id} and ${player2.id}`)
+  }
+
   async function startGame(gameMode) {
     const timeControl = gameMode == 'bullet' ? 60 : gameMode == 'blitz' ? 180 : gameMode == 'rapid' ? 600 : 999
 
     const player1 = await getPlayerFromQueue(gameMode)
     const player2 = await getPlayerFromQueue(gameMode)
+
+    if (player1.id === player2.id) {
+      console.log('identical id`s playing')
+      return
+    }
 
     const roomId = uuidV4()
     const orientation = Math.random() < 0.5 ? 'white' : 'black'
@@ -225,6 +337,8 @@ async function setupSocketIO(server) {
           : null,
     }
     queues[gameMode].shift()
+    getPlayer.inGame = true
+    await getPlayer.save()
     return player
   }
 
@@ -302,6 +416,7 @@ async function setupSocketIO(server) {
   }
 
   async function endGame(roomId, dbId, reason, mode) {
+    console.log(roomId, dbId, reason, mode)
     const game = games[roomId]
     clearInterval(game?.timerInterval)
 
@@ -443,6 +558,9 @@ async function setupSocketIO(server) {
       player1[eloKey] += 1
       player2[eloKey] += 1
     }
+
+    player1.inGame = false
+    player2.inGame = false
 
     await player1.save()
     await player2.save()
