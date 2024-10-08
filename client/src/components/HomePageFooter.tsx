@@ -79,7 +79,7 @@ export default function HomePageFooter() {
   }, [accountLevel])
 
   return (
-    <footer className="absolute bottom-0 left-0 px-4 py-4 z-0 h-min">
+    <footer className="absolute bottom-0 left-0 px-4 py-4 z-50 h-min">
       <div className="w-full justify-end items-center grid bg-white">
         <div className="grid items-center justify-items-center gap-2 border rounded py-4 px-8 avatarCard shadow-md">
           <Link to={`/socket/profile/${auth?.id}`}>

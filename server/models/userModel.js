@@ -50,17 +50,7 @@ const UserSchema = new mongoose.Schema({
   },
   friends: {
     type: Array,
-    default: [
-      '66e4691593519af7091aff78',
-      '66ffc921a41d74f61edd3597',
-      '66ffc947a41d74f61edd35a5',
-      '66ffc979cf24d6deafd4ef6f',
-      '66ffc9b1cf24d6deafd4ef80',
-      '66ffc9ffcf24d6deafd4ef91',
-      '66ffca25cf24d6deafd4efa2',
-      '66ffca4ccf24d6deafd4efb3',
-      '66ffca89cf24d6deafd4efc5',
-    ],
+    default: [],
   },
   friendsInvites: {
     type: Array,

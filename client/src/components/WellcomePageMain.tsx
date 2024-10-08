@@ -2,7 +2,7 @@
 
 import { Button } from './ui/button'
 import mainImage from '../assets/images/main-imge.jpg'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import HomePageHeader from './HomePageHeader'
 import rook from '../assets/images/rook.png'
 import pawn from '../assets/images/pawn.png'
@@ -14,7 +14,7 @@ export default function WellcomePageMain() {
   return (
     <main className="w-full h-full items-center flex justify-center">
       <HomePageHeader />
-      <div className="grid gap-6 h-min items-center mt-36 w-3/5 justify-center">
+      <div className="grid gap-6 h-min items-center w-3/5 justify-center">
         <div className="flex items-center justify-center">
           <img src={rook} alt="rook" className="size-24" />
           <img src={pawn} alt="rook" className="size-28" />
@@ -30,9 +30,6 @@ export default function WellcomePageMain() {
             Login
           </Button>
         </Link>
-        <Button className="rounded-sm text-2xl py-6" variant={'outline'}>
-          Play fast game
-        </Button>
       </div>
     </main>
   )

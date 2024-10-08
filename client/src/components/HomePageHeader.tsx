@@ -21,7 +21,7 @@ export default function HomePageHeader({ variant }) {
     /^\/socket\/game\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
 
   return (
-    <header className="w-full absolute top-0 flex">
+    <header className="w-full absolute top-0 flex z-50">
       <section className="flex py-2 px-4 w-full justify-between">
         <Link
           style={{ justifyContent: variant === 'play' ? 'start' : 'center' }}
@@ -31,7 +31,7 @@ export default function HomePageHeader({ variant }) {
           <h1 className="text-4xl font-bold cursor-pointer">Chessfull</h1>
           <img src={rook} alt="rook" className="size-10 mb-2" />
         </Link>
-        {isDynamicGameRoute.test(location.pathname) ? null : (
+        {isDynamicGameRoute.test(location.pathname) || location.pathname == '/wellcome' ? null : (
           <Sheet open={sheet} onOpenChange={() => setSheet(!sheet)}>
             <SheetTrigger asChild>
               <button className="border-none outline-none cursor-pointer hover:bg-slate-100 py-2 px-2 rounded-xl">
@@ -76,7 +76,7 @@ export default function HomePageHeader({ variant }) {
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="profile">
-                    <AccordionTrigger className="font-bold text-2xl">Profile</AccordionTrigger>
+                    <AccordionTrigger className="font-bold text-2xl">Profile & chat</AccordionTrigger>
                     <AccordionContent>
                       <Button
                         onClick={() => {
@@ -96,6 +96,14 @@ export default function HomePageHeader({ variant }) {
                         className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200"
                       >
                         Open friends & search
+                      </div>
+                      <div
+                        onClick={() => {
+                          navigate('/socket/messages')
+                        }}
+                        className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200"
+                      >
+                        Open chat
                       </div>
                     </AccordionContent>
                   </AccordionItem>

@@ -1,6 +1,7 @@
 const { Server } = require('socket.io')
 const Room = require('./models/gameRoomModel')
 const User = require('./models/userModel')
+const Message = require('./models/MessageModel')
 const { v4: uuidV4 } = require('uuid')
 
 const TIME_TO_RECONNECT = 20000
@@ -24,6 +25,24 @@ async function setupSocketIO(server) {
   io.on('connection', async (socket) => {
     const dbId = socket.handshake.query.data
     console.log('A user connected:', socket.id, `database id: ${dbId}`)
+
+    socket.on('sendMessage', ({ message, companion }) => {
+      const saveMessage = async (messageData, socket) => {
+        const newMessage = new Message(messageData)
+        await newMessage.save()
+
+        socket.emit('messageDelivered')
+      }
+
+      saveMessage(message, socket)
+      io.emit('sendMessage', { message, companion })
+    })
+
+    socket.on('sendMessage', ({ message, companion }) => {
+      if (companion === dbId) {
+        socket.emit('messageRecieved', { message })
+      }
+    })
 
     // Handle player joining a queue
     socket.on('joinQueue', async ({ gameMode, id }) => {

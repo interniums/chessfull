@@ -64,16 +64,41 @@ export default function SocketProvider() {
       }
     }
 
+    const handleRecieveMessage = ({ message }) => {
+      toast({
+        title: `New message`,
+        description: `${message.content}`,
+        action: (
+          <ToastAction
+            onClick={() =>
+              navigate('/socket/messages', {
+                state: {
+                  conversationIdFromLocation: message.conversationId,
+                  showMessagesFromState: true,
+                  companionFromState: message.sender,
+                },
+              })
+            }
+            altText="go to message"
+          >
+            Message
+          </ToastAction>
+        ),
+      })
+    }
+
     // Register socket listeners
     sock.on('startGame', handleStartGame)
     sock.on('inviteExpired', handleExpiredInvite)
     sock.on('gameInviteForAll', handleGameInviteForAll)
+    sock.on('messageRecieved', handleRecieveMessage)
 
     // Cleanup on unmount
     return () => {
       sock.off('startGame', handleStartGame)
       sock.off('inviteExpired', handleExpiredInvite)
       sock.off('gameInviteForAll', handleGameInviteForAll)
+      sock.off('messageRecieved', handleRecieveMessage)
     }
   }, [sock, auth.id, setGlobalState, navigate, location])
 

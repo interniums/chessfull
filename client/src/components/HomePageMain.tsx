@@ -188,6 +188,7 @@ export default function HomePageMain() {
           className="text-2xl py-6 w-full mt-2 font-bold"
           variant={'outline'}
           disabled
+          title="not available yet"
         >
           Play vs Computer
         </Button>

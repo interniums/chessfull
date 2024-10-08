@@ -13,7 +13,7 @@ import PersistLogin from './components/PersistLogin.tsx'
 import RequireAuth from './components/RequireAuth.tsx'
 import SocketProvider from './pages/SocketProvider.tsx'
 import ComputerGame from './pages/ComputerGame.tsx'
-// import GameProvider from './pages/GameProvider.tsx'
+import MessagesPage from './pages/MessagesPage.tsx'
 
 export const routes: RouteObject[] = [
   {
@@ -63,6 +63,10 @@ export const routes: RouteObject[] = [
                   {
                     path: '/socket/profile/:id',
                     element: <ProfilePage />,
+                  },
+                  {
+                    path: '/socket/messages',
+                    element: <MessagesPage />,
                   },
                 ],
               },

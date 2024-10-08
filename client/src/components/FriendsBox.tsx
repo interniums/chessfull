@@ -277,12 +277,30 @@ export default function FriendsBox() {
                     </Avatar>
                     <div className="font-medium">{friend.name}</div>
                   </div>
-                  <img
-                    title="Remove friend"
-                    src={remove}
-                    className="w-8 h-8 cursor-pointer hover:opacity-90"
-                    onClick={() => removeFriend(friend.id, friend.name)}
-                  />
+                  <div className="flex items-center justify-center gap-2">
+                    <img
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        navigate('/socket/messages', {
+                          state: { createConversation: true, createId: friend.id, companionFromState: friend.id },
+                        })
+                        setGlobalState((prev) => ({ ...prev, friendsOpen: false }))
+                        window.location.reload()
+                      }}
+                      src={chat}
+                      alt="chat"
+                      className="w-8 h-8 cursor-pointer hover:opacity-90"
+                    />
+                    <img
+                      title="Remove friend"
+                      src={remove}
+                      className="w-8 h-8 cursor-pointer hover:opacity-90"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        removeFriend(friend.id, friend.name)
+                      }}
+                    />
+                  </div>
                 </div>
               ))
             )}
