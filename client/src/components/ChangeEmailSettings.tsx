@@ -14,6 +14,7 @@ export default function ChangeEmailSettings({ setEditEmail, editEmail, email, id
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [ifEmailValid, setIfEmailValid] = useState('mount')
+  const [initialEmail, setInitialEmail] = useState(email)
 
   useEffect(() => {
     if (!editEmail) {
@@ -74,6 +75,7 @@ export default function ChangeEmailSettings({ setEditEmail, editEmail, email, id
         <div className="relative w-full">
           <Input
             disabled={editEmail ? false : true}
+            style={{ textShadow: 'none' }}
             className={
               'font-medium text-l w-full cursor-pointer hover:bg-slate-100' +
               `${
@@ -114,6 +116,7 @@ export default function ChangeEmailSettings({ setEditEmail, editEmail, email, id
                 variant={'outline'}
                 type="button"
                 onClick={(e) => {
+                  setEmail(initialEmail)
                   setEditEmail(false)
                   e.preventDefault()
                 }}

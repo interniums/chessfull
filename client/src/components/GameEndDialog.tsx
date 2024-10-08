@@ -24,13 +24,13 @@ export default function GameEndDialog({ setOpenEndDialog, gameState, mode, loadi
     setRematchSent(true)
     const opponent = players.filter((item) => item.id !== auth.id)
     console.log(opponent)
-    sock.emit('offerRematch', { from: auth.id, to: opponent[0].id, fromName: auth.username })
+    sock.emit('offerRematch', { from: auth.id, to: opponent[0].id, fromName: auth.username, gamemode: mode })
   }
 
   useEffect(() => {
-    sock.on('offerRematch', ({ from, to, fromName, socketId }) => {
+    sock.on('offerRematch', ({ from, to, fromName, socketId, gamemode }) => {
       if (to === auth.id) {
-        setReamatchData({ from, to, fromName, socketId, gamemode: mode })
+        setReamatchData({ from, to, fromName, socketId, gamemode })
         setShowRematch(true)
       }
     })
@@ -120,7 +120,7 @@ export default function GameEndDialog({ setOpenEndDialog, gameState, mode, loadi
                     </div>
                   </div>
                   <div>
-                    <div className="text-center text-xl text-ellipsis flex items-center justify-center">
+                    <div className="text-center text-xl text-ellipsis grid items-center justify-center">
                       <span
                         className="text-ellipsis text-center w-full"
                         style={{
@@ -131,7 +131,7 @@ export default function GameEndDialog({ setOpenEndDialog, gameState, mode, loadi
                       </span>{' '}
                       vs{' '}
                       <span
-                        className="ml-4 text-ellipsis text-center w-full"
+                        className="text-ellipsis text-center w-full"
                         style={{
                           textDecorationLine: gameState?.winner === players[1]?.id ? 'underline' : 'none',
                         }}

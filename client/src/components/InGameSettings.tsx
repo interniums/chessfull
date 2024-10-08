@@ -22,17 +22,17 @@ export default function InGameSettings({ userPreferences, setUserPreferences }) 
             <div className="absolute right-3 top-3" onClick={() => setOpen(false)}>
               <Cross1Icon className="size-9 hover:bg-slate-200 cursor-pointer p-2 rounded-lg" />
             </div>
-            <h1 className="text-2xl mb-6">Settings</h1>
+            <h1 className="text-3xl font-bold mb-6">Settings</h1>
             <div className="py-2 px-2 flex gap-8 items-center justify-center">
               <div className="grid gap-8 items-start justify-center">
-                <div className="text-l text-start">Piece animation</div>
-                <div className="text-l text-start">Piece move method</div>
-                <div className="text-l text-start">Allow premoves</div>
-                <div className="text-l text-start">Always promote to queen</div>
-                <div className="text-l text-start">Choose piece set</div>
-                <div className="text-l text-start">Choose board</div>
+                <div className="text-lg text-start">Piece animation</div>
+                <div className="text-lg text-start">Piece move method</div>
+                <div className="text-lg text-start">Allow premoves</div>
+                <div className="text-lg text-start">Always promote to queen</div>
+                <div className="text-lg text-start">Choose piece set</div>
+                <div className="text-lg text-start">Choose board</div>
               </div>
-              <div className="grid gap-5 items-center justify-center">
+              <div className="grid gap-6 items-center justify-center">
                 <div className="speedAnimation flex gap-4 items-center justify-center">
                   <Select
                     value={userPreferences?.pieceSpeedAnimation}

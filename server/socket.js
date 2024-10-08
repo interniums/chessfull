@@ -59,9 +59,9 @@ async function setupSocketIO(server) {
       await Room.findByIdAndUpdate(room._id, { $set: { history: data.history } })
     })
 
-    socket.on('offerRematch', ({ from, to, fromName }) => {
+    socket.on('offerRematch', ({ from, to, fromName, gamemode }) => {
       console.log('server got reamtch')
-      io.emit('offerRematch', { from, to, fromName, socketId: socket.id })
+      io.emit('offerRematch', { from, to, fromName, socketId: socket.id, gamemode })
     })
 
     socket.on('rematchRejected', ({ from, to }) => {

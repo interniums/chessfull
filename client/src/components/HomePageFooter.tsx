@@ -92,7 +92,7 @@ export default function HomePageFooter() {
               </AvatarFallback>
             </Avatar>
           </Link>
-          <p>{auth?.username}</p>
+          <p className="font-bold text-lg">{auth?.username}</p>
           <Link to={`/socket/profile/${auth?.id}`} className="w-full">
             <Button className="w-full" variant={'outline'}>
               Profile

@@ -137,7 +137,7 @@ export default function ChangePasswordSettings({ editPassword, id }) {
             {pwdLoading ? (
               <ReloadIcon className="animate-spin size-5" />
             ) : (
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center font-bold text-lg">
                 Submit
                 <CheckIcon className="ml-2 size-5" />
               </div>
@@ -145,7 +145,7 @@ export default function ChangePasswordSettings({ editPassword, id }) {
           </Button>
         </form>
       ) : (
-        <Button className="w-full" variant={'outline'}>
+        <Button className="w-full font-bold text-lg" variant={'outline'}>
           Change password
         </Button>
       )}

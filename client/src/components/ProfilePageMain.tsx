@@ -22,7 +22,15 @@ import winrate from '../assets/images/win-svgrepo-com.svg'
 import { axiosPrivate } from '@/api/axios'
 import useAxiosPrivate from '@/hooks/useAxiosPrivate'
 import useAuth from '@/hooks/useAuth'
-import { CheckIcon, Cross1Icon, Pencil1Icon, Pencil2Icon, PlusCircledIcon, ReloadIcon } from '@radix-ui/react-icons'
+import {
+  CheckIcon,
+  Cross1Icon,
+  ExitIcon,
+  Pencil1Icon,
+  Pencil2Icon,
+  PlusCircledIcon,
+  ReloadIcon,
+} from '@radix-ui/react-icons'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Button } from './ui/button'
 import { useLocation, useOutletContext, useParams } from 'react-router-dom'
@@ -40,6 +48,7 @@ import remove from '../assets/images/remove-square-svgrepo-com.svg'
 import GameSettings from './GameSettings'
 import { ToastAction } from './ui/toast'
 import { useGlobalContext } from '@/context/GlobalContext'
+import useLogout from '@/hooks/useLogout'
 
 export default function ProfilePageMain() {
   const { id } = useParams()
@@ -51,7 +60,10 @@ export default function ProfilePageMain() {
   const [statsSelection, setStatsSelection] = useState('Blitz')
   const [playerStats, setPlayerStats] = useState({})
   const [isItUserProfile, setIsItUserProfile] = useState()
-  const [settingsOpen, setSettingsOpen] = useState(false)
+  const { state } = useLocation()
+  const { showSettingsOpenFromState, activeTabFromState } = state || false
+  const [settingsOpen, setSettingsOpen] = useState(showSettingsOpenFromState || false)
+  const [activeTab, setActiveTab] = useState(activeTabFromState || 'account')
 
   const [name, setName] = useState('')
   const [editName, setEditName] = useState(false)
@@ -63,6 +75,11 @@ export default function ProfilePageMain() {
   const [forceUpdate, setForceUpdate] = useState(false)
   const [userPreferences, setUserPreferences] = useState({})
   const isFirstRender = useRef(true)
+  const logout = useLogout()
+
+  const handleLogout = async () => {
+    await logout()
+  }
 
   useEffect(() => {
     setIsItUserProfile(auth.id === id ? true : false)
@@ -237,7 +254,7 @@ export default function ProfilePageMain() {
               <div className="grid items-center justify-center p-4 gap-8 w-full">
                 <div className="flex items-center justify-center w-full">
                   <div className="flex items-end justify-centers text-4xl text-center gap-3">
-                    <div>{playerStats?.name}</div>
+                    <div className="font-bold">{playerStats?.name}</div>
                     {!isItUserProfile ? (
                       <>
                         {!ifVisitorFriend ? (
@@ -294,7 +311,7 @@ export default function ProfilePageMain() {
                               </DialogDescription>
                             </DialogHeader>
                             <div className="w-full">
-                              <Tabs defaultValue="account">
+                              <Tabs value={activeTab} onValueChange={setActiveTab}>
                                 <TabsList className="grid w-full grid-cols-2">
                                   <TabsTrigger value="account">Account</TabsTrigger>
                                   <TabsTrigger value="game">Game</TabsTrigger>
@@ -327,6 +344,25 @@ export default function ProfilePageMain() {
                                     </div>
                                     <div className="flex gap-8 items-end w-full">
                                       <ChangePasswordSettings editPassword={true} id={id} />
+                                    </div>
+                                    <div className="grid gap-2 w-full">
+                                      <h1
+                                        className="w-full text-center 
+                                      font-bold"
+                                      >
+                                        Active user:{' '}
+                                        <span className="ml-2 font-extrabold text-blue-500 hover:text-blue-600 cursor-pointer">
+                                          {auth?.username}
+                                        </span>
+                                      </h1>
+                                      <Button
+                                        className="w-full font-bold text-lg"
+                                        onClick={handleLogout}
+                                        variant={'outline'}
+                                      >
+                                        Logout
+                                        <ExitIcon className="ml-2 size-5" />
+                                      </Button>
                                     </div>
                                   </div>
                                 </TabsContent>
@@ -371,13 +407,19 @@ export default function ProfilePageMain() {
             <div className="w-full h-full grid gap-8 bg-slate-100 rounded-2xl py-6 px-20 shadow-md items-center justify-center">
               <div className="w-full flex items-center justify-center">
                 <Select onValueChange={setStatsSelection}>
-                  <SelectTrigger>
+                  <SelectTrigger className="text-lg">
                     <SelectValue placeholder={statsSelection} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Bullet">Bullet</SelectItem>
-                    <SelectItem value="Blitz">Blitz</SelectItem>
-                    <SelectItem value="Rapid">Rapid</SelectItem>
+                    <SelectItem className="text-lg" value="Bullet">
+                      Bullet
+                    </SelectItem>
+                    <SelectItem className="text-lg" value="Blitz">
+                      Blitz
+                    </SelectItem>
+                    <SelectItem className="text-lg" value="Rapid">
+                      Rapid
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -400,7 +442,7 @@ export default function ProfilePageMain() {
                 </div>
                 <div className="flex items-center justify-center gap-10 mt-10">
                   <div className="grid items-center justify-center gap-2">
-                    <p className="text-2xl text-center">Total games</p>
+                    <p className="text-2xl text-center font-bold">Total games</p>
                     <p className="text-center text-xl">
                       {statsSelection == 'Blitz'
                         ? playerStats?.blitzGames

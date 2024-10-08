@@ -1,22 +1,28 @@
 // @ts-nocheck
 
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import rook from '../assets/images/rook.svg'
 import useAuth from '@/hooks/useAuth'
 import { Button } from './ui/button'
-import useLogout from '@/hooks/useLogout'
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet'
+import { HamburgerMenuIcon } from '@radix-ui/react-icons'
+import hamburger from '../assets/images/hamburger-menu-svgrepo-com.svg'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion'
+import { useGlobalContext } from '@/context/GlobalContext'
+import { useState } from 'react'
 
 export default function HomePageHeader({ variant }) {
   const { auth } = useAuth()
-  const logout = useLogout()
-
-  const handleLogout = async () => {
-    await logout()
-  }
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { globalState, setGlobalState } = useGlobalContext()
+  const [sheet, setSheet] = useState(false)
+  const isDynamicGameRoute =
+    /^\/socket\/game\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
 
   return (
-    <header className="w-full py-2 px-4 absolute top-0 flex">
-      <section className="w-full">
+    <header className="w-full absolute top-0 flex">
+      <section className="flex py-2 px-4 w-full justify-between">
         <Link
           style={{ justifyContent: variant === 'play' ? 'start' : 'center' }}
           className="flex items-center justify-center w-max"
@@ -25,13 +31,110 @@ export default function HomePageHeader({ variant }) {
           <h1 className="text-4xl font-bold cursor-pointer">Chessfull</h1>
           <img src={rook} alt="rook" className="size-10 mb-2" />
         </Link>
+        {isDynamicGameRoute.test(location.pathname) ? null : (
+          <Sheet open={sheet} onOpenChange={() => setSheet(!sheet)}>
+            <SheetTrigger asChild>
+              <button className="border-none outline-none cursor-pointer hover:bg-slate-100 py-2 px-2 rounded-xl">
+                <img src={hamburger} alt="hamburger menu button" title="menu" className="size-10" />
+              </button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle className="text-3xl">Menu</SheetTitle>
+                <SheetDescription className="font-medium text-md">navigation menu</SheetDescription>
+                <hr />
+              </SheetHeader>
+              <div className="grid py-6 h-full">
+                <Accordion type="single" collapsible>
+                  <AccordionItem value="play">
+                    <AccordionTrigger className="font-bold text-2xl">Play chess</AccordionTrigger>
+                    <AccordionContent>
+                      <div
+                        onClick={() =>
+                          navigate(`/socket/game/queue/blitz`, { state: { gameMode: 'blitz', id: auth.id } })
+                        }
+                        className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200"
+                      >
+                        Play with random opponent
+                      </div>
+                      <div
+                        onClick={() => {
+                          navigate(`/socket/home`, { state: { showCreateGameDialogFromState: true } })
+                          window.location.reload()
+                        }}
+                        className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200"
+                      >
+                        Play with friends
+                      </div>
+                      <Button
+                        disabled
+                        variant={'ghost'}
+                        className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200"
+                      >
+                        Play vs computer
+                      </Button>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="profile">
+                    <AccordionTrigger className="font-bold text-2xl">Profile</AccordionTrigger>
+                    <AccordionContent>
+                      <Button
+                        onClick={() => {
+                          navigate(`/socket/profile/${auth.id}`)
+                          window.location.reload()
+                        }}
+                        className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200 border-none w-full justify-start"
+                        variant={'ghost'}
+                      >
+                        Open profile
+                      </Button>
+                      <div
+                        onClick={() => {
+                          setSheet(false)
+                          setGlobalState((prev) => ({ ...prev, friendsOpen: true }))
+                        }}
+                        className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200"
+                      >
+                        Open friends & search
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="settings">
+                    <AccordionTrigger className="font-bold text-2xl">Settings</AccordionTrigger>
+                    <AccordionContent>
+                      <div
+                        onClick={() => {
+                          navigate(`/socket/profile/${auth.id}`, {
+                            state: { showSettingsOpenFromState: true, activeTabFromState: 'account' },
+                          })
+                          window.location.reload()
+                        }}
+                        className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200"
+                      >
+                        Open account settings
+                      </div>
+                      <div
+                        onClick={() => {
+                          navigate(`/socket/profile/${auth.id}`, {
+                            state: { activeTabFromState: 'game', showSettingsOpenFromState: true },
+                          })
+                          window.location.reload()
+                        }}
+                        className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200"
+                      >
+                        Open game settings
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+                <div className="grid items-end mb-10">
+                  <h1 className="text-2xl text-center hover:underline cursor-pointer">Contact us</h1>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
       </section>
-      <div className="flex items-center justify-center gap-4 flex-wrap">
-        <h1 className="w-full text-center">Active user: {auth?.username ? auth?.username : ' none'}</h1>
-        <Button className="w-full" onClick={handleLogout} variant={'outline'}>
-          Logout
-        </Button>
-      </div>
     </header>
   )
 }

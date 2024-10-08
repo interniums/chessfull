@@ -14,6 +14,7 @@ export default function ChangeUsernameSettings({ setEditName, editName, name, id
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [ifNameValid, setIfNameValid] = useState('mount')
+  const [initialName, setInitialName] = useState(name)
 
   useEffect(() => {
     if (!editName) {
@@ -73,6 +74,7 @@ export default function ChangeUsernameSettings({ setEditName, editName, name, id
         <div className="relative w-full">
           <Input
             disabled={editName ? false : true}
+            style={{ textShadow: 'none' }}
             className={
               'font-medium text-l w-full cursor-pointer hover:bg-slate-100' +
               `${
@@ -113,6 +115,7 @@ export default function ChangeUsernameSettings({ setEditName, editName, name, id
                 variant={'outline'}
                 type="button"
                 onClick={(e) => {
+                  setName(initialName)
                   setEditName(false)
                   e.preventDefault()
                 }}

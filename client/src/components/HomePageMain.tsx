@@ -14,7 +14,7 @@ import rank6 from '../assets/images/frame6.png'
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group'
 import { Button } from './ui/button'
 import { useEffect, useState } from 'react'
-import { useNavigate, useOutletContext } from 'react-router-dom'
+import { useLocation, useNavigate, useOutletContext } from 'react-router-dom'
 import { ToastAction } from './ui/toast'
 import { Avatar, AvatarImage } from './ui/avatar'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog'
@@ -32,11 +32,13 @@ export default function HomePageMain() {
   const navigate = useNavigate()
   const axiosPrivate = useAxiosPrivate()
   const { globalState, setGlobalState } = useGlobalContext()
+  const { state } = useLocation()
+  const { showCreateGameDialogFromState } = state || false
 
-  const [gameMode, setGameMode] = useState('blitz')
+  const [gameMode, setGameMode] = useState('')
   const [startGame, setStartGame] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [showCreateGameDialog, setShowCreateGameDialog] = useState(false)
+  const [showCreateGameDialog, setShowCreateGameDialog] = useState(showCreateGameDialogFromState || false)
   const [friendsInfo, setFriendsInfo] = useState([])
   const [inviteInfo, setInviteInfo] = useState({ from: auth?.id, to: '', gamemode: '', fromName: auth?.username })
   const [user, setUser] = useState({})
@@ -82,7 +84,7 @@ export default function HomePageMain() {
   }
 
   useEffect(() => {
-    if (startGame) {
+    if (gameMode.length > 1) {
       navigate(`/socket/game/queue/${gameMode}`, { state: { gameMode, id: auth.id } })
     }
   }, [startGame, gameMode, navigate, auth.id])
@@ -174,15 +176,20 @@ export default function HomePageMain() {
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
-        <Button onClick={() => setStartGame(true)} className="text-xl py-6 w-full mt-8 font-medium" variant={'outline'}>
-          Find {gameMode} Game
-        </Button>
         <Button
           onClick={() => setShowCreateGameDialog(true)}
-          className="text-xl py-6 w-full mt-2 font-medium"
+          className="text-2xl py-6 w-full mt-4 font-bold"
           variant={'outline'}
         >
           Game with Friends
+        </Button>
+        <Button
+          onClick={() => navigate('/socket/game/computer')}
+          className="text-2xl py-6 w-full mt-2 font-bold"
+          variant={'outline'}
+          disabled
+        >
+          Play vs Computer
         </Button>
       </div>
       <HomePageFooter />
@@ -193,9 +200,9 @@ export default function HomePageMain() {
 function GameModeCard({ title, image, elo }) {
   return (
     <div className="text-center">
-      <h1 className="text-2xl text-center">{title}</h1>
+      <h1 className="text-3xl text-center">{title}</h1>
       <img src={image} alt={title} className="size-32" />
-      <h1 className="text-xl text-center font-medium">
+      <h1 className="text-2xl text-center font-medium">
         Elo: <span>{elo}</span>
       </h1>
     </div>

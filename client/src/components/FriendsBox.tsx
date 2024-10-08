@@ -193,7 +193,6 @@ export default function FriendsBox() {
     }
   }, [searchResult, input])
 
-  console.log(searchResult)
   return (
     <Dialog
       open={globalState.friendsOpen}
@@ -207,7 +206,9 @@ export default function FriendsBox() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Friends</DialogTitle>
-          <DialogDescription className="font-medium">Make new friends and chat</DialogDescription>
+          <DialogDescription style={{ textShadow: 'none' }} className="font-medium">
+            Make new friends and chat
+          </DialogDescription>
           <div className="flex gap-4 items-center">
             <div className="relative w-full" ref={dropDownRef}>
               <input
@@ -219,6 +220,7 @@ export default function FriendsBox() {
                 style={{
                   borderBottomLeftRadius: searchOpen ? '0px' : '6px',
                   borderBottomRightRadius: searchOpen ? '0px' : '6px',
+                  textShadow: 'none',
                 }}
                 placeholder="Search for other players"
               />
