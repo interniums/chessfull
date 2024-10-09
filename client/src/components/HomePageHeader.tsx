@@ -34,8 +34,11 @@ export default function HomePageHeader({ variant }) {
         {isDynamicGameRoute.test(location.pathname) || location.pathname == '/wellcome' ? null : (
           <Sheet open={sheet} onOpenChange={() => setSheet(!sheet)}>
             <SheetTrigger asChild>
-              <button className="border-none outline-none cursor-pointer hover:bg-slate-100 py-2 px-2 rounded-xl">
+              <button className="border-none outline-none cursor-pointer hover:bg-slate-100 py-2 px-2 rounded-xl relative">
                 <img src={hamburger} alt="hamburger menu button" title="menu" className="size-10" />
+                {globalState?.newMessage ? (
+                  <div className="w-3 h-3 rounded-full bg-red-600 animate-pulse absolute top-0 right-0"></div>
+                ) : null}
               </button>
             </SheetTrigger>
             <SheetContent>
@@ -76,7 +79,15 @@ export default function HomePageHeader({ variant }) {
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="profile">
-                    <AccordionTrigger className="font-bold text-2xl">Profile & chat</AccordionTrigger>
+                    <AccordionTrigger
+                      className={
+                        globalState?.newMessage
+                          ? 'font-bold text-2xl relative animate-pulse bg-red-50'
+                          : 'font-bold text-2xl relative'
+                      }
+                    >
+                      Profile & chat
+                    </AccordionTrigger>
                     <AccordionContent>
                       <Button
                         onClick={() => {
@@ -100,8 +111,13 @@ export default function HomePageHeader({ variant }) {
                       <div
                         onClick={() => {
                           navigate('/socket/messages')
+                          window.location.reload()
                         }}
-                        className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200"
+                        className={
+                          globalState?.newMessage
+                            ? 'text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200 relative animate-pulse bg-red-50'
+                            : 'text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200 relative'
+                        }
                       >
                         Open chat
                       </div>

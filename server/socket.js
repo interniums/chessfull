@@ -2,9 +2,11 @@ const { Server } = require('socket.io')
 const Room = require('./models/gameRoomModel')
 const User = require('./models/userModel')
 const Message = require('./models/MessageModel')
+const Conversation = require('./models/ConversationModel')
 const { v4: uuidV4 } = require('uuid')
 
 const TIME_TO_RECONNECT = 20000
+const users = {}
 const queues = {
   bullet: [],
   rapid: [],
@@ -22,25 +24,75 @@ async function setupSocketIO(server) {
     },
   })
 
+  const getCompanionSocketId = (companionId) => {
+    return users[companionId] || null
+  }
+
   io.on('connection', async (socket) => {
     const dbId = socket.handshake.query.data
+    users[dbId] = socket.id
     console.log('A user connected:', socket.id, `database id: ${dbId}`)
 
-    socket.on('sendMessage', ({ message, companion }) => {
-      const saveMessage = async (messageData, socket) => {
-        const newMessage = new Message(messageData)
-        await newMessage.save()
+    socket.on('sendMessage', async ({ message, companion }) => {
+      try {
+        const saveMessage = async (messageData) => {
+          const newMessage = new Message(messageData)
+          await newMessage.save()
 
-        socket.emit('messageDelivered')
+          await Conversation.findByIdAndUpdate(
+            message.conversationId,
+            { lastMessage: newMessage._id, updatedAt: newMessage.createdAt },
+            { new: true }
+          )
+
+          const populatedMessage = await Message.findById(newMessage._id).populate('sender', 'username').exec()
+
+          socket.emit('messageDelivered', { populatedMessage })
+
+          const companionSocketId = getCompanionSocketId(companion)
+          if (companionSocketId) {
+            socket.to(companionSocketId).emit('messageReceived', { populatedMessage })
+          }
+        }
+
+        await saveMessage(message)
+      } catch (err) {
+        console.error('Error sending message:', err)
       }
-
-      saveMessage(message, socket)
-      io.emit('sendMessage', { message, companion })
     })
 
-    socket.on('sendMessage', ({ message, companion }) => {
+    socket.on('deleteConversation', async ({ conversationId, currentUserId }) => {
+      try {
+        const deletedConversation = await Conversation.findByIdAndDelete(conversationId)
+
+        if (!deletedConversation) {
+          return socket.emit('error', { message: 'Conversation not found' })
+        }
+
+        const otherParticipant = deletedConversation.participants.find(
+          (participantId) => participantId.toString() !== currentUserId.toString()
+        )
+
+        if (otherParticipant) {
+          const otherParticipantSocket = getCompanionSocketId(otherParticipant)
+          console.log(otherParticipantSocket)
+          socket.emit('conversationDeleted', {
+            conversationId,
+          })
+          io.to(otherParticipantSocket).emit('conversationDeletedByOtherUser', {
+            conversationId,
+          })
+        }
+      } catch (err) {
+        console.error(err)
+        socket.emit('error', { message: 'Error deleting conversation' })
+      }
+    })
+
+    // This part listens for the sent message and checks the companion
+    socket.on('sendmsg', ({ message, companion }) => {
       if (companion === dbId) {
-        socket.emit('messageRecieved', { message })
+        socket.emit('messageReceived', { message })
       }
     })
 
@@ -190,6 +242,7 @@ async function setupSocketIO(server) {
     socket.on('disconnect', async () => {
       handleSocketDisconnect(socket.id)
       await handleDisconnection(socket.id, dbId)
+      delete users[dbId]
     })
 
     socket.on('leaveRoom', async () => {

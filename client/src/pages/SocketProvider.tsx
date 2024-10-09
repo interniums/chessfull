@@ -64,34 +64,37 @@ export default function SocketProvider() {
       }
     }
 
-    const handleRecieveMessage = ({ message }) => {
-      toast({
-        title: `New message`,
-        description: `${message.content}`,
-        action: (
-          <ToastAction
-            onClick={() =>
-              navigate('/socket/messages', {
-                state: {
-                  conversationIdFromLocation: message.conversationId,
-                  showMessagesFromState: true,
-                  companionFromState: message.sender,
-                },
-              })
-            }
-            altText="go to message"
-          >
-            Message
-          </ToastAction>
-        ),
-      })
+    const handleRecieveMessage = ({ populatedMessage }) => {
+      setGlobalState((prev) => ({ ...prev, newMessage: true, conversationId: populatedMessage.conversationId }))
+      if (!isDynamicGameRoute.test(location.pathname)) {
+        toast({
+          title: `New message`,
+          description: `${populatedMessage.sender.username}: ${populatedMessage.content}`,
+          action: (
+            <ToastAction
+              onClick={() =>
+                navigate('/socket/messages', {
+                  state: {
+                    conversationIdFromLocation: populatedMessage.conversationId,
+                    showMessagesFromState: true,
+                    companionFromState: populatedMessage.sender._id,
+                  },
+                })
+              }
+              altText="go to message"
+            >
+              Message
+            </ToastAction>
+          ),
+        })
+      }
     }
 
     // Register socket listeners
     sock.on('startGame', handleStartGame)
     sock.on('inviteExpired', handleExpiredInvite)
     sock.on('gameInviteForAll', handleGameInviteForAll)
-    sock.on('messageRecieved', handleRecieveMessage)
+    sock.on('messageReceived', handleRecieveMessage)
 
     // Cleanup on unmount
     return () => {

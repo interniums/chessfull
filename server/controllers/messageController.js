@@ -31,7 +31,7 @@ const getConverstation = asyncHandler(async (req, res, next) => {
   })
     .populate('participants', 'username')
     .populate('lastMessage')
-    .sort({ updatedAt: -1 })
+    .sort({ updatedAt: 1 })
   if (!conversations) {
     return res.status(101).json({ message: 'Invalid id or no conversatitons' })
   }
@@ -45,14 +45,43 @@ const createConversation = asyncHandler(async (req, res, next) => {
     return res.status(400).json({ message: 'Invalid data' })
   }
 
+  const existingConversation = await Conversation.findOne({
+    participants: { $all: [id1, id2], $size: 2 }, // Ensures both participants exist in the conversation
+  })
+
+  // If a conversation exists, return it instead of creating a new one
+  if (existingConversation) {
+    return res.status(200)
+  }
+
   const newConversation = new Conversation({ participants: [id1, id2] })
   await newConversation.save()
 
-  return res.status(200).json(newConversation)
+  const populatedConversation = await Conversation.findById(newConversation._id)
+    .populate('participants', 'username')
+    .populate('lastMessage')
+
+  // Respond with the populated conversation
+  return res.status(200).json(populatedConversation)
+})
+
+const deleteConversation = asyncHandler(async (req, res, next) => {
+  const { id } = req.params
+  if (!id) {
+    return res.status(400).json({ message: 'Invalid data' })
+  }
+
+  const deletedConversation = await Conversation.findByIdAndDelete(id)
+  if (!deletedConversation) {
+    return res.status(404).json({ message: 'Invalid id' })
+  }
+
+  return res.status(200).json({ message: 'Success' })
 })
 
 module.exports = {
   getMessage,
   getConverstation,
   createConversation,
+  deleteConversation,
 }

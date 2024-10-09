@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const Message = require('./MessageModel')
 
 const conversationSchema = new mongoose.Schema({
   participants: [
@@ -10,9 +11,7 @@ const conversationSchema = new mongoose.Schema({
   lastMessage: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Message',
-    default: {
-      content: '',
-    },
+    default: null,
   },
   updatedAt: {
     type: Date,
@@ -20,6 +19,12 @@ const conversationSchema = new mongoose.Schema({
   },
 })
 
-conversationSchema.index({ participants: 1 }) // Indexing for faster queries
+conversationSchema.index({ participants: 1 })
+conversationSchema.post('findOneAndDelete', async function (doc) {
+  if (doc) {
+    // Delete all messages associated with the conversation
+    await Message.deleteMany({ conversationId: doc._id })
+  }
+})
 
 module.exports = mongoose.model('Conversation', conversationSchema)

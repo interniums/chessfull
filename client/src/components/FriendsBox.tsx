@@ -282,7 +282,11 @@ export default function FriendsBox() {
                       onClick={(e) => {
                         e.stopPropagation()
                         navigate('/socket/messages', {
-                          state: { createConversation: true, createId: friend.id, companionFromState: friend.id },
+                          state: {
+                            createConversation: true,
+                            createIdFromState: friend.id,
+                            companionFromState: friend.id,
+                          },
                         })
                         setGlobalState((prev) => ({ ...prev, friendsOpen: false }))
                         window.location.reload()

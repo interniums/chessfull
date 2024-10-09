@@ -3,7 +3,7 @@
 import { axiosPrivate } from '@/api/axios'
 import useAuth from '@/hooks/useAuth'
 import useAxiosPrivate from '@/hooks/useAxiosPrivate'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useOutletContext } from 'react-router-dom'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
@@ -17,8 +17,17 @@ export default function Messanger({ conversationId, companion }) {
   const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState('')
   const [sock] = useOutletContext()
-  const [reloadMessages, setReloadMessages] = useState(null)
-  // const [focus, setFocus] = useState(null)
+  const messageContainerRef = useRef(null)
+
+  const scrollToBottom = () => {
+    if (messageContainerRef.current) {
+      messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight
+    }
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
 
   useEffect(() => {
     setLoading(true)
@@ -33,7 +42,6 @@ export default function Messanger({ conversationId, companion }) {
         console.log(response)
         isMounted && setMessages(response.data)
         setLoading(false)
-        setReloadMessages(null)
       } catch (err) {
         console.error(err)
       }
@@ -46,29 +54,38 @@ export default function Messanger({ conversationId, companion }) {
       isMounted = false
       controller.abort()
     }
-  }, [conversationId, reloadMessages])
+  }, [conversationId])
 
   const sendMessage = () => {
     const message = {
       conversationId,
       sender: auth?.id,
       content: newMessage,
+      createdAt: Date.now(),
     }
 
     sock.emit('sendMessage', { message, companion })
+    setNewMessage('')
   }
 
   useEffect(() => {
-    sock.on('messageRecieved', ({ message }) => {
-      setMessages((prevMessages) => [...prevMessages, message])
+    sock.on('messageReceived', ({ populatedMessage }) => {
+      console.log('message recieved')
+      setMessages((prevMessages) => [...prevMessages, populatedMessage])
     })
-    sock.on('messageDelivered', () => {
-      setReloadMessages(true)
+    sock.on('messageDelivered', ({ populatedMessage }) => {
+      console.log('message delivered')
+      setMessages((prev) => [...prev, populatedMessage])
     })
+
+    return () => {
+      sock.off('messageReceived')
+      sock.off('messageDelivered')
+    }
   }, [sock])
 
   return (
-    <div className="h-full py-4 px-6">
+    <div className="h-full py-4 relative">
       {loading ? (
         <div className="grid gap-6 items-center justify-center h-full">
           <div>
@@ -78,41 +95,52 @@ export default function Messanger({ conversationId, companion }) {
         </div>
       ) : (
         <>
-          <div className="h-5/6">
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={
-                  msg.sender.username == auth?.username
-                    ? 'rounded-lg py-2 px-2 bg-gray-200 h-fit my-4'
-                    : 'rounded-lg py-2 px-2 bg-slate-200 h-fit my-4'
-                }
-              >
-                <h1 className="font-bold text-lg">{msg.sender.username}</h1>
-                <div className="flex justify-between">
-                  <p>{msg.content}</p>
-                  <p className="text-sm text-end">
-                    {new Date(msg.createdAt).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </p>
-                </div>
+          <div ref={messageContainerRef} className="overflow-y-auto px-4" style={{ height: '90%' }}>
+            {!messages.length ? (
+              <div className="w-full h-full flex items-center justify-center">
+                <div>No messages yet...</div>
               </div>
-            ))}
-          </div>
-          <div className="h-1/6 flex items-center justify-center gap-8">
-            <Input value={newMessage} onChange={(e) => setNewMessage(e.target.value)} className="cursor-pointer" />
-            <Button
-              className="text-lg flex items-center justify-center gap-2"
-              variant={'outline'}
-              onClick={() => sendMessage()}
-            >
-              <img src={send} alt="send" className="size-10" />
-            </Button>
+            ) : (
+              <>
+                {messages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={
+                      msg.sender.username == auth?.username
+                        ? 'rounded-lg py-2 px-2 bg-gray-200 h-fit my-4'
+                        : 'rounded-lg py-2 px-2 bg-slate-200 h-fit my-4'
+                    }
+                  >
+                    <h1 className="font-bold text-lg">{msg.sender.username}</h1>
+                    <div className="flex justify-between">
+                      <p>{msg.content}</p>
+                      <p className="text-sm text-end">
+                        {new Date(msg.createdAt).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         </>
       )}
+      <form
+        style={{ height: '10%' }}
+        className="h-1/6 px-4 flex items-end justify-center gap-8 sticky bottom-0"
+        onSubmit={(e) => {
+          e.preventDefault()
+          sendMessage()
+        }}
+      >
+        <Input value={newMessage} onChange={(e) => setNewMessage(e.target.value)} className="cursor-pointer" />
+        <Button className="text-lg flex items-center justify-center gap-2" variant={'outline'}>
+          <img src={send} alt="send" className="size-10" />
+        </Button>
+      </form>
     </div>
   )
 }

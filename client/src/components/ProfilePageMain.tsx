@@ -33,7 +33,7 @@ import {
 } from '@radix-ui/react-icons'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Button } from './ui/button'
-import { useLocation, useOutletContext, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import { Label } from './ui/label'
@@ -52,6 +52,7 @@ import useLogout from '@/hooks/useLogout'
 
 export default function ProfilePageMain() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const { toast } = useToast()
   const axiosPrivate = useAxiosPrivate()
   const { globalState, setGlobalState } = useGlobalContext()
@@ -76,6 +77,8 @@ export default function ProfilePageMain() {
   const [userPreferences, setUserPreferences] = useState({})
   const isFirstRender = useRef(true)
   const logout = useLogout()
+
+  console.log(playerStats)
 
   const handleLogout = async () => {
     await logout()
@@ -287,7 +290,18 @@ export default function ProfilePageMain() {
                             <img className="size-9" src={remove} title="remove from friednds" alt="remove" />
                           </div>
                         )}
-                        <div className="hover:scale-105 transition-transform cursor-pointer active:scale-90">
+                        <div
+                          onClick={() => {
+                            navigate('/socket/messages', {
+                              state: {
+                                createConversation: true,
+                                createIdFromState: id,
+                                companionFromState: id,
+                              },
+                            })
+                          }}
+                          className="hover:scale-105 transition-transform cursor-pointer active:scale-90"
+                        >
                           <img src={chat} className="size-9" alt="chat" title="send message" />
                         </div>
                       </>

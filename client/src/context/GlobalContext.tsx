@@ -10,6 +10,8 @@ export const GlobalProvider = ({ children }) => {
   const [globalState, setGlobalState] = useState({
     successRegisterMessage: '',
     unauthorizedRedirectMessage: '',
+    newMessage: false,
+    conversationId: '',
     friendsOpen: false,
     gameInvite: {
       from: '',
