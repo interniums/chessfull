@@ -12,7 +12,7 @@ import ErrorPage from './components/Error.tsx'
 import PersistLogin from './components/PersistLogin.tsx'
 import RequireAuth from './components/RequireAuth.tsx'
 import SocketProvider from './pages/SocketProvider.tsx'
-import ComputerGame from './pages/ComputerGame.tsx'
+// import ComputerGame from './pages/ComputerGame.tsx'
 import MessagesPage from './pages/MessagesPage.tsx'
 
 export const routes: RouteObject[] = [
@@ -52,10 +52,10 @@ export const routes: RouteObject[] = [
                     path: '/socket/game/:id',
                     element: <GamePage />,
                   },
-                  {
-                    path: '/socket/game/computer',
-                    element: <ComputerGame />,
-                  },
+                  // {
+                  //   path: '/socket/game/computer',
+                  //   element: <ComputerGame />,
+                  // },
                   {
                     path: '/socket/game/queue/:mode',
                     element: <QueuePage />,

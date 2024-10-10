@@ -7,7 +7,6 @@ import { Avatar, AvatarImage } from './ui/avatar'
 import { ReloadIcon } from '@radix-ui/react-icons'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import { useGlobalContext } from '@/context/GlobalContext'
-import useAuth from '@/hooks/useAuth'
 import useAxiosPrivate from '@/hooks/useAxiosPrivate'
 import { useToast } from '@/hooks/use-toast'
 import rank1 from '../assets/images/frame1.png'
@@ -20,6 +19,7 @@ import chat from '../assets/images/chat-round-unread-svgrepo-com.svg'
 import remove from '../assets/images/remove-square-svgrepo-com.svg'
 import reject from '../assets/images/delete-remove-uncheck-svgrepo-com.svg'
 import accept from '../assets/images/accept-check-good-mark-ok-tick-svgrepo-com.svg'
+import useAuth from '@/hooks/useAuth'
 
 export default function FriendsBox() {
   const axiosPrivate = useAxiosPrivate()

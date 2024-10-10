@@ -1,14 +1,10 @@
 // @ts-nocheck
 
 import { Outlet } from 'react-router-dom'
-import { AuthProvider } from './context/authProvider'
+import { AuthProvider } from './context/AuthProvider'
 
 function App() {
-  return (
-    <AuthProvider>
-      <Outlet />
-    </AuthProvider>
-  )
+  return <Outlet />
 }
 
 export default App

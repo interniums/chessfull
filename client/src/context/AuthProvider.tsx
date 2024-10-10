@@ -1,4 +1,5 @@
 // @ts-nocheck
+
 import { createContext, useState } from 'react'
 
 const AuthContext = createContext({})

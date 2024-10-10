@@ -7,12 +7,15 @@ import './index.css'
 import { GlobalProvider } from './context/GlobalContext.tsx'
 import { Toaster } from './components/ui/toaster.tsx'
 import { routes } from './routes'
+import { AuthProvider } from './context/AuthProvider.tsx'
 
 const router = createBrowserRouter(routes)
 
 createRoot(document.getElementById('root')!).render(
-  <GlobalProvider>
-    <Toaster />
-    <RouterProvider router={router} />
-  </GlobalProvider>
+  <AuthProvider>
+    <GlobalProvider>
+      <Toaster />
+      <RouterProvider router={router} />
+    </GlobalProvider>
+  </AuthProvider>
 )
