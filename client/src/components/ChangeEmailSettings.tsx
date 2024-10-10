@@ -36,7 +36,7 @@ export default function ChangeEmailSettings({ setEditEmail, editEmail, email, id
 
     try {
       console.log('fetching')
-      const response = await axiosPrivate.patch(`http://localhost:3000/user/${id}/updateEmail`, {
+      const response = await axiosPrivate.patch(`https://chessfull-production.up.railway.app/user/${id}/updateEmail`, {
         signal: controller.signal,
         email,
       })

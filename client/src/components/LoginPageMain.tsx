@@ -86,7 +86,7 @@ export default function LoginPageMain() {
     setLoading(true)
     axios
       .post(
-        'http://localhost:3000/login',
+        'https://chessfull-production.up.railway.app/login',
         {
           email: data.email,
           password: data.password,

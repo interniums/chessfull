@@ -43,11 +43,14 @@ export default function MessagesMain() {
     const controller = new AbortController()
 
     try {
-      const response = await axiosPrivate.post(`http://localhost:3000/message/conversations/new`, {
-        signal: controller.signal,
-        id1: auth.id,
-        id2: companion,
-      })
+      const response = await axiosPrivate.post(
+        `https://chessfull-production.up.railway.app/message/conversations/new`,
+        {
+          signal: controller.signal,
+          id1: auth.id,
+          id2: companion,
+        }
+      )
       console.log(response)
       if (response.data) {
         setConversations((prev) => [...prev, response.data])
@@ -70,9 +73,12 @@ export default function MessagesMain() {
 
     const getMessages = async () => {
       try {
-        const response = await axiosPrivate.get(`http://localhost:3000/message/conversations/${auth?.id}`, {
-          signal: controller.signal,
-        })
+        const response = await axiosPrivate.get(
+          `https://chessfull-production.up.railway.app/message/conversations/${auth?.id}`,
+          {
+            signal: controller.signal,
+          }
+        )
         if (response.status === 200 && isMounted) {
           setConversations(response.data)
           setLoading(false)

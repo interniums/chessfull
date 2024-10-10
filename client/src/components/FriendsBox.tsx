@@ -52,7 +52,7 @@ export default function FriendsBox() {
 
     const getFriendsInfo = async () => {
       try {
-        const response = await axiosPrivate.get(`http://localhost:3000/user/${auth?.id}/getFriends`, {
+        const response = await axiosPrivate.get(`chessfull-production.up.railway.app/user/${auth?.id}/getFriends`, {
           signal: controller.signal,
         })
         setFriendsInfo(response?.data.userFriendsInfo || [])
@@ -88,7 +88,7 @@ export default function FriendsBox() {
     const controller = new AbortController()
 
     try {
-      await axiosPrivate.post(`http://localhost:3000/user/${auth.id}/removeFriend`, {
+      await axiosPrivate.post(`https://chessfull-production.up.railway.app/user/${auth.id}/removeFriend`, {
         signal: controller.signal,
         deleteId: id,
       })
@@ -104,7 +104,7 @@ export default function FriendsBox() {
     const controller = new AbortController()
 
     try {
-      await axiosPrivate.post(`http://localhost:3000/user/${auth.id}/acceptFriend`, {
+      await axiosPrivate.post(`https://chessfull-production.up.railway.app/user/${auth.id}/acceptFriend`, {
         signal: controller.signal,
         acceptedId: id,
       })
@@ -120,7 +120,7 @@ export default function FriendsBox() {
     const controller = new AbortController()
 
     try {
-      await axiosPrivate.post(`http://localhost:3000/user/${auth.id}/rejectFriend`, {
+      await axiosPrivate.post(`https://chessfull-production.up.railway.app/user/${auth.id}/rejectFriend`, {
         signal: controller.signal,
         rejectedId: id,
       })
@@ -170,7 +170,7 @@ export default function FriendsBox() {
     setSearchLoading(true)
 
     try {
-      const response = await axiosPrivate.post(`http://localhost:3000/user/userSearch`, {
+      const response = await axiosPrivate.post(`https://chessfull-production.up.railway.app/user/userSearch`, {
         signal: controller.signal,
         input,
       })

@@ -94,7 +94,7 @@ export default function ProfilePageMain() {
 
     const getProfileStats = async () => {
       try {
-        const response = await axiosPrivate.get(`http://localhost:3000/user/${id}/profile`, {
+        const response = await axiosPrivate.get(`https://chessfull-production.up.railway.app/user/${id}/profile`, {
           signal: controller.signal,
         })
         isMounted && setPlayerStats(response.data)
@@ -134,10 +134,13 @@ export default function ProfilePageMain() {
     const controller = new AbortController()
 
     try {
-      const response = await axiosPrivate.post(`http://localhost:3000/user/${auth.id}/removeFriend`, {
-        signal: controller.signal,
-        deleteId: id,
-      })
+      const response = await axiosPrivate.post(
+        `https://chessfull-production.up.railway.app/user/${auth.id}/removeFriend`,
+        {
+          signal: controller.signal,
+          deleteId: id,
+        }
+      )
       setForceUpdate(!forceUpdate)
       toast({
         title: 'Success',
@@ -158,10 +161,13 @@ export default function ProfilePageMain() {
     const controller = new AbortController()
 
     try {
-      const response = await axiosPrivate.post(`http://localhost:3000/user/${auth.id}/addFriend`, {
-        signal: controller.signal,
-        friendId: id,
-      })
+      const response = await axiosPrivate.post(
+        `https://chessfull-production.up.railway.app/user/${auth.id}/addFriend`,
+        {
+          signal: controller.signal,
+          friendId: id,
+        }
+      )
       if (response.status === 200) {
         toast({
           title: 'Success',
@@ -185,16 +191,19 @@ export default function ProfilePageMain() {
 
     const updateUserPreferences = async () => {
       try {
-        const response = await axiosPrivate.patch(`http://localhost:3000/user/update/preferences`, {
-          signal: controller.signal,
-          pieceSpeedAnimation: userPreferences?.pieceSpeedAnimation,
-          pieceMoveType: userPreferences?.pieceMoveType,
-          premovesAllowed: userPreferences?.premovesAllowed,
-          queenPromotion: userPreferences?.queenPromotion,
-          pieceSet: userPreferences?.pieceSet,
-          board: userPreferences?.board,
-          id: auth.id,
-        })
+        const response = await axiosPrivate.patch(
+          `https://chessfull-production.up.railway.app/user/update/preferences`,
+          {
+            signal: controller.signal,
+            pieceSpeedAnimation: userPreferences?.pieceSpeedAnimation,
+            pieceMoveType: userPreferences?.pieceMoveType,
+            premovesAllowed: userPreferences?.premovesAllowed,
+            queenPromotion: userPreferences?.queenPromotion,
+            pieceSet: userPreferences?.pieceSet,
+            board: userPreferences?.board,
+            id: auth.id,
+          }
+        )
 
         console.log('user preferences updated')
       } catch (err) {
@@ -223,9 +232,12 @@ export default function ProfilePageMain() {
 
     const getUserPreferences = async () => {
       try {
-        const response = await axiosPrivate.get(`http://localhost:3000/user/${auth?.id}/getPreferences`, {
-          signal: controller.signal,
-        })
+        const response = await axiosPrivate.get(
+          `https://chessfull-production.up.railway.app/user/${auth?.id}/getPreferences`,
+          {
+            signal: controller.signal,
+          }
+        )
         isMounted && setUserPreferences(response.data)
       } catch (err) {
         console.error(err)

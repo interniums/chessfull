@@ -7,7 +7,7 @@ let sock
 const getSocket = () => {
   const { auth } = useAuth()
   if (!sock) {
-    sock = io('http://localhost:8080' + `?data=${auth.id}`, {
+    sock = io('https://chessfull-production-8a3f.up.railway.app' + `?data=${auth.id}`, {
       extraHeaders: {
         Authorization: `skip-auth`,
       },

@@ -57,9 +57,11 @@ export default function HomePageMain() {
     }
 
     const getFriendsInfo = () =>
-      fetchData(`http://localhost:3000/user/${auth?.id}/getFriends`, (data) => setFriendsInfo(data.userFriendsInfo))
+      fetchData(`https://chessfull-production.up.railway.app/user/${auth?.id}/getFriends`, (data) =>
+        setFriendsInfo(data.userFriendsInfo)
+      )
     const getUserData = () =>
-      fetchData(`http://localhost:3000/user/${auth.id}`, (data) =>
+      fetchData(`https://chessfull-production.up.railway.app/user/${auth.id}`, (data) =>
         setUser({
           name: data.name,
           blitzElo: data.blitzElo,

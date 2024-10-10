@@ -4,12 +4,9 @@ import { Cross1Icon, GearIcon } from '@radix-ui/react-icons'
 import { useEffect, useMemo, useState } from 'react'
 import { Label } from './ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import { axiosPrivate } from '@/api/axios'
-import useAxiosPrivate from '@/hooks/useAxiosPrivate'
 import useAuth from '@/hooks/useAuth'
 
 export default function InGameSettings({ userPreferences, setUserPreferences }) {
-  const axiosPrivate = useAxiosPrivate()
   const { auth } = useAuth()
   const [open, setOpen] = useState(false)
 

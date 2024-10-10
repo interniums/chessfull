@@ -46,7 +46,7 @@ export default function RegisterPageMain() {
     setLoading(true)
     axios
       .post(
-        'http://localhost:3000/registration',
+        'https://chessfull-production.up.railway.app/registration',
         {
           email: data?.email,
           password: data?.password,

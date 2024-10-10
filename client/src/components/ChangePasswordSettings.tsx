@@ -36,7 +36,7 @@ export default function ChangePasswordSettings({ editPassword, id }) {
     setPwdLoading(true)
 
     try {
-      const response = await axiosPrivate.patch(`http://localhost:3000/user/${id}/updatePwd`, {
+      const response = await axiosPrivate.patch(`https://chessfull-production.up.railway.app/user/${id}/updatePwd`, {
         signal: controller.signal,
         oldPassword,
         newPassword,

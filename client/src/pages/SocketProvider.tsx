@@ -119,9 +119,12 @@ export default function SocketProvider() {
 
     const checkForReconnect = async () => {
       try {
-        const response = await axiosPrivate.get(`http://localhost:3000/game/reconnect/${auth.id}`, {
-          signal: controller.signal,
-        })
+        const response = await axiosPrivate.get(
+          `https://chessfull-production.up.railway.app/game/reconnect/${auth.id}`,
+          {
+            signal: controller.signal,
+          }
+        )
         if (response.status === 200) {
           showReconnectToast(response.data)
         }

@@ -52,7 +52,7 @@ export default function HomePageFooter() {
 
     const getUserLevel = async () => {
       try {
-        const response = await axiosPrivate.get(`http://localhost:3000/user/${auth?.id}`, {
+        const response = await axiosPrivate.get(`https://chessfull-production.up.railway.app/user/${auth?.id}`, {
           signal: controller.signal,
         })
         isMounted && setAccountLevel(response?.data.accountLevel)

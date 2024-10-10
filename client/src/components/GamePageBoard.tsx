@@ -144,16 +144,19 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
 
     const updateUserPreferences = async () => {
       try {
-        const response = await axiosPrivate.patch(`http://localhost:3000/user/update/preferences`, {
-          signal: controller.signal,
-          pieceSpeedAnimation: userPreferences?.pieceSpeedAnimation,
-          pieceMoveType: userPreferences?.pieceMoveType,
-          premovesAllowed: userPreferences?.premovesAllowed,
-          queenPromotion: userPreferences?.queenPromotion,
-          pieceSet: userPreferences?.pieceSet,
-          board: userPreferences?.board,
-          id: auth.id,
-        })
+        const response = await axiosPrivate.patch(
+          `https://chessfull-production.up.railway.app/user/update/preferences`,
+          {
+            signal: controller.signal,
+            pieceSpeedAnimation: userPreferences?.pieceSpeedAnimation,
+            pieceMoveType: userPreferences?.pieceMoveType,
+            premovesAllowed: userPreferences?.premovesAllowed,
+            queenPromotion: userPreferences?.queenPromotion,
+            pieceSet: userPreferences?.pieceSet,
+            board: userPreferences?.board,
+            id: auth.id,
+          }
+        )
 
         console.log('user preferences updated')
       } catch (err) {
@@ -182,9 +185,12 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
 
     const getUserPreferences = async () => {
       try {
-        const response = await axiosPrivate.get(`http://localhost:3000/user/${auth?.id}/getPreferences`, {
-          signal: controller.signal,
-        })
+        const response = await axiosPrivate.get(
+          `https://chessfull-production.up.railway.app/user/${auth?.id}/getPreferences`,
+          {
+            signal: controller.signal,
+          }
+        )
         isMounted && setUserPreferences(response.data)
       } catch (err) {
         console.error(err)
@@ -208,7 +214,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
 
     const getState = async () => {
       try {
-        const response = await axiosPrivate.get(`http://localhost:3000/game/state/${roomId}`, {
+        const response = await axiosPrivate.get(`https://chessfull-production.up.railway.app/state/${roomId}`, {
           signal: controller.signal,
         })
         isMounted && loadGameState(response.data)

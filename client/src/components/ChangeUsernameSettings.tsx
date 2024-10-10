@@ -35,10 +35,13 @@ export default function ChangeUsernameSettings({ setEditName, editName, name, id
 
     try {
       console.log('fetching')
-      const response = await axiosPrivate.patch(`http://localhost:3000/user/${id}/updateUsername`, {
-        signal: controller.signal,
-        name,
-      })
+      const response = await axiosPrivate.patch(
+        `https://chessfull-production.up.railway.app/user/${id}/updateUsername`,
+        {
+          signal: controller.signal,
+          name,
+        }
+      )
       console.log(response)
       if (response.status === 200) {
         setIfNameValid('true')
