@@ -16,7 +16,6 @@ let games = {}
 let timeToReconnect
 
 async function setupSocketIO(server) {
-  // await Room.deleteMany({})
   const io = new Server(server, {
     cors: {
       origin: 'http://localhost:5173',

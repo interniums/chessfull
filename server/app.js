@@ -42,7 +42,7 @@ app.set('trust proxy', true)
 
 // HTTP Server
 const server = http.createServer(app)
-const port = process.env.PORT || 8080
+const port = 5050
 
 // Setup Socket.io
 setupSocketIO(server)
