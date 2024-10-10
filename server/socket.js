@@ -18,7 +18,10 @@ let timeToReconnect
 async function setupSocketIO(server) {
   const io = new Server(server, {
     cors: {
-      origin: 'https://vercel.live/link/chessfull-git-master-interniums-projects.vercel.app',
+      origin: [
+        'https://vercel.live/link/chessfull-git-master-interniums-projects.vercel.app',
+        'https://chessfull.vercel.app',
+      ],
       allowedHeaders: ['Authorization'],
     },
   })
