@@ -43,7 +43,6 @@ const handleLogin = asyncHandler(async (req, res, next) => {
     httpOnly: true,
     secure: true,
     maxAge: 24 * 60 * 60 * 1000,
-    path: '/',
   })
 
   res.json({ accessToken, username: result.username, id: result._id })
