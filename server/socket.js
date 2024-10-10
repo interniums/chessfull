@@ -33,6 +33,11 @@ async function setupSocketIO(server) {
     users[dbId] = socket.id
     console.log('A user connected:', socket.id, `database id: ${dbId}`)
 
+    socket.on('friendInvite', ({ to, from }) => {
+      const friendSocket = getCompanionSocketId(to)
+      io.to(friendSocket).emit('newFriendInvite', { from })
+    })
+
     socket.on('sendMessage', async ({ message, companion }) => {
       try {
         const saveMessage = async (messageData) => {

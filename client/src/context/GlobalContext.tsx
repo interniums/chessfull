@@ -12,6 +12,7 @@ export const GlobalProvider = ({ children }) => {
     unauthorizedRedirectMessage: '',
     newMessage: false,
     conversationId: '',
+    newFriendInvite: false,
     friendsOpen: false,
     gameInvite: {
       from: '',

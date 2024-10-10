@@ -68,7 +68,7 @@ export default function ChangePasswordSettings({ editPassword, id }) {
     <div className="w-full mt-2">
       {editPassword ? (
         <form className="grid gap-3" onSubmit={(e) => changePassword(e)}>
-          <h1 className="font-bold">Change password</h1>
+          <h1 className="font-bold text-xl">Change password</h1>
           <div className="relative">
             <Input
               onChange={(e) => {
@@ -77,7 +77,7 @@ export default function ChangePasswordSettings({ editPassword, id }) {
                 setOldPasswordBadFormat(false)
               }}
               className={
-                'font-medium text-l w-full cursor-pointer hover:bg-slate-100' +
+                'font-medium text-lg w-full cursor-pointer hover:bg-slate-100' +
                 `${
                   isPasswordValid === 'false' || oldPasswordBadFormat
                     ? ' border-red-500 border-2 focus-visible:ring-0'
@@ -114,7 +114,7 @@ export default function ChangePasswordSettings({ editPassword, id }) {
                 setNewPasswordBadFormat(false)
               }}
               className={
-                'font-medium text-l w-full cursor-pointer hover:bg-slate-100' +
+                'font-medium text-lg w-full cursor-pointer hover:bg-slate-100' +
                 `${newPasswordBadFormat ? ' border-red-500 border-2 focus-visible:ring-0' : ' '}`
               }
               placeholder="New password"
@@ -137,9 +137,9 @@ export default function ChangePasswordSettings({ editPassword, id }) {
             {pwdLoading ? (
               <ReloadIcon className="animate-spin size-5" />
             ) : (
-              <div className="flex items-center justify-center font-bold text-lg">
+              <div className="flex items-center justify-center font-bold text-xl">
                 Submit
-                <CheckIcon className="ml-2 size-5" />
+                <CheckIcon className="ml-2 size-6" />
               </div>
             )}
           </Button>

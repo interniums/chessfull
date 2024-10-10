@@ -70,14 +70,14 @@ export default function ChangeEmailSettings({ setEditEmail, editEmail, email, id
 
   return (
     <div className="w-full">
-      <h1 className="font-bold mb-2">Email</h1>
+      <h1 className="font-bold mb-2 text-xl">Email</h1>
       <form className="flex gap-8 w-full" onSubmit={(e) => changeEmail(e)}>
         <div className="relative w-full">
           <Input
             disabled={editEmail ? false : true}
             style={{ textShadow: 'none' }}
             className={
-              'font-medium text-l w-full cursor-pointer hover:bg-slate-100' +
+              'font-medium text-lg w-full cursor-pointer hover:bg-slate-100' +
               `${
                 ifEmailValid === 'dublicate' || ifEmailValid === 'false' || ifEmailValid === 'already registered'
                   ? ' border-red-500 border-2 focus-visible:ring-0'

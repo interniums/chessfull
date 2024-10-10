@@ -170,13 +170,19 @@ export default function MessagesMain() {
 
   return (
     <main className="h-full w-full flex items-center justify-center absolute inset-0 z-10">
-      <div className="border rounded-lg shadow-md w-3/4 h-2/3">
-        <div className="flex flex-grow h-full">
-          <div className="w-2/5 border-r overflow-y-auto text-ellipsis">
+      <div className="w-5/6 h-2/3 border rounded-lg shadow-md lg:w-3/4 lg:h-2/3">
+        <div className="flex lg:flex-grow h-full w-full">
+          <div
+            className={
+              showMessages
+                ? 'lg:w-2/5 lg:border-r overflow-y-auto text-ellipsis w-0'
+                : 'lg:w-2/5 lg:border-r overflow-y-auto text-ellipsis w-full'
+            }
+          >
             {loading ? (
               <div className="grid gap-6 items-center justify-center h-full">
                 <div>
-                  <ReloadIcon className="animate-spin size-56 mb-6" />
+                  <ReloadIcon className="animate-spin size-36 lg:size-56 lg:mb-6 mb-4" />
                   <h1 className="text-center text-3xl">Loading...</h1>
                 </div>
               </div>
@@ -245,9 +251,18 @@ export default function MessagesMain() {
               </>
             )}
           </div>
-          <div className="w-3/5">
-            {showMessages ? <Messanger conversationId={conversationId} companion={companion} /> : null}
-          </div>
+          {showMessages ? (
+            <div className="lg:w-3/5 w-full">
+              <Messanger
+                setConversationId={setConversationId}
+                setShowMessages={setShowMessages}
+                conversationId={conversationId}
+                companion={companion}
+              />
+            </div>
+          ) : (
+            <div className="w-0"></div>
+          )}
         </div>
       </div>
     </main>

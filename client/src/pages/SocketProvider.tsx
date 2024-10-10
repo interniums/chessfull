@@ -90,14 +90,23 @@ export default function SocketProvider() {
       }
     }
 
+    const handleNewFriendInvite = () => {
+      setGlobalState((prev) => ({ ...prev, newFriendInvite: true }))
+      toast({
+        title: 'New friends invite',
+      })
+    }
+
     // Register socket listeners
     sock.on('startGame', handleStartGame)
     sock.on('inviteExpired', handleExpiredInvite)
     sock.on('gameInviteForAll', handleGameInviteForAll)
     sock.on('messageReceived', handleRecieveMessage)
+    sock.on('newFriendInvite', handleNewFriendInvite)
 
     // Cleanup on unmount
     return () => {
+      sock.off('newFriendInvite', handleNewFriendInvite)
       sock.off('startGame', handleStartGame)
       sock.off('inviteExpired', handleExpiredInvite)
       sock.off('gameInviteForAll', handleGameInviteForAll)

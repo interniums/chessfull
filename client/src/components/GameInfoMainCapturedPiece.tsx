@@ -37,7 +37,7 @@ const pieceIconsWhite = {
   q: wQ,
 }
 
-export default function CapturedPieces({ color, capturedPieces }) {
+export default function CapturedPieces({ color, capturedPieces, isSmallScreen }) {
   const [capturedPiecesEdited, setCapturedPiecesEdited] = useState({ white: [], black: [] })
   const [pieceDifferenceBlack, setPieceDifferenceBlack] = useState(0)
   const [pieceDifferenceWhite, setPieceDifferenceWhite] = useState(0)
@@ -84,7 +84,7 @@ export default function CapturedPieces({ color, capturedPieces }) {
         <div className="flex items-center justify-center">
           {capturedPiecesEdited?.white.map((piece, index) => (
             <div key={index}>
-              <img src={pieceIconsWhite[piece]} className="size-6"></img>
+              <img src={pieceIconsWhite[piece]} className={!isSmallScreen ? 'size-6' : 'size-7'}></img>
             </div>
           ))}
           <div className="text-center ml-2">
@@ -95,7 +95,7 @@ export default function CapturedPieces({ color, capturedPieces }) {
         <div className="flex items-center justify-center ">
           {capturedPiecesEdited?.black.map((piece, index) => (
             <div key={index}>
-              <img src={pieceIconsBlack[piece]} className="size-6"></img>
+              <img src={pieceIconsBlack[piece]} className={!isSmallScreen ? 'size-6' : 'size-7'}></img>
             </div>
           ))}
           <div className="text-center ml-2">

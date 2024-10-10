@@ -95,7 +95,7 @@ export default function HomePageMain() {
   }
 
   return (
-    <main className="h-full w-full absolute">
+    <main className="h-full w-full absolute flex items-center justify-center">
       {showCreateGameDialog && (
         <Dialog open={showCreateGameDialog} onOpenChange={() => setShowCreateGameDialog(!showCreateGameDialog)}>
           <DialogContent>
@@ -158,9 +158,8 @@ export default function HomePageMain() {
           </DialogContent>
         </Dialog>
       )}
-      <HomePageHeader />
-      <div className="w-full h-full items-center content-center justify-center grid">
-        <ToggleGroup type="single" value={gameMode} className="flex justify-center gap-20">
+      <div className="w-full items-center content-center justify-center grid overflow-y-auto py-20 pt-22">
+        <ToggleGroup type="single" value={gameMode} className="grid sm:flex justify-center md:gap-20">
           {['bullet', 'blitz', 'rapid'].map((mode, idx) => (
             <ToggleGroupItem
               className="h-max py-4 px-8 rounded-md font-bold"
@@ -178,14 +177,14 @@ export default function HomePageMain() {
         </ToggleGroup>
         <Button
           onClick={() => setShowCreateGameDialog(true)}
-          className="text-2xl py-6 w-full mt-4 font-bold"
+          className="text-2xl sm:text-xl md:text-2xl py-4 sm:py-5 md:py-6 w-full mt-4 font-bold"
           variant={'outline'}
         >
           Game with Friends
         </Button>
         <Button
           onClick={() => navigate('/socket/game/computer')}
-          className="text-2xl py-6 w-full mt-2 font-bold"
+          className="text-2xl sm:text-xl md:text-2xl py-4 sm:py-5 md:py-6 w-full mt-2 font-bold"
           variant={'outline'}
           disabled
           title="not available yet"
@@ -200,12 +199,18 @@ export default function HomePageMain() {
 
 function GameModeCard({ title, image, elo }) {
   return (
-    <div className="text-center">
-      <h1 className="text-3xl text-center">{title}</h1>
-      <img src={image} alt={title} className="size-32" />
-      <h1 className="text-2xl text-center font-medium">
-        Elo: <span>{elo}</span>
-      </h1>
+    <div className="grid items-center justify-center">
+      <div>
+        <h1 className="text-2xl md:text-2xl lg:text-3xl text-center">{title}</h1>
+      </div>
+      <div className="w-full flex items-center justify-center">
+        <img src={image} alt={title} className="size-24 md:size-28 lg:size-32 object-cover" />
+      </div>
+      <div>
+        <h1 className="text-xl sm:text-xl md:text-2xl  text-center font-medium">
+          Elo: <span>{elo}</span>
+        </h1>
+      </div>
     </div>
   )
 }

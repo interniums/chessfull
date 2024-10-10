@@ -11,7 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './
 import { useGlobalContext } from '@/context/GlobalContext'
 import { useState } from 'react'
 
-export default function HomePageHeader({ variant }) {
+export default function HomePageHeader() {
   const { auth } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -21,17 +21,20 @@ export default function HomePageHeader({ variant }) {
     /^\/socket\/game\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
 
   return (
-    <header className="w-full absolute top-0 flex z-50">
-      <section className="flex py-2 px-4 w-full justify-between">
-        <Link
-          style={{ justifyContent: variant === 'play' ? 'start' : 'center' }}
-          className="flex items-center justify-center w-max"
-          to={'/socket/home'}
-        >
+    <header
+      className={
+        isDynamicGameRoute.test(location.hash) ? 'w-full sticky top-0 flex z-50' : 'w-full absolute top-0 flex z-50'
+      }
+    >
+      <section className="flex py-2 px-4 w-full justify-center lg:justify-between md:justify-between transition-all">
+        <Link className="flex items-center justify-center w-max" to={'/socket/home'}>
           <h1 className="text-4xl font-bold cursor-pointer">Chessfull</h1>
           <img src={rook} alt="rook" className="size-10 mb-2" />
         </Link>
-        {isDynamicGameRoute.test(location.pathname) || location.pathname == '/wellcome' ? null : (
+        {isDynamicGameRoute.test(location.pathname) ||
+        location.pathname == '/wellcome' ||
+        location.pathname == '/registration' ||
+        location.pathname == '/login' ? null : (
           <Sheet open={sheet} onOpenChange={() => setSheet(!sheet)}>
             <SheetTrigger asChild>
               <button className="border-none outline-none cursor-pointer hover:bg-slate-100 py-2 px-2 rounded-xl relative">

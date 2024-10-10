@@ -205,8 +205,8 @@ export default function FriendsBox() {
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Friends</DialogTitle>
-          <DialogDescription style={{ textShadow: 'none' }} className="font-medium">
+          <DialogTitle className="text-3xl font-bold">Friends</DialogTitle>
+          <DialogDescription style={{ textShadow: 'none' }} className="font-medium text-md">
             Make new friends and chat
           </DialogDescription>
           <div className="flex gap-4 items-center">
@@ -214,7 +214,7 @@ export default function FriendsBox() {
               <input
                 onChange={(e) => setInput(e.target.value)}
                 autoComplete="off"
-                className={`hover:bg-slate-100 w-full border py-2 px-3 cursor-pointer rounded-md outline-none font-medium text-sm ${
+                className={`hover:bg-slate-100 w-full border py-2 px-3 cursor-pointer rounded-md outline-none font-medium text-md ${
                   searchOpen ? 'border-b-0' : ''
                 }`}
                 style={{
@@ -244,7 +244,7 @@ export default function FriendsBox() {
                         <Avatar>
                           <AvatarImage title="account level" src={getImg(item.accountLevel)} />
                         </Avatar>
-                        <div className="font-medium">{item.username}</div>
+                        <div className="font-bold text-lg">{item.username}</div>
                       </div>
                     </div>
                   ))}
@@ -257,7 +257,12 @@ export default function FriendsBox() {
         <Tabs defaultValue="friends">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="friends">Friends</TabsTrigger>
-            <TabsTrigger value="invites">Invites</TabsTrigger>
+            <TabsTrigger value="invites" className="relative">
+              Invites{' '}
+              {globalState?.newFriendInvite ? (
+                <div className="absolute top-1 right-1   bg-red-500 w-2 h-2 rounded-full animate-pulse"></div>
+              ) : null}
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="friends" className="max-h-80 min-h-80 h-full overflow-y-auto">
             {loading ? (
@@ -275,7 +280,7 @@ export default function FriendsBox() {
                     <Avatar>
                       <AvatarImage title="account level" src={getImg(friend.accountLevel)} />
                     </Avatar>
-                    <div className="font-medium">{friend.name}</div>
+                    <div className="font-bold text-lg">{friend.name}</div>
                   </div>
                   <div className="flex items-center justify-center gap-2">
                     <img
@@ -326,13 +331,19 @@ export default function FriendsBox() {
                     title="Accept"
                     src={accept}
                     className="w-8 h-8 cursor-pointer hover:opacity-90"
-                    onClick={() => acceptFriends(invite.id, invite.name)}
+                    onClick={() => {
+                      acceptFriends(invite.id, invite.name)
+                      setGlobalState((prev) => ({ ...prev, newFriendInvite: false }))
+                    }}
                   />
                   <img
                     title="Reject"
                     src={reject}
                     className="w-8 h-8 cursor-pointer hover:opacity-90"
-                    onClick={() => rejectFriends(invite.id)}
+                    onClick={() => {
+                      rejectFriends(invite.id)
+                      setGlobalState((prev) => ({ ...prev, newFriendInvite: false }))
+                    }}
                   />
                 </div>
               </div>

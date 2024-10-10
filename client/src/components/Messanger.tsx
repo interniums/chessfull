@@ -9,8 +9,9 @@ import { Input } from './ui/input'
 import { Button } from './ui/button'
 import { PaperPlaneIcon, ReloadIcon } from '@radix-ui/react-icons'
 import send from '../assets/images/send-alt-2-svgrepo-com.svg'
+import leftArrow from '../assets/images/left-arrow-svgrepo-com.svg'
 
-export default function Messanger({ conversationId, companion }) {
+export default function Messanger({ conversationId, companion, setShowMessages, setConversationId }) {
   const { auth } = useAuth()
   const axiosPrivate = useAxiosPrivate()
   const [loading, setLoading] = useState(false)
@@ -18,6 +19,19 @@ export default function Messanger({ conversationId, companion }) {
   const [newMessage, setNewMessage] = useState('')
   const [sock] = useOutletContext()
   const messageContainerRef = useRef(null)
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1024)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth < 1024)
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
   const scrollToBottom = () => {
     if (messageContainerRef.current) {
@@ -97,32 +111,64 @@ export default function Messanger({ conversationId, companion }) {
         <>
           <div ref={messageContainerRef} className="overflow-y-auto px-4" style={{ height: '90%' }}>
             {!messages.length ? (
-              <div className="w-full h-full flex items-center justify-center">
-                <div>No messages yet...</div>
-              </div>
+              <>
+                {isSmallScreen ? (
+                  <div>
+                    <Button
+                      onClick={() => {
+                        setConversationId('')
+                        setShowMessages(false)
+                      }}
+                      variant={'outline'}
+                      className="w-full text-xl"
+                    >
+                      Back
+                    </Button>
+                  </div>
+                ) : null}
+                <div className="w-full h-4/5 flex items-center justify-center">
+                  <div>No messages yet...</div>
+                </div>
+              </>
             ) : (
               <>
-                {messages.map((msg, index) => (
-                  <div
-                    key={index}
-                    className={
-                      msg.sender.username == auth?.username
-                        ? 'rounded-lg py-2 px-2 bg-gray-200 h-fit my-4'
-                        : 'rounded-lg py-2 px-2 bg-slate-200 h-fit my-4'
-                    }
-                  >
-                    <h1 className="font-bold text-lg">{msg.sender.username}</h1>
-                    <div className="flex justify-between">
-                      <p>{msg.content}</p>
-                      <p className="text-sm text-end">
-                        {new Date(msg.createdAt).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </p>
+                <div>
+                  {isSmallScreen ? (
+                    <div>
+                      <Button
+                        onClick={() => {
+                          setConversationId('')
+                          setShowMessages(false)
+                        }}
+                        variant={'outline'}
+                        className="w-full text-xl"
+                      >
+                        Back
+                      </Button>
                     </div>
-                  </div>
-                ))}
+                  ) : null}
+                  {messages.map((msg, index) => (
+                    <div
+                      key={index}
+                      className={
+                        msg.sender.username == auth?.username
+                          ? 'rounded-lg py-2 px-2 bg-gray-200 h-fit my-4'
+                          : 'rounded-lg py-2 px-2 bg-slate-200 h-fit my-4'
+                      }
+                    >
+                      <h1 className="font-bold text-lg">{msg.sender.username}</h1>
+                      <div className="flex justify-between">
+                        <p>{msg.content}</p>
+                        <p className="text-sm text-end">
+                          {new Date(msg.createdAt).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </>
             )}
           </div>

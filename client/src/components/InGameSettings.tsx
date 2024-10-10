@@ -25,12 +25,12 @@ export default function InGameSettings({ userPreferences, setUserPreferences }) 
             <h1 className="text-3xl font-bold mb-6">Settings</h1>
             <div className="py-2 px-2 flex gap-8 items-center justify-center">
               <div className="grid gap-8 items-start justify-center">
-                <div className="text-lg text-start">Piece animation</div>
-                <div className="text-lg text-start">Piece move method</div>
-                <div className="text-lg text-start">Allow premoves</div>
-                <div className="text-lg text-start">Always promote to queen</div>
-                <div className="text-lg text-start">Choose piece set</div>
-                <div className="text-lg text-start">Choose board</div>
+                <div className="text-lg text-start truncate">Piece animation</div>
+                <div className="text-lg text-start truncate">Piece move method</div>
+                <div className="text-lg text-start truncate">Allow premoves</div>
+                <div className="text-lg text-start truncate">Always promote to queen</div>
+                <div className="text-lg text-start truncate">Choose piece set</div>
+                <div className="text-lg text-start truncate">Choose board</div>
               </div>
               <div className="grid gap-6 items-center justify-center">
                 <div className="speedAnimation flex gap-4 items-center justify-center">

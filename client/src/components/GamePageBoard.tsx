@@ -10,9 +10,9 @@ import useAxiosPrivate from '@/hooks/useAxiosPrivate'
 import GameInfo from './GameInfo'
 import GameEndDialog from './GameEndDialog'
 import useAuth from '@/hooks/useAuth'
-import moveSound from '../assets/sounds/move.mp3'
-import captureSound from '../assets/sounds/capture.mp3'
-import endGameSound from '../assets/sounds/endGame.mp3'
+import move from '../assets/sounds/move.mp3'
+import capture from '../assets/sounds/capture.mp3'
+import endGame from '../assets/sounds/endGame.mp3'
 import UIfx from 'uifx'
 
 export default function GamePageBoard({ mode, players, moves, setMoves, roomId, orientation, sock }) {
@@ -20,13 +20,13 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
   const player2Orientation = orientation === 'white' ? 'black' : 'white'
 
   // sounds
-  const moveSoundPlay = new UIfx(moveSound, {
+  const moveSoundPlay = new UIfx(move, {
     volume: 1,
   })
-  const captureSoundPlay = new UIfx(captureSound, {
+  const captureSoundPlay = new UIfx(capture, {
     volume: 1,
   })
-  const endGameSoundPlay = new UIfx(endGameSound, {
+  const endGameSoundPlay = new UIfx(endGame, {
     volume: 1,
   })
 
@@ -71,20 +71,25 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
   const [whiteTime, setWhiteTime] = useState(300)
   const [blackTime, setBlackTime] = useState(300)
   const [activePlayer, setActivePlayer] = useState('white')
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1024)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth < 1024)
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
+
+  console.log(isSmallScreen)
 
   const waitDrawAnswerRef = useRef(waitDrawAnswer)
   const overRef = useRef(gameState?.over)
   const isFirstRender = useRef(true)
-
-  // console.log(fen)
-  // console.log(history)
-  // console.log(gameState)
-  // console.log(chess.turn())
-  // console.log(gameState)
-  // console.log(currentMoveIndex)
-  // console.log(fenHistory.length)
-  // console.log(chess)
-  // console.log(userPreferences)
 
   // Function to go to the first move
   const goToFirstMove = () => {
@@ -706,7 +711,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
 
   return (
     <>
-      <div className="w-full h-full flex items-center pl-20 pr-96 min-h-screen">
+      <div className="w-full lg:h-full lg:flex block items-center pl-0 lg:pl-20 lg:pr-96 pr-0 lg:min-h-screen justify-center lg:justify-normal">
         {openEndDialog ? (
           <GameEndDialog
             setOpenEndDialog={setOpenEndDialog}
@@ -716,40 +721,46 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
             loading={loading}
           />
         ) : null}
-        <div className="w-full h-full pr-24 min-h-screen">
-          <div className="min-h-screen h-full w-full flex items-start justify-center min-w-max py-24">
-            <GameInfo
-              opponentDisconnected={opponentDisconnected}
-              mode={mode}
-              players={players}
-              roomId={roomId}
-              sock={sock}
-              offerDraw={offerDraw}
-              setOfferDraw={setOfferDraw}
-              waitDrawAnswer={waitDrawAnswer}
-              setWaitDrawAnswer={setWaitDrawAnswer}
-              over={gameState?.over}
-              winner={gameState?.winner}
-              loading={loading}
-              history={history}
-              capturedPieces={capturedPieces}
-              orientation={orientation}
-              player1Orientation={player1Orientation}
-              player2Orientation={player2Orientation}
-              userPreferences={userPreferences}
-              setUserPreferences={setUserPreferences}
-              fenHistory={fenHistory}
-              currentMoveIndex={currentMoveIndex}
-              goToFirstMove={goToFirstMove}
-              goToPreviousMove={goToPreviousMove}
-              goToNextMove={goToNextMove}
-              goToLastMove={goToLastMove}
-              goToIndexMove={goToIndexMove}
-            />
+        {isSmallScreen ? null : (
+          <div className="w-0 h-0 lg:w-full lg:h-full lg:pr-24 lg:min-h-screen">
+            <div className="lg:min-h-screen lg:h-full w-full flex items-start justify-center lg:min-w-max lg:py-24">
+              <GameInfo
+                opponentDisconnected={opponentDisconnected}
+                mode={mode}
+                players={players}
+                roomId={roomId}
+                sock={sock}
+                offerDraw={offerDraw}
+                setOfferDraw={setOfferDraw}
+                waitDrawAnswer={waitDrawAnswer}
+                setWaitDrawAnswer={setWaitDrawAnswer}
+                over={gameState?.over}
+                winner={gameState?.winner}
+                loading={loading}
+                history={history}
+                capturedPieces={capturedPieces}
+                orientation={orientation}
+                player1Orientation={player1Orientation}
+                player2Orientation={player2Orientation}
+                userPreferences={userPreferences}
+                setUserPreferences={setUserPreferences}
+                fenHistory={fenHistory}
+                currentMoveIndex={currentMoveIndex}
+                goToFirstMove={goToFirstMove}
+                goToPreviousMove={goToPreviousMove}
+                goToNextMove={goToNextMove}
+                goToLastMove={goToLastMove}
+                goToIndexMove={goToIndexMove}
+                isSmallScreen={isSmallScreen}
+              />
+            </div>
           </div>
-        </div>
-        <div className="grid gap-1 h-full min-h-screen" style={{ maxWidth: '85vh', width: '85vh' }}>
-          <div className="w-full flex items-center justify-center gap-8 py-2">
+        )}
+        <div
+          className="lg:h-full lg:min-h-screen"
+          style={{ maxWidth: '85vh', width: !isSmallScreen ? '85vh' : '100%' }}
+        >
+          <div className="w-full flex items-center justify-center gap-8 pt-20 lg:mt-8 lg:pt-0">
             <div
               className={
                 chess.turn() === 'w' && !gameState?.winner.length
@@ -771,10 +782,10 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
             </div>
           </div>
           <div
-            className="board h-fit rounded-md"
+            className="board h-fit rounded-md flex items-center justify-center"
             style={{
               maxWidth: '85vh',
-              width: '85vh',
+              width: !isSmallScreen ? '85vh' : '100%',
               boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 10px',
             }}
           >
@@ -821,6 +832,41 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
             />
           </div>
         </div>
+        {isSmallScreen ? (
+          <div className="w-full lg:w-full lg:h-full lg:pr-24 lg:min-h-screen">
+            <div className="lg:min-h-screen lg:h-full w-full flex items-start justify-center lg:min-w-max lg:py-24">
+              <GameInfo
+                opponentDisconnected={opponentDisconnected}
+                mode={mode}
+                players={players}
+                roomId={roomId}
+                sock={sock}
+                offerDraw={offerDraw}
+                setOfferDraw={setOfferDraw}
+                waitDrawAnswer={waitDrawAnswer}
+                setWaitDrawAnswer={setWaitDrawAnswer}
+                over={gameState?.over}
+                winner={gameState?.winner}
+                loading={loading}
+                history={history}
+                capturedPieces={capturedPieces}
+                orientation={orientation}
+                player1Orientation={player1Orientation}
+                player2Orientation={player2Orientation}
+                userPreferences={userPreferences}
+                setUserPreferences={setUserPreferences}
+                fenHistory={fenHistory}
+                currentMoveIndex={currentMoveIndex}
+                goToFirstMove={goToFirstMove}
+                goToPreviousMove={goToPreviousMove}
+                goToNextMove={goToNextMove}
+                goToLastMove={goToLastMove}
+                goToIndexMove={goToIndexMove}
+                isSmallScreen={isSmallScreen}
+              />
+            </div>
+          </div>
+        ) : null}
       </div>
     </>
   )

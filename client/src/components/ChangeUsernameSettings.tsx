@@ -69,14 +69,14 @@ export default function ChangeUsernameSettings({ setEditName, editName, name, id
 
   return (
     <div className="w-full">
-      <h1 className="font-bold mb-2">Username</h1>
+      <h1 className="font-bold mb-2 text-xl">Username</h1>
       <form className="flex gap-8 w-full" onSubmit={(e) => changeName(e)}>
         <div className="relative w-full">
           <Input
             disabled={editName ? false : true}
             style={{ textShadow: 'none' }}
             className={
-              'font-medium text-l w-full cursor-pointer hover:bg-slate-100' +
+              'font-medium text-lg w-full cursor-pointer hover:bg-slate-100' +
               `${
                 ifNameValid === 'dublicate' || ifNameValid === 'false' || ifNameValid === 'already registered'
                   ? ' border-red-500 border-2 focus-visible:ring-0'

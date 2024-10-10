@@ -27,6 +27,19 @@ export default function HomePageFooter() {
   const axiosPrivate = useAxiosPrivate()
   const { globalState, setGlobalState } = useGlobalContext()
   const [friendsOpen, setFriendsOpen] = useState(globalState.friendsOpen)
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1024)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth < 1024)
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
   useEffect(() => {
     setFriendsOpen(globalState.friendsOpen)
@@ -79,34 +92,45 @@ export default function HomePageFooter() {
   }, [accountLevel])
 
   return (
-    <footer className="absolute bottom-0 left-0 px-4 py-4 z-50 h-min">
-      <div className="w-full justify-end items-center grid bg-white">
-        <div className="grid items-center justify-items-center gap-2 border rounded py-4 px-8 avatarCard shadow-md">
-          <Link to={`/socket/profile/${auth?.id}`}>
-            <Avatar className="size-12">
-              <AvatarImage />
-              <AvatarFallback>
-                <div className="">
-                  <img src={loading ? avatar : rankAvatar} alt="avatar" className="w-full" />
-                </div>
-              </AvatarFallback>
-            </Avatar>
-          </Link>
-          <p className="font-bold text-lg">{auth?.username}</p>
-          <Link to={`/socket/profile/${auth?.id}`} className="w-full">
-            <Button className="w-full" variant={'outline'}>
-              Profile
+    <footer className="absolute bottom-0 left-0 px-4 py-4 z-50 h-min transition-all">
+      {isSmallScreen ? null : (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.5 }}
+          className="w-full justify-end items-center grid bg-white"
+        >
+          <div className="grid items-center justify-items-center gap-2 border rounded py-4 px-8 avatarCard shadow-md">
+            <Link to={`/socket/profile/${auth?.id}`}>
+              <Avatar className="size-12">
+                <AvatarImage />
+                <AvatarFallback>
+                  <div className="">
+                    <img src={loading ? avatar : rankAvatar} alt="avatar" className="w-full" />
+                  </div>
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+            <p className="font-bold text-lg">{auth?.username}</p>
+            <Link to={`/socket/profile/${auth?.id}`} className="w-full">
+              <Button className="w-full" variant={'outline'}>
+                Profile
+              </Button>
+            </Link>
+            <Button
+              onClick={() => setGlobalState((prev) => ({ ...prev, friendsOpen: !friendsOpen }))}
+              className="w-full relative"
+              variant={'outline'}
+            >
+              {globalState?.newFriendInvite ? (
+                <div className="absolute top-1 right-1 bg-red-500 w-2 h-2 rounded-full animate-pulse"></div>
+              ) : null}
+              Friends
             </Button>
-          </Link>
-          <Button
-            onClick={() => setGlobalState((prev) => ({ ...prev, friendsOpen: !friendsOpen }))}
-            className="w-full"
-            variant={'outline'}
-          >
-            Friends
-          </Button>
-        </div>
-      </div>
+          </div>
+        </motion.div>
+      )}
     </footer>
   )
 }
