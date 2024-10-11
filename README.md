@@ -1,7 +1,37 @@
-<p align='center'>
-  <img src='https://private-user-images.githubusercontent.com/143904715/374578922-773f6d65-fa1f-4e44-871f-cf6640bfb2d0.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjgzOTQ3MTQsIm5iZiI6MTcyODM5NDQxNCwicGF0aCI6Ii8xNDM5MDQ3MTUvMzc0NTc4OTIyLTc3M2Y2ZDY1LWZhMWYtNGU0NC04NzFmLWNmNjY0MGJmYjJkMC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjQxMDA4JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI0MTAwOFQxMzMzMzRaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT05NTA3NjNhYzgwMzE0N2YyZTdkZTMxOWZjYzQxNTI3MzQ1MDY2YzhhYmU2MTFiZjBkODJkNjc2NDRhNzNiMTk4JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.wWonoL_EeHgVjY1GUr4kgciAvuwVbqmtqDwyqpH6UYE' />
-</p>
+Chessfull is an Online Chess Platform, a full-featured online chess experience built with modern web technologies. 
 
-<h1 align='center' style='text-align: center'>Chessfull is online chess platform</h1>
+Introduction
+This platform is designed to offer a seamless online chess experience, allowing players to engage with friends or random opponents, enjoy various game modes, and personalize their chess setup. It also includes a chat feature to communicate with others users. The app is responsive and works on both desktop and mobile devices.
 
-#
+Features
+Full Chess Experience: Play chess online with friends or random players.
+Game Modes: Support for Blitz, Bullet, and Rapid modes with different time controls.
+Account System: Create and manage user accounts with personal stats.
+Real-Time Gameplay: Use WebSockets for live game updates and reconnect functionality.
+Customization: Customize chess boards, pieces, animation speeds, and enable features like premoves and promotion piece selection.
+Friends and Messaging: Add friends, chat during games, and send messages through the built-in messenger.
+Reconnection Support: Automatically reconnect to your game if disconnected.
+Mobile-Friendly: Fully responsive, ensuring great gameplay on any device size.
+Technologies Used
+Frontend: React, React Router DOM, Tailwind CSS, Shadcn, Framer Motion, React-Chess-Board
+Backend: Node.js, Express
+Real-Time Communication: Socket.io
+Authentication: JWT (JSON Web Token)
+Form Management: React Hook Form, Zod
+Chess Logic: Chess.js
+Styling & Animations: Tailwind CSS, Shadcn, Framer Motion
+
+Game Modes
+Blitz: Fast-paced games with 3-5 minutes per player.
+Bullet: Ultra-fast games with only 1 minute per player.
+Rapid: Longer games with time controls ranging from 10-30 minutes.
+Customization
+Players can personalize their gameplay experience by modifying:
+
+Chess board and piece designs.
+Piece movement animations (adjustable speed).
+Premove functionality.
+Promotion piece selection (automatically queen or other pieces).
+Chat & Friends
+Friends System: Search for players, add friends, and view their game stats.
+Messenger: Use the platform’s chat feature to talk with other users outside of games.
