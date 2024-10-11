@@ -2,7 +2,6 @@ const User = require('../models/userModel')
 const asyncHandler = require('express-async-handler')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const cookie = require('cookie')
 
 // const handleLogin = asyncHandler(async (req, res, next) => {
 //   const { email, password } = req.body
@@ -80,9 +79,9 @@ const handleLogin = asyncHandler(async (req, res, next) => {
     await user.save()
 
     res.cookie('jwt', refreshToken, {
-      sameSite: 'None',
       httpOnly: true,
       secure: true,
+      sameSite: 'None',
       maxAge: 24 * 60 * 60 * 1000,
     })
 
