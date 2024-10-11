@@ -197,7 +197,18 @@ async function setupSocketIO(server) {
       const room = await Room.findOne({ id: data.roomId })
 
       room.state = data.fen
-      room.save()
+      try {
+        if (!room._saving) {
+          room._saving = true
+
+          await room.save()
+
+          // Reset the saving flag
+          room._saving = false
+        }
+      } catch {
+        console.error('Error during save:', error)
+      }
     })
 
     socket.on('offerDraw', async (data) => {
@@ -428,7 +439,18 @@ async function setupSocketIO(server) {
           blackTime: game.blackTime,
           activePlayer: game.activePlayer,
         }
-        await room.save()
+        try {
+          if (!room._saving) {
+            room._saving = true
+
+            await room.save()
+
+            // Reset the saving flag
+            room._saving = false
+          }
+        } catch {
+          console.error('Error during save:', error)
+        }
       }
     }, 1000)
   }
@@ -474,7 +496,19 @@ async function setupSocketIO(server) {
     }
 
     room.state = fen
-    await room.save()
+
+    try {
+      if (!room._saving) {
+        room._saving = true
+
+        await room.save()
+
+        // Reset the saving flag
+        room._saving = false
+      }
+    } catch {
+      console.error('Error during save:', error)
+    }
     console.log(`move ${move} in ${roomId}`)
     io.to(roomId).emit('move', move)
   }
@@ -525,7 +559,18 @@ async function setupSocketIO(server) {
     }
 
     room.socketId = room.socketId.filter((id) => id !== socketId)
-    await room.save()
+    try {
+      if (!room._saving) {
+        room._saving = true
+
+        await room.save()
+
+        // Reset the saving flag
+        room._saving = false
+      }
+    } catch {
+      console.error('Error during save:', error)
+    }
     io.to(room.socketId[0]).emit('opponentDisconnected')
 
     timeToReconnect = setTimeout(async () => {
