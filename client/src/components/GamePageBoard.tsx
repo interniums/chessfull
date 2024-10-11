@@ -766,7 +766,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
           className="lg:h-full lg:min-h-screen"
           style={{ maxWidth: '85vh', width: !isSmallScreen ? '85vh' : '100%' }}
         >
-          <div className="w-full flex items-center justify-center gap-8 pt-20 lg:mt-8 lg:pt-0">
+          <div className="w-full flex items-center justify-center gap-8 pt-20 lg:mt-8 lg:pt-0 lg:mb-6">
             <div
               className={
                 chess.turn() === 'w' && !gameState?.winner.length
