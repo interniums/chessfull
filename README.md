@@ -1,9 +1,11 @@
 Chessfull is an Online Chess Platform, a full-featured online chess experience built with modern web technologies. 
 
 Introduction
+
 This platform is designed to offer a seamless online chess experience, allowing players to engage with friends or random opponents, enjoy various game modes, and personalize their chess setup. It also includes a chat feature to communicate with others users. The app is responsive and works on both desktop and mobile devices.
 
 Features
+
 Full Chess Experience: Play chess online with friends or random players.
 Game Modes: Support for Blitz, Bullet, and Rapid modes with different time controls.
 Account System: Create and manage user accounts with personal stats.
@@ -22,12 +24,14 @@ Chess Logic: Chess.js
 Styling & Animations: Tailwind CSS, Shadcn, Framer Motion
 
 Game Modes
+
 Blitz: Fast-paced games with 3-5 minutes per player.
 Bullet: Ultra-fast games with only 1 minute per player.
 Rapid: Longer games with time controls ranging from 10-30 minutes.
-Customization
-Players can personalize their gameplay experience by modifying:
 
+Customization
+
+Players can personalize their gameplay experience by modifying:
 Chess board and piece designs.
 Piece movement animations (adjustable speed).
 Premove functionality.
