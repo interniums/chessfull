@@ -9,6 +9,7 @@ const getGameState = asyncHandler(async (req, res, next) => {
   }
 
   const room = await Room.findOne({ id: id })
+  console.log(room)
   if (!room) {
     return res.status(404).json({ message: 'Invalid id' })
   }
