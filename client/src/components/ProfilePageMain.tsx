@@ -21,6 +21,7 @@ import joined from '../assets/images/group-svgrepo-com.svg'
 import winrate from '../assets/images/win-svgrepo-com.svg'
 import { axiosPrivate } from '@/api/axios'
 import useAxiosPrivate from '@/hooks/useAxiosPrivate'
+import loadinggif from '../assets/images/loading gif.webp'
 import useAuth from '@/hooks/useAuth'
 import {
   CheckIcon,
@@ -258,8 +259,10 @@ export default function ProfilePageMain() {
       {loading ? (
         <main className="inset-0 absolute z-50 bg-white flex items-center justify-center">
           <div className="grid gap-6">
-            <ReloadIcon className="animate-spin size-56" />
-            <h1 className="text-center text-3xl">Loading...</h1>
+            {/* <ReloadIcon className="animate-spin size-56" />
+            <h1 className="text-center text-3xl">Loading...</h1> */}
+            <img src={loadinggif} alt="loading" className="size-56" />
+            <div className="dot-elastic"></div>
           </div>
         </main>
       ) : (

@@ -10,6 +10,7 @@ import { motion } from 'framer-motion'
 import { useOutletContext } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { toast, useToast } from '@/hooks/use-toast'
+import loadinggif from '../assets/images/loading gif.webp'
 
 export default function GameEndDialog({ setOpenEndDialog, gameState, mode, loading, players }) {
   const { auth } = useAuth()
@@ -93,10 +94,12 @@ export default function GameEndDialog({ setOpenEndDialog, gameState, mode, loadi
             {loading ? (
               <div className="min-h-80 py-8 px-16">
                 <div className="grid gap-6 items-center justify-center">
-                  <div className="w-full flex items-center justify-center">
+                  {/* <div className="w-full flex items-center justify-center">
                     <ReloadIcon className="animate-spin size-44" />
                   </div>
-                  <div className="text-center text-2xl">Loading...</div>
+                  <div className="text-center text-2xl">Loading...</div> */}
+                  <img src={loadinggif} alt="loading" className="size-44" />
+                  <div className="dot-elastic"></div>
                 </div>
               </div>
             ) : (

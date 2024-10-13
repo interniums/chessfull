@@ -10,6 +10,7 @@ import { Button } from './ui/button'
 import { PaperPlaneIcon, ReloadIcon } from '@radix-ui/react-icons'
 import send from '../assets/images/send-alt-2-svgrepo-com.svg'
 import leftArrow from '../assets/images/left-arrow-svgrepo-com.svg'
+import loadinggif from '../assets/images/loading gif.webp'
 
 export default function Messanger({ conversationId, companion, setShowMessages, setConversationId }) {
   const { auth } = useAuth()
@@ -106,8 +107,10 @@ export default function Messanger({ conversationId, companion, setShowMessages, 
       {loading ? (
         <div className="grid gap-6 items-center justify-center h-full">
           <div>
-            <ReloadIcon className="animate-spin size-56 mb-6" />
-            <h1 className="text-center text-3xl">Loading...</h1>
+            {/* <ReloadIcon className="animate-spin size-56 mb-6" />
+            <h1 className="text-center text-3xl">Loading...</h1> */}
+            <img src={loadinggif} alt="loading" className="size-56 mb-6" />
+            <div className="dot-elastic"></div>
           </div>
         </div>
       ) : (

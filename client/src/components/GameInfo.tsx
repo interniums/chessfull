@@ -11,6 +11,7 @@ import { Avatar, AvatarImage } from './ui/avatar'
 import avatar from '../assets/images/avatar.svg'
 import CapturedPieces from './GameInfoMainCapturedPiece'
 import InGameSettings from './InGameSettings'
+import loadinggif from '../assets/images/loading gif.webp'
 
 export default function GameInfo({
   mode,
@@ -75,10 +76,12 @@ export default function GameInfo({
       {loading ? (
         <div className="min-h-80 py-8 px-16">
           <div className="grid gap-6 items-center justify-center">
-            <div className="w-full flex items-center justify-center">
+            {/* <div className="w-full flex items-center justify-center">
               <ReloadIcon className="animate-spin size-44" />
             </div>
-            <div className="text-center text-2xl">Loading...</div>
+            <div className="text-center text-2xl">Loading...</div> */}
+            <img src={loadinggif} alt="loading" className="size-44" />
+            <div className="dot-elastic"></div>
           </div>
         </div>
       ) : (

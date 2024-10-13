@@ -249,8 +249,9 @@ export default function RegisterPageMain() {
               >
                 {loading ? (
                   <>
-                    <ReloadIcon className="animate-spin sm:size-6 size-4 mr-2" />
-                    Loading
+                    {/* <ReloadIcon className="animate-spin sm:size-6 size-4 mr-2" />
+                    Loading */}
+                    <div className="dot-elastic"></div>
                   </>
                 ) : (
                   'Register'

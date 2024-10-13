@@ -10,6 +10,7 @@ import rank3 from '../assets/images/frame3.png'
 import rank4 from '../assets/images/frame4.png'
 import rank5 from '../assets/images/frame5.png'
 import rank6 from '../assets/images/frame6.png'
+import loadinggif from '../assets/images/loading gif.webp'
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group'
 import { Button } from './ui/button'
 import { useEffect, useState } from 'react'
@@ -103,9 +104,10 @@ export default function HomePageMain() {
         <div>
           <div className="text-2xl md:text-2xl lg:text-3xl text-center flex items-center justify-center">
             {loading ? (
-              <div className="animate-spin">
-                <ReloadIcon className="size-7" />
-              </div>
+              // <div className="animate-spin">
+              //   <ReloadIcon className="size-7" />
+              // </div>
+              <div className="dot-elastic"></div>
             ) : (
               title
             )}
@@ -117,9 +119,10 @@ export default function HomePageMain() {
         <div>
           <div className="text-xl sm:text-xl md:text-2xl text-center font-medium flex items-center justify-center">
             {loading ? (
-              <div className="animate-spin">
-                <ReloadIcon className="size-7" />
-              </div>
+              // <div className="animate-spin">
+              //   <ReloadIcon className="size-7" />
+              // </div>
+              <div className="dot-elastic"></div>
             ) : (
               <div>
                 Elo: <span>{elo}</span>

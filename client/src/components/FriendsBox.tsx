@@ -20,6 +20,7 @@ import remove from '../assets/images/remove-square-svgrepo-com.svg'
 import reject from '../assets/images/delete-remove-uncheck-svgrepo-com.svg'
 import accept from '../assets/images/accept-check-good-mark-ok-tick-svgrepo-com.svg'
 import useAuth from '@/hooks/useAuth'
+import loadinggif from '../assets/images/loading gif.webp'
 
 export default function FriendsBox() {
   const axiosPrivate = useAxiosPrivate()
@@ -271,8 +272,10 @@ export default function FriendsBox() {
             {loading ? (
               <div className="flex justify-center items-center w-full h-full">
                 <div className="grid items-center justify-center">
-                  <ReloadIcon className="size-20 animate-spin" />
-                  <div>loading...</div>
+                  {/* <ReloadIcon className="size-20 animate-spin" />
+                  <div>loading...</div> */}
+                  <img src={loadinggif} alt="loading" className="size-20" />
+                  <div className="dot-elastic"></div>
                 </div>
               </div>
             ) : (

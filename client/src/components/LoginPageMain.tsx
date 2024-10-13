@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { Label } from './ui/label'
 import { Input } from './ui/input'
+import loadinggif from '../assets/images/loading gif.webp'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import UserSchema from '@/utils/LoginUserSchema'
@@ -220,8 +221,9 @@ export default function LoginPageMain() {
             >
               {loading ? (
                 <>
-                  <ReloadIcon className="animate-spin sm:size-6 size-4 mr-2" />
-                  Loading
+                  {/* <ReloadIcon className="animate-spin sm:size-6 size-4 mr-2" />
+                  Loading */}
+                  <div className="dot-elastic"></div>
                 </>
               ) : (
                 'Login'
