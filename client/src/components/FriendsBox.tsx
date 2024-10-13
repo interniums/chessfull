@@ -52,9 +52,12 @@ export default function FriendsBox() {
 
     const getFriendsInfo = async () => {
       try {
-        const response = await axiosPrivate.get(`chessfull-production.up.railway.app/user/${auth?.id}/getFriends`, {
-          signal: controller.signal,
-        })
+        const response = await axiosPrivate.get(
+          `https://chessfull-production.up.railway.app/user/${auth?.id}/getFriends`,
+          {
+            signal: controller.signal,
+          }
+        )
         setFriendsInfo(response?.data.userFriendsInfo || [])
         setFriendsInvites(response?.data.userInvitesInfo || [])
       } catch (err) {
