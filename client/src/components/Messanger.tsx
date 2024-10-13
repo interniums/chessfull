@@ -177,19 +177,21 @@ export default function Messanger({ conversationId, companion, setShowMessages, 
           </div>
         </>
       )}
-      <form
-        style={{ height: '10%' }}
-        className="h-1/6 px-4 flex items-end justify-center gap-8 sticky bottom-0"
-        onSubmit={(e) => {
-          e.preventDefault()
-          sendMessage()
-        }}
-      >
-        <Input value={newMessage} onChange={(e) => setNewMessage(e.target.value)} className="cursor-pointer" />
-        <Button className="text-lg flex items-center justify-center gap-2" variant={'outline'}>
-          <img src={send} alt="send" className="size-10" />
-        </Button>
-      </form>
+      {loading ? null : (
+        <form
+          style={{ height: '10%' }}
+          className="h-1/6 px-4 flex items-end justify-center gap-8 sticky bottom-0"
+          onSubmit={(e) => {
+            e.preventDefault()
+            sendMessage()
+          }}
+        >
+          <Input value={newMessage} onChange={(e) => setNewMessage(e.target.value)} className="cursor-pointer" />
+          <Button className="text-lg flex items-center justify-center gap-2" variant={'outline'}>
+            <img src={send} alt="send" className="size-10" />
+          </Button>
+        </form>
+      )}
     </div>
   )
 }
