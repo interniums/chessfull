@@ -14,7 +14,7 @@ Features
 * Friends and Messaging: Add friends, chat during games, and send messages through the built-in messenger.
 * Reconnection Support: Automatically reconnect to your game if disconnected.
 * Mobile-Friendly: Fully responsive, ensuring great gameplay on any device size.
-* 
+  
 Technologies Used
 
 * Frontend: React, React Router DOM, Tailwind CSS, Shadcn, Framer Motion, React-Chess-Board
