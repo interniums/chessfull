@@ -55,12 +55,11 @@ export default function SocketProvider() {
       }
     }
 
-    const handleStartGame = ({ roomId, players, mode, orientation }) => {
+    const handleStartGame = async ({ roomId, players, mode, orientation }) => {
       if (!isDynamicGameRoute.test(location.pathname)) {
         navigate(`/socket/game/${roomId}`, { state: { roomId, players, mode, orientation } })
       } else {
-        navigate(`/socket/game/${roomId}`, { state: { roomId, players, mode, orientation } })
-        window.location.reload()
+        navigate(`/socket/game/${roomId}`, { state: { roomId, players, mode, orientation, reloadPageFromState: true } })
       }
     }
 

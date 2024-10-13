@@ -269,8 +269,11 @@ export default function FriendsBox() {
           </TabsList>
           <TabsContent value="friends" className="max-h-80 min-h-80 h-full overflow-y-auto">
             {loading ? (
-              <div className="flex justify-center items-center">
-                <ReloadIcon className="w-12 h-12 animate-spin" />
+              <div className="flex justify-center items-center w-full h-full">
+                <div className="grid items-center justify-center">
+                  <ReloadIcon className="size-20 animate-spin" />
+                  <div>loading...</div>
+                </div>
               </div>
             ) : (
               friendsInfo?.map((friend, index) => (

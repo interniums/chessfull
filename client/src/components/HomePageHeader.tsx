@@ -65,8 +65,9 @@ export default function HomePageHeader() {
                       </div>
                       <div
                         onClick={() => {
-                          navigate(`/socket/home`, { state: { showCreateGameDialogFromState: true } })
-                          window.location.reload()
+                          navigate(`/socket/home`, {
+                            state: { showCreateGameDialogFromState: true, reloadPageFromState: true },
+                          })
                         }}
                         className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200"
                       >
@@ -94,10 +95,7 @@ export default function HomePageHeader() {
                     <AccordionContent>
                       <Button
                         onClick={() => {
-                          navigate(`/socket/profile/${auth.id}`)
-                          setTimeout(() => {
-                            window.location.reload()
-                          }, 100)
+                          navigate(`/socket/profile/${auth.id}`, { state: { reloadPageFromState: true } })
                         }}
                         className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200 border-none w-full justify-start"
                         variant={'ghost'}
@@ -115,10 +113,7 @@ export default function HomePageHeader() {
                       </div>
                       <div
                         onClick={() => {
-                          navigate('/socket/messages')
-                          setTimeout(() => {
-                            window.location.reload()
-                          }, 100)
+                          navigate('/socket/messages', { state: { reloadPageFromState: true } })
                         }}
                         className={
                           globalState?.newMessage
@@ -136,11 +131,12 @@ export default function HomePageHeader() {
                       <div
                         onClick={() => {
                           navigate(`/socket/profile/${auth.id}`, {
-                            state: { showSettingsOpenFromState: true, activeTabFromState: 'account' },
+                            state: {
+                              showSettingsOpenFromState: true,
+                              activeTabFromState: 'account',
+                              reloadPageFromState: true,
+                            },
                           })
-                          setTimeout(() => {
-                            window.location.reload()
-                          }, 100)
                         }}
                         className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200"
                       >
@@ -149,11 +145,12 @@ export default function HomePageHeader() {
                       <div
                         onClick={() => {
                           navigate(`/socket/profile/${auth.id}`, {
-                            state: { activeTabFromState: 'game', showSettingsOpenFromState: true },
+                            state: {
+                              activeTabFromState: 'game',
+                              showSettingsOpenFromState: true,
+                              reloadPageFromState: true,
+                            },
                           })
-                          setTimeout(() => {
-                            window.location.reload()
-                          }, 100)
                         }}
                         className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200"
                       >

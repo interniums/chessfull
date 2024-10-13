@@ -10,8 +10,15 @@ import GamePageBoard from '@/components/GamePageBoard'
 
 export default function GamePage() {
   const { state } = useLocation()
-  const { roomId, players, mode, orientation } = state
+  const { roomId, players, mode, orientation, reloadPageFromState } = state
   const [sock] = useOutletContext()
+  const [reloadPage, setReloadPage] = useState(reloadPageFromState || false)
+
+  useEffect(() => {
+    if (reloadPage) {
+      window.location.reload()
+    }
+  }, [])
 
   return (
     <>

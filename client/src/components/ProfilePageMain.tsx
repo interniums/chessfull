@@ -62,9 +62,10 @@ export default function ProfilePageMain() {
   const [playerStats, setPlayerStats] = useState({})
   const [isItUserProfile, setIsItUserProfile] = useState()
   const { state } = useLocation()
-  const { showSettingsOpenFromState, activeTabFromState } = state || false
+  const { showSettingsOpenFromState, activeTabFromState, reloadPageFromState } = state || false
   const [settingsOpen, setSettingsOpen] = useState(showSettingsOpenFromState || false)
   const [activeTab, setActiveTab] = useState(activeTabFromState || 'account')
+  const [reloadPage, setReloadPage] = useState(reloadPageFromState || false)
 
   const [name, setName] = useState('')
   const [editName, setEditName] = useState(false)
@@ -78,6 +79,12 @@ export default function ProfilePageMain() {
   const isFirstRender = useRef(true)
   const [sock] = useOutletContext()
   const logout = useLogout()
+
+  useEffect(() => {
+    if (reloadPage) {
+      window.location.reload()
+    }
+  }, [])
 
   const handleLogout = async () => {
     await logout()

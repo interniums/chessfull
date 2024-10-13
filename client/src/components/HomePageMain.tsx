@@ -1,7 +1,6 @@
 // @ts-nocheck
 
 import HomePageFooter from './HomePageFooter'
-import HomePageHeader from './HomePageHeader'
 import pawn from '../assets/images/pawn.png'
 import queen from '../assets/images/queen.png'
 import rook from '../assets/images/rook.png'
@@ -15,7 +14,6 @@ import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group'
 import { Button } from './ui/button'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom'
-import { ToastAction } from './ui/toast'
 import { Avatar, AvatarImage } from './ui/avatar'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select'
@@ -34,7 +32,7 @@ export default function HomePageMain() {
   const axiosPrivate = useAxiosPrivate()
   const { globalState, setGlobalState } = useGlobalContext()
   const { state } = useLocation()
-  const { showCreateGameDialogFromState } = state || false
+  const { showCreateGameDialogFromState, reloadPageFromPage } = state || false
 
   const [gameMode, setGameMode] = useState('')
   const [startGame, setStartGame] = useState(false)
@@ -44,6 +42,13 @@ export default function HomePageMain() {
   const [inviteInfo, setInviteInfo] = useState({ from: auth?.id, to: '', gamemode: '', fromName: auth?.username })
   const [user, setUser] = useState({})
   const [sock] = useOutletContext()
+  const [reloadPage, setReloadPage] = useState(reloadPageFromPage || false)
+
+  useEffect(() => {
+    if (reloadPage) {
+      window.location.reload()
+    }
+  }, [])
 
   useEffect(() => {
     const controller = new AbortController()

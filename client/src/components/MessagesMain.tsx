@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { useEffect, useState } from 'react'
+import { useDeferredValue, useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useOutletContext } from 'react-router-dom'
 import Messanger from './Messanger'
 import { axiosPrivate } from '@/api/axios'
@@ -24,6 +24,7 @@ export default function MessagesMain() {
     companionFromState,
     createConversation,
     createIdFromState,
+    reloadPageFromState,
   } = state || false
   const [loading, setLoading] = useState(false)
   const [conversations, setConversations] = useState([])
@@ -32,6 +33,13 @@ export default function MessagesMain() {
   const [companion, setCompanion] = useState(companionFromState || '')
   const [focus, setFocus] = useState('')
   const { globalState, setGlobalState } = useGlobalContext()
+  const [reloadPage, setReloadPage] = useState(reloadPageFromState || false)
+
+  useEffect(() => {
+    if (reloadPage) {
+      window.location.reload()
+    }
+  }, [])
 
   useEffect(() => {
     if (conversationId === globalState?.conversationId) {

@@ -14,6 +14,7 @@ import move from '../assets/sounds/move.mp3'
 import capture from '../assets/sounds/capture.mp3'
 import endGame from '../assets/sounds/endGame.mp3'
 import UIfx from 'uifx'
+import { useLocation } from 'react-router-dom'
 
 export default function GamePageBoard({ mode, players, moves, setMoves, roomId, orientation, sock }) {
   const player1Orientation = orientation
@@ -34,7 +35,10 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
   const { auth } = useAuth()
   const chess = useMemo(() => new Chess(), [])
   const axiosPrivate = useAxiosPrivate()
+  // const { state } = useLocation()
+  // const { reloadPageFromState } = state
 
+  // const [reloadPage, setReloadPage] = useState(true)
   const [history, setHistory] = useState([])
   const [gameState, setGameState] = useState({
     over: '',
@@ -72,6 +76,12 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
   const [blackTime, setBlackTime] = useState(300)
   const [activePlayer, setActivePlayer] = useState('white')
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1024)
+
+  // useEffect(() => {
+  //   if (reloadPage) {
+  //     window.location.reload()
+  //   }
+  // }, [])
 
   useEffect(() => {
     const handleResize = () => {
