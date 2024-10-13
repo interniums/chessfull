@@ -319,6 +319,9 @@ const addFriend = asyncHandler(async (req, res, next) => {
   if (user.friendsInvites.includes(id)) {
     return res.status(101).json({ message: 'Invite already sent' })
   }
+  if (user.friends.includes(id)) {
+    return
+  }
 
   user.friendsInvites.push(id)
   await user.save()
@@ -368,11 +371,15 @@ const acceptFriend = asyncHandler(async (req, res, next) => {
   if (!acceptedUser) {
     return res.status(404).json({ message: 'Invalid id' })
   }
+  if (user.friends.includes(acceptedId) || acceptedUser.friends.includes(id)) {
+    return res.status(101).json({ message: 'Already friends' })
+  }
 
   user.friendsInvites = user.friendsInvites.filter((item) => item !== acceptedId)
   user.friends.push(acceptedId)
   await user.save()
 
+  acceptedUser.friendsInvites = acceptedUser.friendsInvites.filter((item) => item !== id)
   acceptedUser.friends.push(id)
   await acceptedUser.save()
 
@@ -391,8 +398,6 @@ const rejectFriend = asyncHandler(async (req, res, next) => {
   if (!user) {
     return res.status(404).json({ message: 'Invalid id' })
   }
-
-  console.log(user.friendsInvites.filter((item) => item !== rejectedId))
 
   user.friendsInvites = user.friendsInvites.filter((item) => item !== rejectedId)
   await user.save()

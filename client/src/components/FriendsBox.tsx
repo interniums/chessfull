@@ -316,12 +316,12 @@ export default function FriendsBox() {
                       }}
                       src={chat}
                       alt="chat"
-                      className="w-8 h-8 cursor-pointer hover:opacity-90"
+                      className="w-8 h-8 cursor-pointer hover:scale-105"
                     />
                     <img
                       title="Remove friend"
                       src={remove}
-                      className="w-8 h-8 cursor-pointer hover:opacity-90"
+                      className="w-8 h-8 cursor-pointer hover:scale-105"
                       onClick={(e) => {
                         e.stopPropagation()
                         removeFriend(friend.id, friend.name)
@@ -334,9 +334,11 @@ export default function FriendsBox() {
           </TabsContent>
           <TabsContent value="invites" className="max-h-80 min-h-80 h-full overflow-y-auto">
             {loading ? (
-              <div className="flex items-center justify-center w-full h-full">
-                <ReloadIcon className="animate-spin size-20" />
-                <p>Loading...</p>
+              <div className="grid items-center justify-center w-full h-full">
+                <div className="grid items-center justify-center">
+                  <ReloadIcon className="animate-spin size-20" />
+                  <p>Loading...</p>
+                </div>
               </div>
             ) : (
               <>
