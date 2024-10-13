@@ -154,7 +154,7 @@ export default function GameInfo({
                       {players[0].id == auth.id ? players[1]?.name : players[0]?.name}
                     </div>
                   </div>
-                  <div>
+                  <div className="ml-2">
                     {opponentDisconnected && (
                       <h1 className="text-red-400 animate-pulse">Waiting for opponent to connect...</h1>
                     )}
@@ -172,7 +172,9 @@ export default function GameInfo({
                     />
                   </div>
                 </div>
-                <p>vs</p>
+                <div className="flex items-center justify-center">
+                  <p>vs</p>
+                </div>
                 <div>
                   <div className="flex items-center justify-start">
                     <div
@@ -196,7 +198,7 @@ export default function GameInfo({
                       <AvatarImage className="p-1.5" src={avatar} />
                     </Avatar>
                   </div>
-                  <div>
+                  <div className="mr-2">
                     <hr className="mb-2" />
                     <div className="text-center mb-2">
                       <span className="font-bold text-md">

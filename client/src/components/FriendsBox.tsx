@@ -106,13 +106,18 @@ export default function FriendsBox() {
   // Accept friend invite
   const acceptFriends = async (id, name) => {
     const controller = new AbortController()
+    setLoading(true)
 
     try {
-      await axiosPrivate.post(`https://chessfull-production.up.railway.app/user/${auth.id}/acceptFriend`, {
-        signal: controller.signal,
-        acceptedId: id,
-      })
+      const response = await axiosPrivate.post(
+        `https://chessfull-production.up.railway.app/user/${auth.id}/acceptFriend`,
+        {
+          signal: controller.signal,
+          acceptedId: id,
+        }
+      )
       setForceUpdate((prev) => !prev)
+      setLoading(false)
       toast({ title: `You and ${name} are now friends` })
     } catch (err) {
       console.error(err)
@@ -122,6 +127,7 @@ export default function FriendsBox() {
   // Reject friend invite
   const rejectFriends = async (id) => {
     const controller = new AbortController()
+    setLoading(true)
 
     try {
       await axiosPrivate.post(`https://chessfull-production.up.railway.app/user/${auth.id}/rejectFriend`, {
@@ -129,6 +135,7 @@ export default function FriendsBox() {
         rejectedId: id,
       })
       setFriendsInvites((prev) => prev.filter((invite) => invite.id !== id))
+      setLoading(false)
       toast({ title: 'Friend invite rejected' })
     } catch (err) {
       console.error(err)
@@ -339,7 +346,7 @@ export default function FriendsBox() {
                   <img
                     title="Accept"
                     src={accept}
-                    className="w-8 h-8 cursor-pointer hover:opacity-90"
+                    className="w-8 h-8 cursor-pointer hover:scale-105"
                     onClick={() => {
                       acceptFriends(invite.id, invite.name)
                       setGlobalState((prev) => ({ ...prev, newFriendInvite: false }))
@@ -348,7 +355,7 @@ export default function FriendsBox() {
                   <img
                     title="Reject"
                     src={reject}
-                    className="w-8 h-8 cursor-pointer hover:opacity-90"
+                    className="w-8 h-8 cursor-pointer hover:scale-105"
                     onClick={() => {
                       rejectFriends(invite.id)
                       setGlobalState((prev) => ({ ...prev, newFriendInvite: false }))
