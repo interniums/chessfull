@@ -331,39 +331,48 @@ export default function FriendsBox() {
             )}
           </TabsContent>
           <TabsContent value="invites" className="max-h-80 min-h-80 h-full overflow-y-auto">
-            {friendsInvites?.map((invite, index) => (
-              <div
-                className="hover:bg-slate-300 cursor-pointer p-2 flex items-center justify-between text-ellipsis rounded"
-                key={invite.id || index}
-              >
-                <div className="flex items-center gap-2">
-                  <Avatar>
-                    <AvatarImage title="account level" src={getImg(invite.accountLevel)} />
-                  </Avatar>
-                  <div className="font-medium">{invite.name}</div>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <img
-                    title="Accept"
-                    src={accept}
-                    className="w-8 h-8 cursor-pointer hover:scale-105"
-                    onClick={() => {
-                      acceptFriends(invite.id, invite.name)
-                      setGlobalState((prev) => ({ ...prev, newFriendInvite: false }))
-                    }}
-                  />
-                  <img
-                    title="Reject"
-                    src={reject}
-                    className="w-8 h-8 cursor-pointer hover:scale-105"
-                    onClick={() => {
-                      rejectFriends(invite.id)
-                      setGlobalState((prev) => ({ ...prev, newFriendInvite: false }))
-                    }}
-                  />
-                </div>
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <ReloadIcon className="animate-spin size-12" />
+                <p>Loading...</p>
               </div>
-            ))}
+            ) : (
+              <>
+                {friendsInvites?.map((invite, index) => (
+                  <div
+                    className="hover:bg-slate-300 cursor-pointer p-2 flex items-center justify-between text-ellipsis rounded"
+                    key={invite.id || index}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Avatar>
+                        <AvatarImage title="account level" src={getImg(invite.accountLevel)} />
+                      </Avatar>
+                      <div className="font-medium">{invite.name}</div>
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <img
+                        title="Accept"
+                        src={accept}
+                        className="w-8 h-8 cursor-pointer hover:scale-105"
+                        onClick={() => {
+                          acceptFriends(invite.id, invite.name)
+                          setGlobalState((prev) => ({ ...prev, newFriendInvite: false }))
+                        }}
+                      />
+                      <img
+                        title="Reject"
+                        src={reject}
+                        className="w-8 h-8 cursor-pointer hover:scale-105"
+                        onClick={() => {
+                          rejectFriends(invite.id)
+                          setGlobalState((prev) => ({ ...prev, newFriendInvite: false }))
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
           </TabsContent>
         </Tabs>
       </DialogContent>
