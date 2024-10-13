@@ -85,8 +85,6 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     }
   }, [])
 
-  console.log(isSmallScreen)
-
   const waitDrawAnswerRef = useRef(waitDrawAnswer)
   const overRef = useRef(gameState?.over)
   const isFirstRender = useRef(true)
@@ -214,7 +212,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
 
     const getState = async () => {
       try {
-        const response = await axiosPrivate.get(`https://chessfull-production.up.railway.app/state/${roomId}`, {
+        const response = await axiosPrivate.get(`https://chessfull-production.up.railway.app/game/state/${roomId}`, {
           signal: controller.signal,
         })
         isMounted && loadGameState(response.data)
@@ -633,7 +631,6 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
     sock.on('offerDraw', handleOfferDraw)
     sock.on('drawRefused', handleDrawRefused)
     sock.on('disconnect', handleDisconnect)
-    // timer update
     sock.on('timerUpdate', (data) => {
       setWhiteTime(data.whiteTime)
       setBlackTime(data.blackTime)

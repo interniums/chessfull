@@ -23,6 +23,7 @@ import useAuth from '@/hooks/useAuth'
 import useAxiosPrivate from '@/hooks/useAxiosPrivate'
 import { useToast } from '@/hooks/use-toast'
 import { useGlobalContext } from '@/context/GlobalContext'
+import { ReloadIcon } from '@radix-ui/react-icons'
 
 export default function HomePageMain() {
   const TIME_TO_RECONNECT = 20000
@@ -46,6 +47,7 @@ export default function HomePageMain() {
 
   useEffect(() => {
     const controller = new AbortController()
+    setLoading(true)
 
     const fetchData = async (url, setter) => {
       try {
@@ -73,6 +75,7 @@ export default function HomePageMain() {
     getFriendsInfo()
     getUserData()
 
+    setLoading(false)
     return () => controller.abort()
   }, [auth.id])
 
@@ -173,6 +176,7 @@ export default function HomePageMain() {
                 title={mode.charAt(0).toUpperCase() + mode.slice(1)}
                 image={mode === 'bullet' ? rook : mode === 'blitz' ? queen : pawn}
                 elo={user[`${mode}Elo`]}
+                loading={loading}
               />
             </ToggleGroupItem>
           ))}
@@ -199,19 +203,35 @@ export default function HomePageMain() {
   )
 }
 
-function GameModeCard({ title, image, elo }) {
+function GameModeCard({ title, image, elo, loading }) {
   return (
     <div className="grid items-center justify-center">
       <div>
-        <h1 className="text-2xl md:text-2xl lg:text-3xl text-center">{title}</h1>
+        <div className="text-2xl md:text-2xl lg:text-3xl text-center flex items-center justify-center">
+          {loading ? (
+            <div className="animate-spin">
+              <ReloadIcon className="size-7" />
+            </div>
+          ) : (
+            title
+          )}
+        </div>
       </div>
       <div className="w-full flex items-center justify-center">
         <img src={image} alt={title} className="size-24 md:size-28 lg:size-32 object-cover" />
       </div>
       <div>
-        <h1 className="text-xl sm:text-xl md:text-2xl  text-center font-medium">
-          Elo: <span>{elo}</span>
-        </h1>
+        <div className="text-xl sm:text-xl md:text-2xl text-center font-medium flex items-center justify-center">
+          {loading ? (
+            <div className="animate-spin">
+              <ReloadIcon className="size-7" />
+            </div>
+          ) : (
+            <div>
+              Elo: <span>{elo}</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
