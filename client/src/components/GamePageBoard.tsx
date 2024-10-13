@@ -35,10 +35,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
   const { auth } = useAuth()
   const chess = useMemo(() => new Chess(), [])
   const axiosPrivate = useAxiosPrivate()
-  // const { state } = useLocation()
-  // const { reloadPageFromState } = state
 
-  // const [reloadPage, setReloadPage] = useState(true)
   const [history, setHistory] = useState([])
   const [gameState, setGameState] = useState({
     over: '',
@@ -76,12 +73,6 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
   const [blackTime, setBlackTime] = useState(300)
   const [activePlayer, setActivePlayer] = useState('white')
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1024)
-
-  // useEffect(() => {
-  //   if (reloadPage) {
-  //     window.location.reload()
-  //   }
-  // }, [])
 
   useEffect(() => {
     const handleResize = () => {

@@ -66,8 +66,9 @@ export default function HomePageHeader() {
                       <div
                         onClick={() => {
                           navigate(`/socket/home`, {
-                            state: { showCreateGameDialogFromState: true, reloadPageFromState: true },
+                            state: { showCreateGameDialogFromState: true },
                           })
+                          window.location.reload()
                         }}
                         className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200"
                       >
@@ -95,7 +96,8 @@ export default function HomePageHeader() {
                     <AccordionContent>
                       <Button
                         onClick={() => {
-                          navigate(`/socket/profile/${auth.id}`, { state: { reloadPageFromState: true } })
+                          navigate(`/socket/profile/${auth.id}`)
+                          window.location.reload()
                         }}
                         className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200 border-none w-full justify-start"
                         variant={'ghost'}
@@ -113,7 +115,8 @@ export default function HomePageHeader() {
                       </div>
                       <div
                         onClick={() => {
-                          navigate('/socket/messages', { state: { reloadPageFromState: true } })
+                          navigate('/socket/messages')
+                          window.location.reload()
                         }}
                         className={
                           globalState?.newMessage
@@ -134,9 +137,9 @@ export default function HomePageHeader() {
                             state: {
                               showSettingsOpenFromState: true,
                               activeTabFromState: 'account',
-                              reloadPageFromState: true,
                             },
                           })
+                          window.location.reload()
                         }}
                         className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200"
                       >
@@ -148,9 +151,9 @@ export default function HomePageHeader() {
                             state: {
                               activeTabFromState: 'game',
                               showSettingsOpenFromState: true,
-                              reloadPageFromState: true,
                             },
                           })
+                          window.location.reload()
                         }}
                         className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200"
                       >

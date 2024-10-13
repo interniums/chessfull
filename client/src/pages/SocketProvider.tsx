@@ -59,7 +59,8 @@ export default function SocketProvider() {
       if (!isDynamicGameRoute.test(location.pathname)) {
         navigate(`/socket/game/${roomId}`, { state: { roomId, players, mode, orientation } })
       } else {
-        navigate(`/socket/game/${roomId}`, { state: { roomId, players, mode, orientation, reloadPageFromState: true } })
+        navigate(`/socket/game/${roomId}`, { state: { roomId, players, mode, orientation } })
+        window.location.reload()
       }
     }
 

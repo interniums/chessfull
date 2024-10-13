@@ -32,7 +32,7 @@ export default function HomePageMain() {
   const axiosPrivate = useAxiosPrivate()
   const { globalState, setGlobalState } = useGlobalContext()
   const { state } = useLocation()
-  const { showCreateGameDialogFromState, reloadPageFromPage } = state || false
+  const { showCreateGameDialogFromState } = state || false
 
   const [gameMode, setGameMode] = useState('')
   const [startGame, setStartGame] = useState(false)
@@ -42,13 +42,6 @@ export default function HomePageMain() {
   const [inviteInfo, setInviteInfo] = useState({ from: auth?.id, to: '', gamemode: '', fromName: auth?.username })
   const [user, setUser] = useState({})
   const [sock] = useOutletContext()
-  const [reloadPage, setReloadPage] = useState(reloadPageFromPage || false)
-
-  useEffect(() => {
-    if (reloadPage) {
-      window.location.reload()
-    }
-  }, [])
 
   useEffect(() => {
     const controller = new AbortController()

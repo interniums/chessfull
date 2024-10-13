@@ -24,7 +24,6 @@ export default function MessagesMain() {
     companionFromState,
     createConversation,
     createIdFromState,
-    reloadPageFromState,
   } = state || false
   const [loading, setLoading] = useState(false)
   const [conversations, setConversations] = useState([])
@@ -33,14 +32,6 @@ export default function MessagesMain() {
   const [companion, setCompanion] = useState(companionFromState || '')
   const [focus, setFocus] = useState('')
   const { globalState, setGlobalState } = useGlobalContext()
-  const [reloadPage, setReloadPage] = useState(reloadPageFromState || false)
-
-  useEffect(() => {
-    if (reloadPage) {
-      window.location.reload()
-    }
-  }, [])
-
   useEffect(() => {
     if (conversationId === globalState?.conversationId) {
       setGlobalState((prev) => ({ ...prev, newMessage: null, conversationId: '' }))
