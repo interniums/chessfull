@@ -119,11 +119,11 @@ export default function HomePageMain() {
         <div>
           <div className="text-xl sm:text-xl md:text-2xl text-center font-medium flex items-center justify-center">
             {loading ? (
-              // <div className="animate-spin">
-              //   <ReloadIcon className="size-7" />
-              // </div>
-              <div className="dot-elastic"></div>
+              <div className="animate-spin">
+                <ReloadIcon className="size-7" />
+              </div>
             ) : (
+              // <div className="dot-elastic"></div>
               <div>
                 Elo: <span>{elo}</span>
               </div>

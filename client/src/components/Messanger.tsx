@@ -107,10 +107,10 @@ export default function Messanger({ conversationId, companion, setShowMessages, 
       {loading ? (
         <div className="grid gap-6 items-center justify-center h-full">
           <div>
-            {/* <ReloadIcon className="animate-spin size-56 mb-6" />
-            <h1 className="text-center text-3xl">Loading...</h1> */}
-            <img src={loadinggif} alt="loading" className="size-56 mb-6" />
-            <div className="dot-elastic"></div>
+            <ReloadIcon className="animate-spin size-56 mb-6" />
+            <h1 className="text-center text-3xl">Loading...</h1>
+            {/* <img src={loadinggif} alt="loading" className="size-56 mb-6" />
+            <div className="dot-elastic"></div> */}
           </div>
         </div>
       ) : (

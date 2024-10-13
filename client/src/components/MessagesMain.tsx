@@ -188,9 +188,9 @@ export default function MessagesMain() {
             {loading ? (
               <div className="grid gap-6 items-center justify-center h-full">
                 <div>
-                  {/* <ReloadIcon className="animate-spin size-36 lg:size-56 lg:mb-6 mb-4" />
-                  <h1 className="text-center text-3xl">Loading...</h1> */}
-                  <img src={loadinggif} alt="loading" className="size-36 lg:56 lg:mb-6 mb-4" />
+                  <ReloadIcon className="animate-spin size-36 lg:size-56 lg:mb-6 mb-4" />
+                  <h1 className="text-center text-3xl">Loading...</h1>
+                  {/* <img src={loadinggif} alt="loading" className="size-36 lg:56 lg:mb-6 mb-4" /> */}
                   <div className="dot-elastic"></div>
                 </div>
               </div>

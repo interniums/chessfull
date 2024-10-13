@@ -272,10 +272,10 @@ export default function FriendsBox() {
             {loading ? (
               <div className="flex justify-center items-center w-full h-full">
                 <div className="grid items-center justify-center">
-                  {/* <ReloadIcon className="size-20 animate-spin" />
-                  <div>loading...</div> */}
-                  <img src={loadinggif} alt="loading" className="size-20" />
-                  <div className="dot-elastic"></div>
+                  <ReloadIcon className="size-20 animate-spin" />
+                  <div>loading...</div>
+                  {/* <img src={loadinggif} alt="loading" className="size-20" />
+                  <div className="dot-elastic"></div> */}
                 </div>
               </div>
             ) : (

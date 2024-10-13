@@ -3,7 +3,7 @@
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import App from './App.tsx'
-import './index.scss'
+import './index.css'
 import { GlobalProvider } from './context/GlobalContext.tsx'
 import { Toaster } from './components/ui/toaster.tsx'
 import { routes } from './routes'
