@@ -66,9 +66,7 @@ export default function HomePageHeader() {
                       <div
                         onClick={() => {
                           navigate(`/socket/home`, { state: { showCreateGameDialogFromState: true } })
-                          setTimeout(() => {
-                            window.location.reload()
-                          }, 100)
+                          window.location.reload()
                         }}
                         className="text-lg py-1 px-2 cursor-pointer rounded hover:bg-slate-200"
                       >

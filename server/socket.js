@@ -568,7 +568,7 @@ async function setupSocketIO(server) {
         // Reset the saving flag
         room._saving = false
       }
-    } catch {
+    } catch (error) {
       console.error('Error during save:', error)
     }
     io.to(room.socketId[0]).emit('opponentDisconnected')
