@@ -90,6 +90,7 @@ export default function FriendsBox() {
   // Remove friend
   const removeFriend = async (id, name) => {
     const controller = new AbortController()
+    setLoading(true)
 
     try {
       await axiosPrivate.post(`https://chessfull-production.up.railway.app/user/${auth.id}/removeFriend`, {
@@ -97,6 +98,7 @@ export default function FriendsBox() {
         deleteId: id,
       })
       setFriendsInfo((prev) => prev.filter((friend) => friend.id !== id))
+      setLoading(false)
       toast({ title: 'Success', description: `User ${name} removed from friends` })
     } catch (err) {
       console.error(err)
@@ -332,8 +334,8 @@ export default function FriendsBox() {
           </TabsContent>
           <TabsContent value="invites" className="max-h-80 min-h-80 h-full overflow-y-auto">
             {loading ? (
-              <div className="flex items-center justify-center">
-                <ReloadIcon className="animate-spin size-12" />
+              <div className="flex items-center justify-center w-full h-full">
+                <ReloadIcon className="animate-spin size-20" />
                 <p>Loading...</p>
               </div>
             ) : (
