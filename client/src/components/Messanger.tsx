@@ -50,9 +50,12 @@ export default function Messanger({ conversationId, companion, setShowMessages, 
 
     const getMessages = async () => {
       try {
-        const response = await axiosPrivate.get(`http://localhost:3000/message/${conversationId}`, {
-          signal: controller.signal,
-        })
+        const response = await axiosPrivate.get(
+          `https://chessfull-production.up.railway.app/message/${conversationId}`,
+          {
+            signal: controller.signal,
+          }
+        )
         console.log(response)
         isMounted && setMessages(response.data)
         setLoading(false)
