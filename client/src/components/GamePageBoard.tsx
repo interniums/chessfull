@@ -72,11 +72,11 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
   const [whiteTime, setWhiteTime] = useState(300)
   const [blackTime, setBlackTime] = useState(300)
   const [activePlayer, setActivePlayer] = useState('white')
-  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1024)
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1300)
 
   useEffect(() => {
     const handleResize = () => {
-      setIsSmallScreen(window.innerWidth < 1024)
+      setIsSmallScreen(window.innerWidth < 1300)
     }
 
     window.addEventListener('resize', handleResize)
@@ -761,8 +761,10 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
           </div>
         )}
         <div
-          className="lg:h-full lg:min-h-screen"
-          style={{ maxWidth: '85vh', width: !isSmallScreen ? '85vh' : '100%' }}
+          className={
+            !isSmallScreen ? 'lg:h-full lg:min-h-screen' : 'lg:h-full lg:min-h-screen w-full grid justify-center'
+          }
+          style={{ maxWidth: !isSmallScreen ? '85vh' : '100vh', width: !isSmallScreen ? '85vh' : '100%' }}
         >
           <div className="w-full flex items-center justify-center gap-8 pt-16 lg:mt-8 lg:pt-0 lg:mb-6 mb-4">
             <div
