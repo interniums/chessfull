@@ -72,11 +72,11 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
   const [whiteTime, setWhiteTime] = useState(300)
   const [blackTime, setBlackTime] = useState(300)
   const [activePlayer, setActivePlayer] = useState('white')
-  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1300)
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1280)
 
   useEffect(() => {
     const handleResize = () => {
-      setIsSmallScreen(window.innerWidth < 1300)
+      setIsSmallScreen(window.innerWidth < 1280)
     }
 
     window.addEventListener('resize', handleResize)
@@ -715,7 +715,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
 
   return (
     <>
-      <div className="w-full lg:h-full lg:flex block items-center pl-0 lg:pl-20 lg:pr-96 pr-0 lg:min-h-screen justify-center lg:justify-normal">
+      <div className="w-full xl:h-full xl:flex block items-center pl-0 xl:pl-20 xl:pr-96 pr-0 xl:min-h-screen justify-center xl:justify-normal">
         {openEndDialog ? (
           <GameEndDialog
             setOpenEndDialog={setOpenEndDialog}
@@ -726,8 +726,8 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
           />
         ) : null}
         {isSmallScreen ? null : (
-          <div className="w-0 h-0 lg:w-full lg:h-full lg:pr-24 lg:min-h-screen">
-            <div className="lg:min-h-screen lg:h-full w-full flex items-start justify-center lg:min-w-max lg:py-24">
+          <div className="w-0 h-0 xl:w-full xl:h-full xl:pr-24 xl:min-h-screen">
+            <div className="xl:min-h-screen xl:h-full w-full flex items-start justify-center xl:min-w-max xl:py-24">
               <GameInfo
                 opponentDisconnected={opponentDisconnected}
                 mode={mode}
@@ -762,11 +762,11 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
         )}
         <div
           className={
-            !isSmallScreen ? 'lg:h-full lg:min-h-screen' : 'lg:h-full lg:min-h-screen w-full grid justify-center'
+            !isSmallScreen ? 'xl:h-full xl:min-h-screen' : 'xl:h-full xl:min-h-screen w-full grid justify-center'
           }
           style={{ maxWidth: !isSmallScreen ? '85vh' : '', width: !isSmallScreen ? '85vh' : '100%' }}
         >
-          <div className="w-full flex items-center justify-center gap-8 pt-16 lg:mt-8 lg:pt-0 lg:mb-6 mb-4">
+          <div className="w-full flex items-center justify-center gap-8 pt-16 xl:mt-8 xl:pt-0 xl:mb-6 mb-4">
             <div
               className={
                 chess.turn() === 'w' && !gameState?.winner.length
@@ -790,7 +790,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
           <div
             className="board h-fit rounded-md flex items-center justify-center"
             style={{
-              maxWidth: '85vh',
+              maxWidth: !isSmallScreen ? '85vh' : '',
               width: !isSmallScreen ? '85vh' : '100%',
               boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 10px',
             }}
@@ -839,8 +839,8 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
           </div>
         </div>
         {isSmallScreen ? (
-          <div className="w-full lg:w-full lg:h-full lg:pr-24 lg:min-h-screen">
-            <div className="lg:min-h-screen lg:h-full w-full flex items-start justify-center lg:min-w-max lg:py-24">
+          <div className="w-full xl:w-full xl:h-full xl:pr-24 xl:min-h-screen">
+            <div className="xl:min-h-screen xl:h-full w-full flex items-start justify-center xl:min-w-max xl:py-24">
               <GameInfo
                 opponentDisconnected={opponentDisconnected}
                 mode={mode}
