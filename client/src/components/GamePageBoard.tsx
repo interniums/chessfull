@@ -788,11 +788,16 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
             </div>
           </div>
           <div
-            className="board h-fit rounded-md flex items-center justify-center"
+            className={
+              !isSmallScreen
+                ? 'board h-fit rounded-md flex items-center justify-center'
+                : 'board h-fit rounded-md flex items-center'
+            }
             style={{
               maxWidth: !isSmallScreen ? '85vh' : '',
               width: !isSmallScreen ? '85vh' : '100%',
               boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 10px',
+              maxHeight: '100vh',
             }}
           >
             <Chessboard
