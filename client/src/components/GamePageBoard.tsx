@@ -787,59 +787,61 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
               B {formatTime(blackTime)}
             </div>
           </div>
-          <div
-            className={
-              !isSmallScreen
-                ? 'board h-fit rounded-md flex items-center justify-center'
-                : 'board h-fit rounded-md flex items-center'
-            }
-            style={{
-              maxWidth: !isSmallScreen ? '85vh' : '700px',
-              width: !isSmallScreen ? '85vh' : '100%',
-              boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 10px',
-            }}
-          >
-            <Chessboard
-              customLightSquareStyle={{
-                backgroundColor: userPreferences.board ? userPreferences?.board.lightSquare : null,
-              }}
-              customDarkSquareStyle={{
-                backgroundColor: userPreferences.board ? userPreferences?.board.darkSquare : null,
-              }}
-              arePremovesAllowed={userPreferences?.premovesAllowed ? allowPremoves : false}
-              animationDuration={userPreferences?.pieceSpeedAnimation}
-              position={fen}
-              arePiecesDraggable={
-                (userPreferences?.pieceMoveType == 1 && currentMoveIndex == fenHistory.length) ||
-                (userPreferences?.pieceMoveType == 3 && currentMoveIndex == fenHistory.length)
-                  ? true
-                  : false
+          <div className="w-full flex items-center justify-center">
+            <div
+              className={
+                !isSmallScreen
+                  ? 'board h-fit rounded-md flex items-center justify-center'
+                  : 'board h-fit rounded-md flex items-center'
               }
-              onPieceDrop={onDrop}
-              boardOrientation={auth.id === players[0].id ? player1Orientation : player2Orientation}
-              onPieceClick={() => {
-                !allowPremoves ? setAllowPremoves(true) : null
+              style={{
+                maxWidth: !isSmallScreen ? '85vh' : '700px',
+                width: !isSmallScreen ? '85vh' : '100%',
+                boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 10px',
               }}
-              onPieceDragBegin={() => {
-                setIsPieceDragged(true)
-              }}
-              onSquareClick={
-                userPreferences?.pieceMoveType == 1 || userPreferences?.pieceMoveType == 2 ? onSquareClick : undefined
-              }
-              onSquareRightClick={onSquareRightClick}
-              onPromotionPieceSelect={
-                !isPieceDragged && !userPreferences?.queenPromotion ? onPromotionPieceSelect : undefined
-              }
-              promotionToSquare={!isPieceDragged && !userPreferences?.queenPromotion ? moveTo : undefined}
-              promotionDialogVariant={'modal'}
-              showPromotionDialog={!isPieceDragged ? showPromotionDialog : undefined}
-              autoPromoteToQueen={userPreferences?.queenPromotion ? true : false}
-              customSquareStyles={customSquareStyles}
-              customBoardStyle={{
-                borderRadius: '4px',
-              }}
-              customPieces={customPieces}
-            />
+            >
+              <Chessboard
+                customLightSquareStyle={{
+                  backgroundColor: userPreferences.board ? userPreferences?.board.lightSquare : null,
+                }}
+                customDarkSquareStyle={{
+                  backgroundColor: userPreferences.board ? userPreferences?.board.darkSquare : null,
+                }}
+                arePremovesAllowed={userPreferences?.premovesAllowed ? allowPremoves : false}
+                animationDuration={userPreferences?.pieceSpeedAnimation}
+                position={fen}
+                arePiecesDraggable={
+                  (userPreferences?.pieceMoveType == 1 && currentMoveIndex == fenHistory.length) ||
+                  (userPreferences?.pieceMoveType == 3 && currentMoveIndex == fenHistory.length)
+                    ? true
+                    : false
+                }
+                onPieceDrop={onDrop}
+                boardOrientation={auth.id === players[0].id ? player1Orientation : player2Orientation}
+                onPieceClick={() => {
+                  !allowPremoves ? setAllowPremoves(true) : null
+                }}
+                onPieceDragBegin={() => {
+                  setIsPieceDragged(true)
+                }}
+                onSquareClick={
+                  userPreferences?.pieceMoveType == 1 || userPreferences?.pieceMoveType == 2 ? onSquareClick : undefined
+                }
+                onSquareRightClick={onSquareRightClick}
+                onPromotionPieceSelect={
+                  !isPieceDragged && !userPreferences?.queenPromotion ? onPromotionPieceSelect : undefined
+                }
+                promotionToSquare={!isPieceDragged && !userPreferences?.queenPromotion ? moveTo : undefined}
+                promotionDialogVariant={'modal'}
+                showPromotionDialog={!isPieceDragged ? showPromotionDialog : undefined}
+                autoPromoteToQueen={userPreferences?.queenPromotion ? true : false}
+                customSquareStyles={customSquareStyles}
+                customBoardStyle={{
+                  borderRadius: '4px',
+                }}
+                customPieces={customPieces}
+              />
+            </div>
           </div>
         </div>
         {isSmallScreen ? (
