@@ -794,7 +794,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
                 : 'board h-fit rounded-md flex items-center'
             }
             style={{
-              maxWidth: !isSmallScreen ? '85vh' : '',
+              maxWidth: !isSmallScreen ? '85vh' : '700px',
               width: !isSmallScreen ? '85vh' : '100%',
               boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 10px',
             }}
