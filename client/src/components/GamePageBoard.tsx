@@ -762,7 +762,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
         )}
         <div
           className={
-            !isSmallScreen ? 'xl:h-full xl:min-h-screen' : 'xl:h-full xl:min-h-screen w-full grid justify-center h-100%'
+            !isSmallScreen ? 'xl:h-full xl:min-h-screen' : 'xl:h-full xl:min-h-screen w-full justify-center h-100%'
           }
           style={{ maxWidth: !isSmallScreen ? '85vh' : '', width: !isSmallScreen ? '85vh' : '100%' }}
         >
