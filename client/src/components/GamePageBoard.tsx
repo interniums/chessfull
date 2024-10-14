@@ -764,7 +764,7 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
           className={
             !isSmallScreen ? 'lg:h-full lg:min-h-screen' : 'lg:h-full lg:min-h-screen w-full grid justify-center'
           }
-          style={{ maxWidth: !isSmallScreen ? '85vh' : '100vh', width: !isSmallScreen ? '85vh' : '100%' }}
+          style={{ maxWidth: !isSmallScreen ? '85vh' : '', width: !isSmallScreen ? '85vh' : '100%' }}
         >
           <div className="w-full flex items-center justify-center gap-8 pt-16 lg:mt-8 lg:pt-0 lg:mb-6 mb-4">
             <div
