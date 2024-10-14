@@ -70,7 +70,7 @@ export default function GameInfo({
 
   return (
     <div
-      className="w-full lg:min-w-80 lg:border lg:rounded-md lg:py-2 lg:block lg:content-start lg:shadow-md"
+      className="w-full xl:min-w-80 xl:border xl:rounded-md xl:py-2 xl:block xl:content-start xl:shadow-md"
       style={{ minHeight: isSmallScreen ? '75%' : 'none' }}
     >
       {loading ? (
