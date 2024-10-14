@@ -130,7 +130,7 @@ export default function GameInfo({
             </>
           ) : (
             <div className="mt-6 w-screen">
-              <div className="flex items-center justify-between w-full">
+              <div className="flex items-center justify-around w-full">
                 <div>
                   <div className="flex items-center justify-start">
                     <Avatar
