@@ -796,8 +796,6 @@ export default function GamePageBoard({ mode, players, moves, setMoves, roomId, 
             style={{
               maxWidth: !isSmallScreen ? '85vh' : '',
               width: !isSmallScreen ? '85vh' : '100%',
-              maxHeight: '80vh',
-              height: '100%',
               boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 10px',
             }}
           >
